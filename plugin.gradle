@@ -1,0 +1,5 @@
+ext.tools = [
+    java : 'java',
+    springboot : 'org.springframework.boot',
+    dependencies : 'io.spring.dependency-management'
+]

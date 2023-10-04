@@ -1,0 +1,326 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.4'
+    id 'io.spring.dependency-management' version '1.1.3'
+}
+
+project("buyer-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+project("seller-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+project("chat-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+project("config-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+project("eureka-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+project("gateway-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+project("user-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+project("common-service"){
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+    }
+
+}
+
+allprojects {
+
+    // Apply external plugin
+    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: tools.java
+    apply plugin: tools.springboot
+    apply plugin: tools.dependencies
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+
+        if(!projectDir.name.startsWith("api-gateway")){
+            implementation libraries.springWeb
+//            implementation libraries.keycloak
+        }
+
+        compileOnly libraries.lombok
+        developmentOnly libraries.devtools
+        annotationProcessor libraries.annoDevtools
+        testImplementation libraries.startTest
+
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

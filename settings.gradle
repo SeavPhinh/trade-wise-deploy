@@ -1,0 +1,10 @@
+rootProject.name = 'go-selling-api'
+include 'buyer-service'
+include 'seller-service'
+include 'chat-service'
+include 'common-service'
+include 'gateway-service'
+include 'eureka-service'
+include 'user-service'
+include 'config-service'
+

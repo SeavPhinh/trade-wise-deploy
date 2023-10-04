@@ -1,0 +1,10 @@
+ext.libraries = [
+
+            springWeb: 'org.springframework.boot:spring-boot-starter-web',
+            lombok: 'org.projectlombok:lombok',
+            devtools: 'org.springframework.boot:spring-boot-devtools',
+            annoDevtools: 'org.projectlombok:lombok',
+            startTest: 'org.springframework.boot:spring-boot-starter-test',
+            keycloak: 'org.keycloak:keycloak-spring-boot-starter:21.0.1'
+
+    ]
