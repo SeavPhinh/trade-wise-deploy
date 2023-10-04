@@ -136,7 +136,9 @@ project("config-service"){
     }
 
     dependencies {
-
+        implementation libraries.actuator
+        implementation libraries.keycloak
+        implementation libraries.configServer
     }
 
 }
@@ -227,6 +229,15 @@ project("user-service"){
         sourceCompatibility = '17'
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
@@ -238,7 +249,13 @@ project("user-service"){
     }
 
     dependencies {
-
+        implementation libraries.actuator
+        implementation libraries.keycloak
+        implementation libraries.configServer
+        implementation libraries.eurekaClient
+        implementation libraries.keycloakAdmin
+        implementation libraries.webMvc
+        implementation libraries.resourceServer
     }
 
 }
@@ -310,7 +327,7 @@ allprojects {
 
         if(!projectDir.name.startsWith("api-gateway")){
             implementation libraries.springWeb
-//            implementation libraries.keycloak
+            implementation libraries.keycloak
         }
 
         compileOnly libraries.lombok

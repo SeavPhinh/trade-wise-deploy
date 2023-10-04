@@ -5,6 +5,17 @@ ext.libraries = [
             devtools: 'org.springframework.boot:spring-boot-devtools',
             annoDevtools: 'org.projectlombok:lombok',
             startTest: 'org.springframework.boot:spring-boot-starter-test',
-            keycloak: 'org.keycloak:keycloak-spring-boot-starter:21.0.1'
+            keycloak: 'org.keycloak:keycloak-spring-boot-starter:21.0.1',
+            configServer: 'org.springframework.cloud:spring-cloud-config-server:4.0.4',
+            actuator: 'org.springframework.boot:spring-boot-starter-actuator:3.1.1',
+            eurekaClient: 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client',
+            webMvc: 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0',
+            resourceServer: 'org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.1.0',
+            postgresql: 'org.postgresql:postgresql',
+            jpa: 'org.springframework.boot:spring-boot-starter-data-jpa',
+            keycloakAdmin: 'org.keycloak:keycloak-admin-client:21.0.1',
+            webFlux: 'org.springframework.boot:spring-boot-starter-webflux',
+            cloudStarter: 'org.springframework.cloud:spring-cloud-starter-config',
+
 
     ]
