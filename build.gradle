@@ -339,10 +339,10 @@ allprojects {
 
     dependencies {
 
-        if(!projectDir.name.startsWith("api-gateway")){
-            implementation libraries.springWeb
-            implementation libraries.keycloak
-        }
+//        if(!projectDir.name.startsWith("api-gateway")){
+//            implementation libraries.springWeb
+//            implementation libraries.keycloak
+//        }
 
         compileOnly libraries.lombok
         developmentOnly libraries.devtools
