@@ -278,6 +278,16 @@ project("common-service"){
         sourceCompatibility = '17'
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
@@ -289,7 +299,8 @@ project("common-service"){
     }
 
     dependencies {
-
+        implementation libraries.circuitBreaker
+        implementation libraries.webMvc
     }
 
 }
