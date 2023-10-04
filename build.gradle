@@ -256,6 +256,8 @@ project("user-service"){
         implementation libraries.keycloakAdmin
         implementation libraries.webMvc
         implementation libraries.resourceServer
+        implementation libraries.zipkinTracking
+        implementation libraries.zipkinReporter
     }
 
 }

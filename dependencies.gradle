@@ -16,7 +16,9 @@ ext.libraries = [
             keycloakAdmin: 'org.keycloak:keycloak-admin-client:21.0.1',
             webFlux: 'org.springframework.boot:spring-boot-starter-webflux',
             cloudStarter: 'org.springframework.cloud:spring-cloud-starter-config',
-            circuitBreaker: 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+            circuitBreaker: 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j',
+            zipkinReporter: 'io.zipkin.reporter2:zipkin-reporter-brave',
+            zipkinTracking: 'io.micrometer:micrometer-tracing-bridge-brave'
 
 
     ]

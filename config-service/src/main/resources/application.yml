@@ -1,9 +1,11 @@
 spring:
+  application:
+    name: config-service
   cloud:
     config:
       server:
         git:
-          uri: https://github.com/renrithysak095/configuration_file.git
+          uri: https://github.com/renrithysak095/go-selling-config.git
           clone-on-start: true
           default-label: main
 server:
