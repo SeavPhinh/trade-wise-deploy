@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
         in = SecuritySchemeIn.HEADER,
         flows = @OAuthFlows(
                 clientCredentials = @OAuthFlow(
-                        tokenUrl = "http://localhost:1234/auth/realms/mini_project02/protocol/openid-connect/token"
+                        tokenUrl = "http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/token"
                 )
         )
 )

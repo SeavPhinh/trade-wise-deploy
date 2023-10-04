@@ -5,7 +5,7 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/renrithysak095/go-selling-config.git
+          uri: git@github.com:renrithysak095/go-selling-config.git
           clone-on-start: true
           default-label: main
 server:

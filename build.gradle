@@ -251,13 +251,14 @@ project("user-service"){
     dependencies {
         implementation libraries.actuator
         implementation libraries.keycloak
-        implementation libraries.configServer
-        implementation libraries.eurekaClient
+        implementation libraries.cloudClient
+//        implementation libraries.eurekaClient
         implementation libraries.keycloakAdmin
         implementation libraries.webMvc
         implementation libraries.resourceServer
-        implementation libraries.zipkinTracking
-        implementation libraries.zipkinReporter
+        implementation libraries.springWeb
+//        implementation libraries.zipkinTracking
+//        implementation libraries.zipkinReporter
     }
 
 }
