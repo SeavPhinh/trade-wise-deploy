@@ -2,7 +2,7 @@ package com.example.userservice.controller;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.request.UserRequest;
-import com.example.userservice.service.UserService;
+import com.example.userservice.service.User.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

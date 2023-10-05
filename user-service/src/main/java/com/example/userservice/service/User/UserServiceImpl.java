@@ -1,4 +1,4 @@
-package com.example.userservice.service;
+package com.example.userservice.service.User;
 
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.exception.NotFoundExceptionClass;
