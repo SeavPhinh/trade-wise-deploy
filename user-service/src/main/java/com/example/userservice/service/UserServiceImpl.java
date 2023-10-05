@@ -1,7 +1,9 @@
-package com.example.userservice.service.user;
-import com.example.userservice.model.user.User;
-import com.example.userservice.model.user.UserDto;
-import com.example.userservice.request.user.UserRequest;
+package com.example.userservice.service;
+
+import com.example.commonservice.enumeration.Role;
+import com.example.commonservice.model.User;
+import com.example.userservice.model.UserDto;
+import com.example.userservice.request.UserRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
@@ -12,21 +14,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UserService {
+public class UserServiceImpl implements UserService{
 
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
     private String realm;
 
-    public UserService(Keycloak keycloak) {
+    public UserServiceImpl(Keycloak keycloak) {
         this.keycloak = keycloak;
     }
 
@@ -48,7 +48,6 @@ public class UserService {
     public User postUser(UserRequest request) {
 
         UsersResource usersResource = keycloak.realm(realm).users();
-
         CredentialRepresentation credentialRepresentation = createPasswordCredentials(request.getPassword());
 
         UserRepresentation userPre = new UserRepresentation();
@@ -57,6 +56,7 @@ public class UserService {
         userPre.setFirstName(request.getFirstname());
         userPre.setLastName(request.getLastname());
         userPre.setEmail(request.getEmail());
+        userPre.singleAttribute("role", String.valueOf(request.getRoles()));
         userPre.singleAttribute("createdDate", String.valueOf(LocalDateTime.now()));
         userPre.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
         usersResource.create(userPre);
@@ -70,6 +70,7 @@ public class UserService {
                 createdUserRepresentation.getEmail(),
                 createdUserRepresentation.getFirstName(),
                 createdUserRepresentation.getLastName(),
+                roles(userPre.getAttributes().get("role").get(0)),
                 LocalDateTime.parse(userPre.getAttributes().get("createdDate").get(0)),
                 LocalDateTime.parse(userPre.getAttributes().get("lastModified").get(0))
         );
@@ -90,10 +91,9 @@ public class UserService {
         updatedUser.setEmail(request.getEmail());
         updatedUser.singleAttribute("createdDate", String.valueOf(existingUserResource.toRepresentation().getAttributes().get("createdDate").get(0)));
         updatedUser.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
-
         existingUserResource.update(updatedUser);
-
         UserRepresentation updatedUserRepresentation = existingUserResource.toRepresentation();
+
 
         return new User(
                 UUID.fromString(updatedUserRepresentation.getId()),
@@ -101,6 +101,7 @@ public class UserService {
                 updatedUserRepresentation.getEmail(),
                 updatedUserRepresentation.getFirstName(),
                 updatedUserRepresentation.getLastName(),
+                roles(updatedUser.getAttributes().get("role").get(0)),
                 LocalDateTime.parse(updatedUser.getAttributes().get("createdDate").get(0)),
                 LocalDateTime.parse(updatedUser.getAttributes().get("lastModified").get(0))
         );
@@ -134,4 +135,12 @@ public class UserService {
 
         return responseUser;
     }
+
+    public List<Role> roles(String role){
+        List<String> rolesList = Arrays.asList(role.replaceAll("\\[|\\]", "").split(", "));
+        return rolesList.stream()
+                .map(Role::valueOf)
+                .collect(Collectors.toList());
+    }
+
 }

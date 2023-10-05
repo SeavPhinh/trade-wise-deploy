@@ -1,7 +1,7 @@
 package com.example.userservice.controller;
-import com.example.userservice.model.user.User;
-import com.example.userservice.request.user.UserRequest;
-import com.example.userservice.service.user.UserService;
+import com.example.commonservice.model.User;
+import com.example.userservice.request.UserRequest;
+import com.example.userservice.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping
+@RequestMapping("api/v1")
 public class AppUserController {
 
     private final UserService userService;

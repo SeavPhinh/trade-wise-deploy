@@ -21,7 +21,7 @@ public class KeyCloakSecurityConfig {
                     //authorize.requestMatchers("keycloak-service/v3/api-docs/**", "keycloak-service/swagger-ui/**", "keycloak-service/swagger-ui.html").permitAll();
                     //For Swagger-ui
                     authorize.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
-                    authorize.requestMatchers("users").permitAll();
+                    authorize.requestMatchers("api/v1/users").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"users/{id}").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
