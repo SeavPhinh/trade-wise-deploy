@@ -21,7 +21,7 @@ public interface UserService {
 
     User postUser(UserRequest request);
 
-    void deleteUser(UUID id);
+    User deleteUser(UUID id);
 
     User updateUser(UUID id, UserRequest request);
 }

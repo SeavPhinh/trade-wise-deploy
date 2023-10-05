@@ -1,4 +1,5 @@
 package com.example.userservice.request;
+import com.example.commonservice.enumeration.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

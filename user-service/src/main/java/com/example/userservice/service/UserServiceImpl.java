@@ -1,6 +1,7 @@
 package com.example.userservice.service;
 
 import com.example.commonservice.enumeration.Role;
+import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.model.User;
 import com.example.userservice.model.UserDto;
 import com.example.userservice.request.UserRequest;
@@ -30,9 +31,13 @@ public class UserServiceImpl implements UserService{
         this.keycloak = keycloak;
     }
 
-
     public List<User> getAllUsers() {
+
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().list();
+        if(userRepresentations.stream().toList().isEmpty()){
+            throw new NotFoundExceptionClass("User not found.");
+        }
+
         return userRepresentations.stream()
                 .map(UserDto::toDto)
                 .collect(Collectors.toList());
@@ -40,6 +45,11 @@ public class UserServiceImpl implements UserService{
 
     public List<User> findByUsername(String username) {
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(username);
+
+        if(userRepresentations.stream().toList().isEmpty()){
+            throw new NotFoundExceptionClass("User not found.");
+        }
+
         return userRepresentations.stream()
                 .map(UserDto::toDto)
                 .collect(Collectors.toList());
@@ -76,24 +86,37 @@ public class UserServiceImpl implements UserService{
         );
     }
 
-    public void deleteUser(UUID userId){
+    public User deleteUser(UUID userId){
+
+        User responseUser = new User();
+        responseUser.setId(UUID.fromString(resource(userId).toRepresentation().getId()));
+        responseUser.setUsername(resource(userId).toRepresentation().getUsername());
+        responseUser.setEmail(resource(userId).toRepresentation().getUsername());
+        responseUser.setFirstName(resource(userId).toRepresentation().getFirstName());
+        responseUser.setLastName(resource(userId).toRepresentation().getLastName());
+        responseUser.setRoles(roles(resource(userId).toRepresentation().getAttributes().get("role").get(0)));
+        responseUser.setCreatedDate(LocalDateTime.now());
+        responseUser.setLastModified(LocalDateTime.now());
         keycloak.realm(realm).users().delete(String.valueOf(userId));
+        return responseUser;
+
     }
 
     public User updateUser(UUID id, UserRequest request) {
 
-        UserResource existingUserResource = keycloak.realm(realm).users().get(String.valueOf(id));
+//        UserResource existingUserResource = keycloak.realm(realm).users().get(String.valueOf(id));
         UserRepresentation updatedUser = new UserRepresentation();
 
         updatedUser.setUsername(request.getUsername());
         updatedUser.setFirstName(request.getFirstname());
         updatedUser.setLastName(request.getLastname());
         updatedUser.setEmail(request.getEmail());
-        updatedUser.singleAttribute("createdDate", String.valueOf(existingUserResource.toRepresentation().getAttributes().get("createdDate").get(0)));
+        updatedUser.singleAttribute("role", String.valueOf(request.getRoles()));
+        updatedUser.singleAttribute("createdDate", String.valueOf(resource(id).toRepresentation().getAttributes().get("createdDate").get(0)));
         updatedUser.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
-        existingUserResource.update(updatedUser);
-        UserRepresentation updatedUserRepresentation = existingUserResource.toRepresentation();
+        resource(id).update(updatedUser);
 
+        UserRepresentation updatedUserRepresentation = resource(id).toRepresentation();
 
         return new User(
                 UUID.fromString(updatedUserRepresentation.getId()),
@@ -122,14 +145,15 @@ public class UserServiceImpl implements UserService{
     }
 
     public User getUserById(UUID id) {
-        UserResource represent = keycloak.realm(realm).users().get(String.valueOf(id));
+
         User responseUser = new User();
 
-        responseUser.setId(UUID.fromString(represent.toRepresentation().getId()));
-        responseUser.setUsername(represent.toRepresentation().getUsername());
-        responseUser.setEmail(represent.toRepresentation().getUsername());
-        responseUser.setFirstName(represent.toRepresentation().getFirstName());
-        responseUser.setLastName(represent.toRepresentation().getLastName());
+        responseUser.setId(UUID.fromString(resource(id).toRepresentation().getId()));
+        responseUser.setUsername(resource(id).toRepresentation().getUsername());
+        responseUser.setEmail(resource(id).toRepresentation().getUsername());
+        responseUser.setFirstName(resource(id).toRepresentation().getFirstName());
+        responseUser.setLastName(resource(id).toRepresentation().getLastName());
+        responseUser.setRoles(roles(resource(id).toRepresentation().getAttributes().get("role").get(0)));
         responseUser.setCreatedDate(LocalDateTime.now());
         responseUser.setLastModified(LocalDateTime.now());
 
@@ -142,5 +166,10 @@ public class UserServiceImpl implements UserService{
                 .map(Role::valueOf)
                 .collect(Collectors.toList());
     }
+
+    public UserResource resource(UUID id){
+        return keycloak.realm(realm).users().get(String.valueOf(id));
+    }
+
 
 }
