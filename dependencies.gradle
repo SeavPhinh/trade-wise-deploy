@@ -1,5 +1,4 @@
 ext.libraries = [
-
             springWeb: 'org.springframework.boot:spring-boot-starter-web',
             lombok: 'org.projectlombok:lombok',
             devtools: 'org.springframework.boot:spring-boot-devtools',
@@ -18,7 +17,5 @@ ext.libraries = [
             cloudClient: 'org.springframework.cloud:spring-cloud-starter-config',
             circuitBreaker: 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j',
             zipkinReporter: 'io.zipkin.reporter2:zipkin-reporter-brave',
-            zipkinTracking: 'io.micrometer:micrometer-tracing-bridge-brave'
-
-
+            zipkinTracking: 'io.micrometer:micrometer-tracing-bridge-brave',
     ]
