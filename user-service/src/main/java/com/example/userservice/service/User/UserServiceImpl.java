@@ -69,6 +69,7 @@ public class UserServiceImpl implements UserService{
         userPre.singleAttribute("role", String.valueOf(request.getRoles()));
         userPre.singleAttribute("createdDate", String.valueOf(LocalDateTime.now()));
         userPre.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
+        userPre.setEnabled(true);
         usersResource.create(userPre);
 
         UserRepresentation createdUserRepresentation =

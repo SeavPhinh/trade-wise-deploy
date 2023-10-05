@@ -34,6 +34,7 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
         for (UserRepresentation user: userRepresentations) {
             if(!keycloak.realm(realm).users().get(user.getId()).toRepresentation().getFederatedIdentities().isEmpty()){
 
+                user.setEnabled(true);
                 user.singleAttribute("role", String.valueOf(List.of(Role.BUYER,Role.SELLER)));
                 user.singleAttribute("createdDate", String.valueOf(LocalDateTime.now()));
                 user.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
