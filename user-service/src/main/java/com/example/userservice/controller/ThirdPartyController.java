@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1")
 public class ThirdPartyController {
@@ -17,10 +19,10 @@ public class ThirdPartyController {
         this.thirdPartyService = thirdPartyService;
     }
 
-    @PutMapping("/gmail")
-    public ResponseEntity<ApiResponse<User>> modifyGmailAccount(){
+    @PutMapping("/modify")
+    public ResponseEntity<ApiResponse<List<User>>> modifyGmailAccount(){
         return new ResponseEntity<>(new ApiResponse<>(
-                "Gmail account modified successfully",
+                "Account modified successfully",
                 thirdPartyService.modifyGmailAccount(),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);

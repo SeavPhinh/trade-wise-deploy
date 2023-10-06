@@ -2,6 +2,9 @@ package com.example.userservice.service.User;
 
 
 import com.example.commonservice.model.User;
+import com.example.userservice.model.UserLogin;
+import com.example.userservice.model.UserResponse;
+import com.example.userservice.request.ChangePassword;
 import com.example.userservice.request.UserRequest;
 import org.springframework.stereotype.Service;
 
@@ -24,4 +27,8 @@ public interface UserService {
     User deleteUser(UUID id);
 
     User updateUser(UUID id, UserRequest request);
+
+    User changePassword(UUID id, ChangePassword request);
+
+    UserResponse loginAccount(UserLogin login);
 }

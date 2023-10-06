@@ -1,6 +1,9 @@
 package com.example.userservice.controller;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.userservice.model.UserLogin;
+import com.example.userservice.model.UserResponse;
+import com.example.userservice.request.ChangePassword;
 import com.example.userservice.request.UserRequest;
 import com.example.userservice.service.User.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -88,6 +91,26 @@ public class AppUserController {
                 userService.updateUser(id, request),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/users/{id}/change-password")
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<User>> changePassword(@PathVariable UUID id,
+                                                        @RequestBody ChangePassword request){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Password changed successfully",
+                userService.changePassword(id, request),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody UserLogin login){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Account logged successfully",
+                userService.loginAccount(login),
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
 

@@ -31,4 +31,5 @@ public class UserDto {
         user.setLastModified(LocalDateTime.parse(userRepresentation.getAttributes().get("lastModified").get(0)));
         return user;
     }
+
 }

@@ -4,11 +4,17 @@ import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.model.User;
 import com.example.userservice.model.UserDto;
+import com.example.userservice.model.UserLogin;
+import com.example.userservice.model.UserResponse;
+import com.example.userservice.request.ChangePassword;
 import com.example.userservice.request.UserRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,10 +26,16 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final Keycloak keycloak;
 
+    @Value("${keycloak.credentials.secret}")
+    private String secretKey;
+    @Value("${keycloak.resource}")
+    private String clientId;
+    @Value("${keycloak.auth-server-url}")
+    private String authUrl;
     @Value("${keycloak.realm}")
     private String realm;
 
@@ -105,7 +117,6 @@ public class UserServiceImpl implements UserService{
 
     public User updateUser(UUID id, UserRequest request) {
 
-//        UserResource existingUserResource = keycloak.realm(realm).users().get(String.valueOf(id));
         UserRepresentation updatedUser = new UserRepresentation();
 
         updatedUser.setUsername(request.getUsername());
@@ -131,6 +142,48 @@ public class UserServiceImpl implements UserService{
         );
     }
 
+    @Override
+    public User changePassword(UUID id, ChangePassword request) {
+
+        CredentialRepresentation passwordCredential = new CredentialRepresentation();
+        passwordCredential.setType(CredentialRepresentation.PASSWORD);
+        passwordCredential.setValue(request.getNewPassword());
+        passwordCredential.setTemporary(false);
+        resource(id).resetPassword(passwordCredential);
+
+        return new User(
+                UUID.fromString(resource(id).toRepresentation().getId()),
+                resource(id).toRepresentation().getUsername(),
+                resource(id).toRepresentation().getEmail(),
+                resource(id).toRepresentation().getFirstName(),
+                resource(id).toRepresentation().getLastName(),
+                roles(resource(id).toRepresentation().getAttributes().get("role").get(0)),
+                LocalDateTime.parse(resource(id).toRepresentation().getAttributes().get("createdDate").get(0)),
+                LocalDateTime.parse(resource(id).toRepresentation().getAttributes().get("lastModified").get(0))
+        );
+    }
+
+    @Override
+    public UserResponse loginAccount(UserLogin login) {
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            String accountId = login.getAccount();
+            if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+                return new UserResponse(
+                        UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
+                        resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
+                        resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
+                        resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
+                        resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
+                        roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
+                        accessTokenResponse(login),
+                        LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
+                        LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
+                );
+            }
+        }
+        throw new NotFoundExceptionClass("User not found");
+    }
+
     private static CredentialRepresentation createPasswordCredentials(String password) {
         CredentialRepresentation passwordCredentials = new CredentialRepresentation();
         passwordCredentials.setTemporary(false);
@@ -146,19 +199,14 @@ public class UserServiceImpl implements UserService{
     }
 
     public User getUserById(UUID id) {
-
-        User responseUser = new User();
-
-        responseUser.setId(UUID.fromString(resource(id).toRepresentation().getId()));
-        responseUser.setUsername(resource(id).toRepresentation().getUsername());
-        responseUser.setEmail(resource(id).toRepresentation().getUsername());
-        responseUser.setFirstName(resource(id).toRepresentation().getFirstName());
-        responseUser.setLastName(resource(id).toRepresentation().getLastName());
-        responseUser.setRoles(roles(resource(id).toRepresentation().getAttributes().get("role").get(0)));
-        responseUser.setCreatedDate(LocalDateTime.now());
-        responseUser.setLastModified(LocalDateTime.now());
-
-        return responseUser;
+        return new User(UUID.fromString(resource(id).toRepresentation().getId()),
+                resource(id).toRepresentation().getUsername(),
+                resource(id).toRepresentation().getEmail(),
+                resource(id).toRepresentation().getFirstName(),
+                resource(id).toRepresentation().getLastName(),
+                roles(resource(id).toRepresentation().getAttributes().get("role").get(0)),
+                LocalDateTime.now(),
+                LocalDateTime.now());
     }
 
     public List<Role> roles(String role){
@@ -172,5 +220,26 @@ public class UserServiceImpl implements UserService{
         return keycloak.realm(realm).users().get(String.valueOf(id));
     }
 
+    public String accessTokenResponse(UserLogin login){
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            if(user.getEmail().equalsIgnoreCase(login.getAccount())){
+               return myKeyCloak(user.getUsername(),login.getPassword());
+            }}
+        return myKeyCloak(login.getAccount(),login.getPassword());
+    }
+
+    public String myKeyCloak(String username, String password){
+        Keycloak keycloak = KeycloakBuilder.builder()
+                .serverUrl(authUrl)
+                .realm(realm)
+                .grantType(OAuth2Constants.PASSWORD)
+                .clientId(clientId)
+                .clientSecret(secretKey)
+                .username(username)
+                .password(password)
+                .build();
+        AccessTokenResponse tok = keycloak.tokenManager().getAccessToken();
+        return tok.getToken();
+    }
 
 }
