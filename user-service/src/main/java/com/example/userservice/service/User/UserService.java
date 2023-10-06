@@ -6,6 +6,7 @@ import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.request.ChangePassword;
 import com.example.userservice.request.UserRequest;
+import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,5 +31,5 @@ public interface UserService {
 
     User changePassword(UUID id, ChangePassword request);
 
-    UserResponse loginAccount(UserLogin login);
+    UserResponse loginAccount(UserLogin login) throws MessagingException;
 }

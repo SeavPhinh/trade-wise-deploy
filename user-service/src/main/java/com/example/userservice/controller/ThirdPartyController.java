@@ -3,6 +3,7 @@ package com.example.userservice.controller;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.service.ThirdParty.ThirdPartyService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1")
+@Tag(name = "Third Party")
 public class ThirdPartyController {
 
     private final ThirdPartyService thirdPartyService;

@@ -7,6 +7,8 @@ import com.example.userservice.request.ChangePassword;
 import com.example.userservice.request.UserRequest;
 import com.example.userservice.service.User.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1")
+@Tag(name = "AppUser")
 public class AppUserController {
 
     private final UserService userService;
@@ -105,7 +108,7 @@ public class AppUserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody UserLogin login){
+    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody UserLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account logged successfully",
                 userService.loginAccount(login),

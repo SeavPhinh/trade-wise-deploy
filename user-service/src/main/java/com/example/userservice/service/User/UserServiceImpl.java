@@ -8,6 +8,8 @@ import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.request.ChangePassword;
 import com.example.userservice.request.UserRequest;
+import com.example.userservice.service.Mail.EmailService;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final Keycloak keycloak;
+    private final EmailService emailService;
 
     @Value("${keycloak.credentials.secret}")
     private String secretKey;
@@ -39,8 +42,9 @@ public class UserServiceImpl implements UserService {
     @Value("${keycloak.realm}")
     private String realm;
 
-    public UserServiceImpl(Keycloak keycloak) {
+    public UserServiceImpl(Keycloak keycloak, EmailService emailService) {
         this.keycloak = keycloak;
+        this.emailService = emailService;
     }
 
     public List<User> getAllUsers() {
@@ -164,10 +168,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse loginAccount(UserLogin login) {
+    public UserResponse loginAccount(UserLogin login) throws MessagingException {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount();
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+                emailService.verifyCode(login);
                 return new UserResponse(
                         UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
                         resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),

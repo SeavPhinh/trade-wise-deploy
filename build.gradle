@@ -326,6 +326,8 @@ project("user-service"){
         implementation libraries.webMvc
         implementation libraries.resourceServer
         implementation libraries.springWeb
+        implementation libraries.thymleaf
+        implementation libraries.starterMail
 //        implementation libraries.zipkinTracking
 //        implementation libraries.zipkinReporter
     }
