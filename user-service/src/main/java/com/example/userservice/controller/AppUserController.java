@@ -3,7 +3,10 @@ import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
+import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.ChangePassword;
+import com.example.userservice.request.RequestResetPassword;
+import com.example.userservice.request.ResetPassword;
 import com.example.userservice.request.UserRequest;
 import com.example.userservice.service.User.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -55,9 +58,9 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/users/email")
+    @PostMapping("/users/email")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<List<User>>> getAllUserByEmail(@RequestParam String email){
+    public ResponseEntity<ApiResponse<User>> getAllUserByEmail(@RequestBody RequestResetPassword email){
         return new ResponseEntity<>(new ApiResponse<>(
                 "User search by email successfully",
                 userService.findByEmail(email),
@@ -108,13 +111,44 @@ public class AppUserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody UserLogin login) throws MessagingException {
+    public ResponseEntity<ApiResponse<User>> login(@RequestBody UserLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account logged successfully",
                 userService.loginAccount(login),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
+
+    @PostMapping("/verify")
+    public ResponseEntity<ApiResponse<UserResponse>> verify(@RequestBody VerifyLogin login) throws MessagingException {
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Account verified successfully",
+                userService.verifiedAccount(login),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<ApiResponse<User>> resetPassword(@RequestBody ResetPassword change) throws MessagingException {
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Password reset successfully",
+                userService.resetPassword(change),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/otp-reset-password")
+    public ResponseEntity<ApiResponse<RequestResetPassword>> otpResetPassword(@RequestBody RequestResetPassword reset) throws MessagingException {
+        return new ResponseEntity<>(new ApiResponse<>(
+                "OtpCode sent successfully",
+                userService.sendOptCode(reset),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
+
+
+
+
 
 
 }

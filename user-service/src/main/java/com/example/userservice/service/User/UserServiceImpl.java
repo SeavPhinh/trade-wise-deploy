@@ -6,7 +6,10 @@ import com.example.commonservice.model.User;
 import com.example.userservice.model.UserDto;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
+import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.ChangePassword;
+import com.example.userservice.request.RequestResetPassword;
+import com.example.userservice.request.ResetPassword;
 import com.example.userservice.request.UserRequest;
 import com.example.userservice.service.Mail.EmailService;
 import jakarta.mail.MessagingException;
@@ -21,7 +24,6 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -104,7 +106,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public User deleteUser(UUID userId){
-
         User responseUser = new User();
         responseUser.setId(UUID.fromString(resource(userId).toRepresentation().getId()));
         responseUser.setUsername(resource(userId).toRepresentation().getUsername());
@@ -116,7 +117,6 @@ public class UserServiceImpl implements UserService {
         responseUser.setLastModified(LocalDateTime.now());
         keycloak.realm(realm).users().delete(String.valueOf(userId));
         return responseUser;
-
     }
 
     public User updateUser(UUID id, UserRequest request) {
@@ -168,25 +168,79 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse loginAccount(UserLogin login) throws MessagingException {
+    public User loginAccount(UserLogin login) throws MessagingException {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount();
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                emailService.verifyCode(login);
-                return new UserResponse(
-                        UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
-                        resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
-                        resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
-                        resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
-                        resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
-                        roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
-                        accessTokenResponse(login),
-                        LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
-                        LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
-                );
+                setAttribute(user, login);
+                return returnUser(user);
             }
         }
         throw new NotFoundExceptionClass("User not found");
+    }
+
+    @Override
+    public UserResponse verifiedAccount(VerifyLogin login){
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            String accountId = login.getAccount();
+            if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+                Map<String, List<String>> attributes = user.getAttributes();
+
+                if(attributes == null || !attributes.containsKey("otpCode")){
+                    throw new NotFoundExceptionClass("User not found");
+
+                }else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(login.getOtpCode())){
+                    return new UserResponse(
+                            UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
+                            resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
+                            resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
+                            resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
+                            resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
+                            roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
+                            accessTokenResponse(login),
+                            LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
+                            LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
+                    );
+                }else{
+                    throw new IllegalArgumentException("Incorrect otpCode.");
+                }
+            }
+        }
+        throw new NotFoundExceptionClass("User not found");
+    }
+
+    @Override
+    public User resetPassword(ResetPassword change){
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            String accountId = change.getAccount();
+
+            if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+                Map<String, List<String>> attributes = user.getAttributes();
+                if(attributes == null || !attributes.containsKey("otpCode")){
+                    throw new NotFoundExceptionClass("User not found");
+                }else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode())){
+                    CredentialRepresentation passwordCredential = new CredentialRepresentation();
+                    passwordCredential.setType(CredentialRepresentation.PASSWORD);
+                    passwordCredential.setValue(change.getNewPassword());
+                    passwordCredential.setTemporary(false);
+                    resource(UUID.fromString(user.getId())).resetPassword(passwordCredential);
+                    return returnUser(user);
+                }else{
+                    throw new IllegalArgumentException("Incorrect otpCode.");
+                }
+            }
+        }
+        throw new NotFoundExceptionClass("User not found");
+    }
+
+    @Override
+    public RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException {
+        User account = findByEmail(new RequestResetPassword(reset.getAccount()));
+        if (account.getEmail().equalsIgnoreCase(reset.getAccount()) || account.getUsername().equalsIgnoreCase(reset.getAccount())) {
+            emailService.resetPassword(reset.getAccount());
+            return reset;
+        }
+        throw new NotFoundExceptionClass("User not found.");
     }
 
     private static CredentialRepresentation createPasswordCredentials(String password) {
@@ -197,10 +251,15 @@ public class UserServiceImpl implements UserService {
         return passwordCredentials;
     }
 
-    public List<User> findByEmail(String email) {  List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(email);
-        return userRepresentations.stream()
-                .map(UserDto::toDto)
-                .collect(Collectors.toList());
+    public User findByEmail(RequestResetPassword email) {
+
+        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().list();
+        for (UserRepresentation user : userRepresentations) {
+            if(user.getEmail().equalsIgnoreCase(email.getAccount())){
+                return returnUser(user);
+            }
+        }
+        throw new NotFoundExceptionClass("User not found");
     }
 
     public User getUserById(UUID id) {
@@ -225,7 +284,7 @@ public class UserServiceImpl implements UserService {
         return keycloak.realm(realm).users().get(String.valueOf(id));
     }
 
-    public String accessTokenResponse(UserLogin login){
+    public String accessTokenResponse(VerifyLogin login){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             if(user.getEmail().equalsIgnoreCase(login.getAccount())){
                return myKeyCloak(user.getUsername(),login.getPassword());
@@ -245,6 +304,24 @@ public class UserServiceImpl implements UserService {
                 .build();
         AccessTokenResponse tok = keycloak.tokenManager().getAccessToken();
         return tok.getToken();
+    }
+
+    public User returnUser(UserRepresentation user){
+        return new User(
+                UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
+                resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
+                resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
+                resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
+                resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
+                roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
+                LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
+                LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
+        );
+    }
+
+    public void setAttribute (UserRepresentation user, UserLogin login) throws MessagingException {
+        user.singleAttribute("otpCode",String.valueOf(emailService.verifyCode(login.getAccount())));
+        resource(UUID.fromString(user.getId())).update(user);
     }
 
 }

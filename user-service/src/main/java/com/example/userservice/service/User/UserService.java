@@ -4,7 +4,10 @@ package com.example.userservice.service.User;
 import com.example.commonservice.model.User;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
+import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.ChangePassword;
+import com.example.userservice.request.RequestResetPassword;
+import com.example.userservice.request.ResetPassword;
 import com.example.userservice.request.UserRequest;
 import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
@@ -21,7 +24,7 @@ public interface UserService {
 
     List<User> findByUsername(String username);
 
-    List<User> findByEmail(String email);
+    User findByEmail(RequestResetPassword email);
 
     User postUser(UserRequest request);
 
@@ -31,5 +34,11 @@ public interface UserService {
 
     User changePassword(UUID id, ChangePassword request);
 
-    UserResponse loginAccount(UserLogin login) throws MessagingException;
+    User loginAccount(UserLogin login) throws MessagingException;
+
+    UserResponse verifiedAccount(VerifyLogin login) throws MessagingException;
+
+    User resetPassword(ResetPassword change) throws MessagingException;
+
+    RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException;
 }

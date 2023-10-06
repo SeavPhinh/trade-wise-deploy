@@ -25,6 +25,10 @@ public class KeyCloakSecurityConfig {
                     authorize.requestMatchers("api/v1/modify").permitAll();
                     authorize.requestMatchers("api/v1/login").permitAll();
                     authorize.requestMatchers("api/v1/username").permitAll();
+                    authorize.requestMatchers("api/v1/verify").permitAll();
+                    authorize.requestMatchers("api/v1/reset-password").permitAll();
+                    authorize.requestMatchers("api/v1/users/email").permitAll();
+                    authorize.requestMatchers("api/v1/otp-reset-password").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/users/{id}").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));

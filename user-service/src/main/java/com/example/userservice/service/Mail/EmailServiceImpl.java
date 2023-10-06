@@ -1,6 +1,8 @@
 package com.example.userservice.service.Mail;
 
+import com.example.commonservice.model.User;
 import com.example.userservice.model.UserLogin;
+import com.example.userservice.model.VerifyLogin;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,21 +31,8 @@ public class EmailServiceImpl implements EmailService {
         this.emailSender = emailSender;
     }
 
-//    @Override
-//    public void sendMailMessage() throws MessagingException {
-//        MimeMessage mimeMessage = emailSender.createMimeMessage();
-//        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-//        boolean html = true;
-//        Context thymeleafContext = new Context(LocaleContextHolder.getLocale());
-//        final String emailContent = this.emailTemplateEngine.process(TEMPLATE, thymeleafContext);
-//        messageHelper.setTo("gosellingproject@gmail.com");
-//        messageHelper.setSubject("Email Sending");
-//        messageHelper.setText(emailContent, html);
-//        emailSender.send(mimeMessage);
-//    }
-
     @Override
-    public int verifyCode(UserLogin login) throws MessagingException {
+    public int verifyCode(String login) throws MessagingException {
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -51,14 +40,36 @@ public class EmailServiceImpl implements EmailService {
         boolean html = true;
 
         Context thymeleafContext = new Context(LocaleContextHolder.getLocale());
-        thymeleafContext.setVariable("name", login.getAccount());
+        thymeleafContext.setVariable("name", login);
         thymeleafContext.setVariable("otp", otp);
 
         final String emailContent = this.emailTemplateEngine.process(TEMPLATE, thymeleafContext);
 
         messageHelper.setFrom(sender);
-        messageHelper.setTo(login.getAccount());
+        messageHelper.setTo(login);
         messageHelper.setSubject("Verification Code");
+        messageHelper.setText(emailContent, html);
+        emailSender.send(mimeMessage);
+        return otp;
+    }
+
+    @Override
+    public int resetPassword(String login) throws MessagingException {
+
+        MimeMessage mimeMessage = emailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+        int otp = generateOTP();
+        boolean html = true;
+
+        Context thymeleafContext = new Context(LocaleContextHolder.getLocale());
+        thymeleafContext.setVariable("name", login);
+        thymeleafContext.setVariable("otp", otp);
+
+        final String emailContent = this.emailTemplateEngine.process(TEMPLATE, thymeleafContext);
+
+        messageHelper.setFrom(sender);
+        messageHelper.setTo(login);
+        messageHelper.setSubject("Reset Password");
         messageHelper.setText(emailContent, html);
         emailSender.send(mimeMessage);
         return otp;
