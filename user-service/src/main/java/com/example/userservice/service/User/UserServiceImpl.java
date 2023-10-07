@@ -153,7 +153,6 @@ public class UserServiceImpl implements UserService {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                myKeyCloak(login.getAccount().replaceAll("\\s+",""),login.getPassword());
                 setAttribute(user, login.getAccount());
                 return returnUser(user);
             } else if (!user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
@@ -331,9 +330,6 @@ public class UserServiceImpl implements UserService {
 
     // Return User Object
     public User returnUser(UserRepresentation user){
-
-        System.out.println("Checking: " + user.getId());
-
         return new User(
                 UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
                 resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
