@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
                 return responseUser;
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new NotFoundExceptionClass("User not found.");
 
     }
 
@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
                 //setAttribute(user, login);
                 return returnUser(user);
             } else if (!user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                throw new NotFoundExceptionClass("User not found");
+                throw new NotFoundExceptionClass("User not found.");
             }
         }
         throw new IllegalArgumentException("Incorrect password");
@@ -199,7 +199,7 @@ public class UserServiceImpl implements UserService {
                 Map<String, List<String>> attributes = user.getAttributes();
 
                 if(attributes == null){
-                    throw new NotFoundExceptionClass("User not found");
+                    throw new NotFoundExceptionClass("User not found.");
                 } else if (!attributes.containsKey("otpCode")) {
                     throw new IllegalArgumentException("Sending otpCode is required");
                 } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(login.getOtpCode().replaceAll("\\s+",""))){
@@ -219,7 +219,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        throw new UsernameNotFoundException("User not found");
+        throw new NotFoundExceptionClass("User not found.");
     }
 
     @Override
@@ -236,7 +236,8 @@ public class UserServiceImpl implements UserService {
                 Map<String, List<String>> attributes = user.getAttributes();
 
                 if(attributes == null){
-                    throw new NotFoundExceptionClass("User not found");
+                    throw new NotFoundExceptionClass("User not found.");
+
                 } else if (!attributes.containsKey("otpCode")) {
                     throw new IllegalArgumentException("Required to send otpCode");
                 } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode().replaceAll("\\s+",""))){
@@ -251,13 +252,13 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new NotFoundExceptionClass("User not found.");
     }
 
     @Override
     public RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException {
         User account = findEmail(reset.getAccount());
-        if (account.getEmail().equalsIgnoreCase(reset.getAccount().replaceAll("\\s+","")) || account.getUsername().equalsIgnoreCase(reset.getAccount().replaceAll("\\s+",""))) {
+        if (account.getEmail().equalsIgnoreCase(reset.getAccount()) || account.getUsername().equalsIgnoreCase(reset.getAccount())) {
             setAttribute(findUser(reset.getAccount()),reset.getAccount().replaceAll("\\s+",""));
             emailService.resetPassword(reset.getAccount().replaceAll("\\s+",""));
             return reset;
@@ -309,11 +310,11 @@ public class UserServiceImpl implements UserService {
     // Returning UserResource by id
     public UserResource resource(UUID id){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            if(!user.getId().equalsIgnoreCase(String.valueOf(id))){
-                throw new NotFoundExceptionClass("User not found");
+            if(user.getId().equalsIgnoreCase(String.valueOf(id))){
+                return keycloak.realm(realm).users().get(String.valueOf(id));
             }
         }
-        return keycloak.realm(realm).users().get(String.valueOf(id));
+        throw new NotFoundExceptionClass("User not found");
     }
 
     // Validating Account
@@ -343,6 +344,9 @@ public class UserServiceImpl implements UserService {
 
     // Return User Object
     public User returnUser(UserRepresentation user){
+
+        System.out.println("Checking: " + user.getId());
+
         return new User(
                 UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
                 resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
@@ -385,11 +389,11 @@ public class UserServiceImpl implements UserService {
     // Return UserRepresentation
     public UserRepresentation findUser(String email){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            if(user.getEmail().equalsIgnoreCase(email)){
+            if(user.getEmail().equalsIgnoreCase(email) || user.getUsername().equalsIgnoreCase(email)){
                 return user;
             }
         }
-        throw new NotFoundExceptionClass("User not found.");
+        throw new NotFoundExceptionClass("User not found");
     }
 
     // Validation Whitespace
