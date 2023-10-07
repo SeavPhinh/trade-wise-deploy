@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChangePassword {
 
-    private String oldPassword;
+    private String otpCode;
     private String newPassword;
     private String confirmPassword;
 

@@ -131,8 +131,8 @@ public class UserServiceImpl implements UserService {
 
         UserRepresentation updatedUser = new UserRepresentation();
         resource(id);
-        updatedUser.setFirstName(request.getFirstname());
-        updatedUser.setLastName(request.getLastname());
+        updatedUser.setFirstName(request.getFirstname().replaceAll("\\s+",""));
+        updatedUser.setLastName(request.getLastname().replaceAll("\\s+",""));
         updatedUser.setEmail(request.getEmail());
         updatedUser.singleAttribute("role", String.valueOf(request.getRoles()));
         updatedUser.singleAttribute("createdDate", String.valueOf(resource(id).toRepresentation().getAttributes().get("createdDate").get(0)));
@@ -143,41 +143,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User changePassword(UUID id, ChangePassword request) {
-
-        if(whiteSpace(request.getOldPassword()) || whiteSpace(request.getNewPassword()) || whiteSpace(request.getConfirmPassword())) {
-            throw new IllegalArgumentException("Password cannot assign nas whitespace");
+    public User loginAccount(UserLogin login) throws MessagingException {
+//        if(whiteSpace(login.getPassword())){
+//            throw new IllegalArgumentException("Password cannot be whitespace");
+//        }
+        if(myKeyCloak(login.getAccount(),login.getPassword()) == null){
+            throw new IllegalArgumentException("Email/Username or password is incorrect");
         }
-        CredentialRepresentation passwordCredential = new CredentialRepresentation();
-        passwordCredential.setType(CredentialRepresentation.PASSWORD);
-        passwordCredential.setValue(request.getNewPassword());
-        passwordCredential.setTemporary(false);
-        resource(id).resetPassword(passwordCredential);
-
-        return new User(
-                UUID.fromString(resource(id).toRepresentation().getId()),
-                resource(id).toRepresentation().getUsername(),
-                resource(id).toRepresentation().getEmail(),
-                resource(id).toRepresentation().getFirstName(),
-                resource(id).toRepresentation().getLastName(),
-                roles(resource(id).toRepresentation().getAttributes().get("role").get(0)),
-                LocalDateTime.parse(resource(id).toRepresentation().getAttributes().get("createdDate").get(0)),
-                LocalDateTime.parse(resource(id).toRepresentation().getAttributes().get("lastModified").get(0))
-        );
-    }
-
-    @Override
-    public User loginAccount(UserLogin login){
-
-        if(whiteSpace(login.getPassword())){
-            throw new IllegalArgumentException("Password cannot be whitespace");
-        }
-
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 myKeyCloak(login.getAccount().replaceAll("\\s+",""),login.getPassword());
-                //setAttribute(user, login);
+                setAttribute(user, login.getAccount());
                 return returnUser(user);
             } else if (!user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 throw new NotFoundExceptionClass("User not found.");
@@ -189,15 +166,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse verifiedAccount(VerifyLogin login){
 
-        if(whiteSpace(login.getPassword())){
-            throw new IllegalArgumentException("Password cannot be whitespace");
+        String token = "";
+
+//        if(whiteSpace(login.getPassword())){
+//            throw new IllegalArgumentException("Password cannot be whitespace");
+//        }
+
+        if(accessTokenResponse(login) == null){
+            throw new IllegalArgumentException("Email/Username or password is incorrect");
         }
+        token = accessTokenResponse(login);
 
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 Map<String, List<String>> attributes = user.getAttributes();
-
                 if(attributes == null){
                     throw new NotFoundExceptionClass("User not found.");
                 } else if (!attributes.containsKey("otpCode")) {
@@ -210,7 +193,7 @@ public class UserServiceImpl implements UserService {
                             resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
                             resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
                             roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
-                            accessTokenResponse(login),
+                            token,
                             LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
                             LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
                     );
@@ -228,19 +211,19 @@ public class UserServiceImpl implements UserService {
         if(whiteSpace(change.getNewPassword()) || whiteSpace(change.getConfirmPassword())){
             throw new IllegalArgumentException("Password cannot be whitespace");
         }
-
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = change.getAccount().replaceAll("\\s+","");
-
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 Map<String, List<String>> attributes = user.getAttributes();
-
                 if(attributes == null){
                     throw new NotFoundExceptionClass("User not found.");
-
                 } else if (!attributes.containsKey("otpCode")) {
                     throw new IllegalArgumentException("Required to send otpCode");
                 } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode().replaceAll("\\s+",""))){
+
+                    if(!change.getNewPassword().equalsIgnoreCase(change.getConfirmPassword())){
+                        throw new IllegalArgumentException("Password not matched");
+                    }
                     CredentialRepresentation passwordCredential = new CredentialRepresentation();
                     passwordCredential.setType(CredentialRepresentation.PASSWORD);
                     passwordCredential.setValue(change.getNewPassword());
@@ -328,18 +311,22 @@ public class UserServiceImpl implements UserService {
 
     // Returning Access Token
     public String myKeyCloak(String username, String password){
-        Keycloak keycloak = KeycloakBuilder.builder()
-                .serverUrl(authUrl)
-                .realm(realm)
-                .grantType(OAuth2Constants.PASSWORD)
-                .clientId(clientId)
-                .clientSecret(secretKey)
-                .username(username.toLowerCase().replaceAll("\\s+",""))
-                .password(password.replaceAll("\\s+",""))
-                .build();
+        try {
+            Keycloak keycloak = KeycloakBuilder.builder()
+                    .serverUrl(authUrl)
+                    .realm(realm)
+                    .grantType(OAuth2Constants.PASSWORD)
+                    .clientId(clientId)
+                    .clientSecret(secretKey)
+                    .username(username.toLowerCase().replaceAll("\\s+", ""))
+                    .password(password)
+                    .build();
 
-        AccessTokenResponse tok = keycloak.tokenManager().getAccessToken();
-        return tok.getToken();
+            AccessTokenResponse tok = keycloak.tokenManager().getAccessToken();
+            return tok.getToken();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // Return User Object

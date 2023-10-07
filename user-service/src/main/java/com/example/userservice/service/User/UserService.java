@@ -29,8 +29,6 @@ public interface UserService {
 
     User updateUser(UUID id, UserUpdate request);
 
-    User changePassword(UUID id, ChangePassword request);
-
     User loginAccount(UserLogin login) throws MessagingException;
 
     UserResponse verifiedAccount(VerifyLogin login) throws MessagingException;

@@ -1,8 +1,8 @@
 package com.example.userservice.service.ThirdParty;
 
 import com.example.commonservice.enumeration.Role;
-import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.model.User;
+import com.example.userservice.exception.NotFoundExceptionClass;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;

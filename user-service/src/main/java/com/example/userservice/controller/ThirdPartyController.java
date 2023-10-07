@@ -3,6 +3,7 @@ package com.example.userservice.controller;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.service.ThirdParty.ThirdPartyService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class ThirdPartyController {
     }
 
     @PutMapping("/modify")
+    @Operation(summary = "modified to set attribute account")
     public ResponseEntity<ApiResponse<List<User>>> modifyGmailAccount(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account modified successfully",

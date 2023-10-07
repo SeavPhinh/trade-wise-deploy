@@ -103,18 +103,8 @@ public class AppUserController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/users/{id}/change-password")
-    @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<User>> changePassword(@PathVariable UUID id,
-                                                        @Valid @RequestBody ChangePassword request){
-        return new ResponseEntity<>(new ApiResponse<>(
-                "Password changed successfully",
-                userService.changePassword(id, request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
-    }
-
     @PostMapping("/login")
+    @Operation(summary = "login account for sending otpCode")
     public ResponseEntity<ApiResponse<User>> login(@Valid @RequestBody UserLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account logged successfully",
@@ -124,6 +114,7 @@ public class AppUserController {
     }
 
     @PostMapping("/verify")
+    @Operation(summary = "verified account to get token")
     public ResponseEntity<ApiResponse<UserResponse>> verify(@Valid @RequestBody VerifyLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account verified successfully",
@@ -133,7 +124,7 @@ public class AppUserController {
     }
 
     @PutMapping("/reset-password")
-    @Operation(summary = "Reset user password")
+    @Operation(summary = "Reset user password or change password")
     public ResponseEntity<ApiResponse<User>> resetPassword(@Valid @RequestBody ResetPassword change) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Password reset successfully",
