@@ -5,10 +5,7 @@ import com.example.commonservice.model.User;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
-import com.example.userservice.request.ChangePassword;
-import com.example.userservice.request.RequestResetPassword;
-import com.example.userservice.request.ResetPassword;
-import com.example.userservice.request.UserRequest;
+import com.example.userservice.request.*;
 import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +27,7 @@ public interface UserService {
 
     User deleteUser(UUID id);
 
-    User updateUser(UUID id, UserRequest request);
+    User updateUser(UUID id, UserUpdate request);
 
     User changePassword(UUID id, ChangePassword request);
 

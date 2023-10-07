@@ -7,10 +7,7 @@ import com.example.userservice.model.UserDto;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
-import com.example.userservice.request.ChangePassword;
-import com.example.userservice.request.RequestResetPassword;
-import com.example.userservice.request.ResetPassword;
-import com.example.userservice.request.UserRequest;
+import com.example.userservice.request.*;
 import com.example.userservice.service.Mail.EmailService;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<User> findByUsername(String username) {
-        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(username);
+        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(username.replaceAll("\\s+",""));
 
         if(userRepresentations.stream().toList().isEmpty()){
             throw new NotFoundExceptionClass("User not found.");
@@ -77,13 +74,18 @@ public class UserServiceImpl implements UserService {
     public User postUser(UserRequest request) {
 
         UsersResource usersResource = keycloak.realm(realm).users();
+
+        if(whiteSpace(request.getPassword())){
+            throw new IllegalArgumentException("Password cannot be whitespace");
+        }
+
         CredentialRepresentation credentialRepresentation = createPasswordCredentials(request.getPassword());
 
         // Validation Existing Account
-        existingAccount(request.getEmail(),request.getUsername());
+        existingAccount(request.getEmail(),request.getUsername().replaceAll("\\s+",""));
 
         UserRepresentation userPre = new UserRepresentation();
-        userPre.setUsername(request.getUsername().toLowerCase());
+        userPre.setUsername(request.getUsername().toLowerCase().replaceAll("\\s+",""));
         userPre.setCredentials(Collections.singletonList(credentialRepresentation));
         userPre.setFirstName(request.getFirstname());
         userPre.setLastName(request.getLastname());
@@ -98,11 +100,11 @@ public class UserServiceImpl implements UserService {
         usersResource.create(userPre);
 
         UserRepresentation createdUserRepresentation =
-                keycloak.realm(realm).users().search(request.getUsername().toLowerCase()).get(0);
+                keycloak.realm(realm).users().search(request.getUsername().replaceAll("\\s+","").toLowerCase()).get(0);
 
         return new User(
                 UUID.fromString(createdUserRepresentation.getId()),
-                createdUserRepresentation.getUsername().toLowerCase(),
+                createdUserRepresentation.getUsername().toLowerCase().replaceAll("\\s+",""),
                 createdUserRepresentation.getEmail().toLowerCase(),
                 createdUserRepresentation.getFirstName(),
                 createdUserRepresentation.getLastName(),
@@ -125,11 +127,10 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    public User updateUser(UUID id, UserRequest request) {
+    public User updateUser(UUID id, UserUpdate request) {
 
         UserRepresentation updatedUser = new UserRepresentation();
-
-        updatedUser.setUsername(request.getUsername());
+        resource(id);
         updatedUser.setFirstName(request.getFirstname());
         updatedUser.setLastName(request.getLastname());
         updatedUser.setEmail(request.getEmail());
@@ -138,23 +139,15 @@ public class UserServiceImpl implements UserService {
         updatedUser.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
         resource(id).update(updatedUser);
 
-        UserRepresentation updatedUserRepresentation = resource(id).toRepresentation();
-
-        return new User(
-                UUID.fromString(updatedUserRepresentation.getId()),
-                updatedUserRepresentation.getUsername(),
-                updatedUserRepresentation.getEmail(),
-                updatedUserRepresentation.getFirstName(),
-                updatedUserRepresentation.getLastName(),
-                roles(updatedUser.getAttributes().get("role").get(0)),
-                LocalDateTime.parse(updatedUser.getAttributes().get("createdDate").get(0)),
-                LocalDateTime.parse(updatedUser.getAttributes().get("lastModified").get(0))
-        );
+        return getUserById(id);
     }
 
     @Override
     public User changePassword(UUID id, ChangePassword request) {
 
+        if(whiteSpace(request.getOldPassword()) || whiteSpace(request.getNewPassword()) || whiteSpace(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Password cannot assign nas whitespace");
+        }
         CredentialRepresentation passwordCredential = new CredentialRepresentation();
         passwordCredential.setType(CredentialRepresentation.PASSWORD);
         passwordCredential.setValue(request.getNewPassword());
@@ -174,11 +167,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User loginAccount(UserLogin login) throws MessagingException {
+    public User loginAccount(UserLogin login){
+
+        if(whiteSpace(login.getPassword())){
+            throw new IllegalArgumentException("Password cannot be whitespace");
+        }
+
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            String accountId = login.getAccount();
+            String accountId = login.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                myKeyCloak(login.getAccount(),login.getPassword());
+                myKeyCloak(login.getAccount().replaceAll("\\s+",""),login.getPassword());
                 //setAttribute(user, login);
                 return returnUser(user);
             } else if (!user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
@@ -190,15 +188,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse verifiedAccount(VerifyLogin login){
+
+        if(whiteSpace(login.getPassword())){
+            throw new IllegalArgumentException("Password cannot be whitespace");
+        }
+
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            String accountId = login.getAccount();
+            String accountId = login.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 Map<String, List<String>> attributes = user.getAttributes();
 
-                if(attributes == null || !attributes.containsKey("otpCode")){
-                    throw new UsernameNotFoundException("User not found");
-
-                }else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(login.getOtpCode())){
+                if(attributes == null){
+                    throw new NotFoundExceptionClass("User not found");
+                } else if (!attributes.containsKey("otpCode")) {
+                    throw new IllegalArgumentException("Sending otpCode is required");
+                } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(login.getOtpCode().replaceAll("\\s+",""))){
                     return new UserResponse(
                             UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
                             resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
@@ -220,14 +224,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User resetPassword(ResetPassword change){
+
+        if(whiteSpace(change.getNewPassword()) || whiteSpace(change.getConfirmPassword())){
+            throw new IllegalArgumentException("Password cannot be whitespace");
+        }
+
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            String accountId = change.getAccount();
+            String accountId = change.getAccount().replaceAll("\\s+","");
 
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 Map<String, List<String>> attributes = user.getAttributes();
-                if(attributes == null || !attributes.containsKey("otpCode")){
-                    throw new UsernameNotFoundException("User not found");
-                }else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode())){
+
+                if(attributes == null){
+                    throw new NotFoundExceptionClass("User not found");
+                } else if (!attributes.containsKey("otpCode")) {
+                    throw new IllegalArgumentException("Required to send otpCode");
+                } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode().replaceAll("\\s+",""))){
                     CredentialRepresentation passwordCredential = new CredentialRepresentation();
                     passwordCredential.setType(CredentialRepresentation.PASSWORD);
                     passwordCredential.setValue(change.getNewPassword());
@@ -235,21 +247,22 @@ public class UserServiceImpl implements UserService {
                     resource(UUID.fromString(user.getId())).resetPassword(passwordCredential);
                     return returnUser(user);
                 }else{
-                    throw new IllegalArgumentException("Incorrect otpCode.");
+                    throw new IllegalArgumentException("Incorrect otpCode");
                 }
             }
         }
-        throw new UsernameNotFoundException("User not found");
+        throw new NotFoundExceptionClass("User not found");
     }
 
     @Override
     public RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException {
         User account = findEmail(reset.getAccount());
-        if (account.getEmail().equalsIgnoreCase(reset.getAccount()) || account.getUsername().equalsIgnoreCase(reset.getAccount())) {
-            emailService.resetPassword(reset.getAccount());
+        if (account.getEmail().equalsIgnoreCase(reset.getAccount().replaceAll("\\s+","")) || account.getUsername().equalsIgnoreCase(reset.getAccount().replaceAll("\\s+",""))) {
+            setAttribute(findUser(reset.getAccount()),reset.getAccount().replaceAll("\\s+",""));
+            emailService.resetPassword(reset.getAccount().replaceAll("\\s+",""));
             return reset;
         }
-        throw new UsernameNotFoundException("User not found.");
+        throw new NotFoundExceptionClass("User not found.");
     }
 
     private static CredentialRepresentation createPasswordCredentials(String password) {
@@ -261,7 +274,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<User> findByEmail(String email) {
-        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().searchByEmail(email,true);
+        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().searchByEmail(email.replaceAll("\\s+",""),true);
 
         if(userRepresentations.stream().toList().isEmpty()){
             throw new NotFoundExceptionClass("User not found.");
@@ -306,10 +319,10 @@ public class UserServiceImpl implements UserService {
     // Validating Account
     public String accessTokenResponse(VerifyLogin login){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            if(user.getEmail().equalsIgnoreCase(login.getAccount())){
+            if(user.getEmail().equalsIgnoreCase(login.getAccount().replaceAll("\\s+",""))){
                return myKeyCloak(user.getUsername(),login.getPassword());
             }}
-        return myKeyCloak(login.getAccount(),login.getPassword());
+        return myKeyCloak(login.getAccount().replaceAll("\\s+",""),login.getPassword());
     }
 
     // Returning Access Token
@@ -320,8 +333,8 @@ public class UserServiceImpl implements UserService {
                 .grantType(OAuth2Constants.PASSWORD)
                 .clientId(clientId)
                 .clientSecret(secretKey)
-                .username(username.toLowerCase())
-                .password(password)
+                .username(username.toLowerCase().replaceAll("\\s+",""))
+                .password(password.replaceAll("\\s+",""))
                 .build();
 
         AccessTokenResponse tok = keycloak.tokenManager().getAccessToken();
@@ -343,13 +356,13 @@ public class UserServiceImpl implements UserService {
     }
 
     // Set otp attribute for user
-    public void setAttribute (UserRepresentation user, UserLogin login) throws MessagingException {
-        user.singleAttribute("otpCode",String.valueOf(emailService.verifyCode(login.getAccount())));
+    public void setAttribute (UserRepresentation user, String email) throws MessagingException {
+        user.singleAttribute("otpCode",String.valueOf(emailService.verifyCode(email)));
         resource(UUID.fromString(user.getId())).update(user);
     }
 
     // Validating Existing Account
-    public boolean existingAccount(String email, String username){
+    public void existingAccount(String email, String username){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             if(user.getEmail().equalsIgnoreCase(email)){
                 throw new IllegalArgumentException("This email is already exist");
@@ -357,17 +370,36 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException("This username is already exist");
             }
         }
-        return true;
     }
 
     // Find Email
     public User findEmail(String account){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            if(user.getEmail().equalsIgnoreCase(account)){
+            if(user.getEmail().equalsIgnoreCase(account) || user.getUsername().equalsIgnoreCase(account)){
                 return returnUser(user);
             }
         }
         throw new NotFoundExceptionClass("User not found");
+    }
+
+    // Return UserRepresentation
+    public UserRepresentation findUser(String email){
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            if(user.getEmail().equalsIgnoreCase(email)){
+                return user;
+            }
+        }
+        throw new NotFoundExceptionClass("User not found.");
+    }
+
+    // Validation Whitespace
+    public boolean whiteSpace(String data){
+        for (char c : data.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

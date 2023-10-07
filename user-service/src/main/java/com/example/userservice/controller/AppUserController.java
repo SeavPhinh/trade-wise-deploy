@@ -4,10 +4,7 @@ import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
-import com.example.userservice.request.ChangePassword;
-import com.example.userservice.request.RequestResetPassword;
-import com.example.userservice.request.ResetPassword;
-import com.example.userservice.request.UserRequest;
+import com.example.userservice.request.*;
 import com.example.userservice.service.User.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -96,8 +93,9 @@ public class AppUserController {
 
     @PutMapping("/users/{id}")
     @SecurityRequirement(name = "oAuth2")
+    @Operation(summary = "update user by id from keycloak")
     public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable UUID id,
-                           @RequestBody UserRequest request){
+                           @Valid @RequestBody UserUpdate request){
         return new ResponseEntity<>(new ApiResponse<>(
                 "User updated by id successfully",
                 userService.updateUser(id, request),
@@ -108,7 +106,7 @@ public class AppUserController {
     @PutMapping("/users/{id}/change-password")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<User>> changePassword(@PathVariable UUID id,
-                                                        @RequestBody ChangePassword request){
+                                                        @Valid @RequestBody ChangePassword request){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Password changed successfully",
                 userService.changePassword(id, request),
@@ -117,7 +115,7 @@ public class AppUserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<User>> login(@RequestBody UserLogin login) throws MessagingException {
+    public ResponseEntity<ApiResponse<User>> login(@Valid @RequestBody UserLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account logged successfully",
                 userService.loginAccount(login),
@@ -126,7 +124,7 @@ public class AppUserController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<ApiResponse<UserResponse>> verify(@RequestBody VerifyLogin login) throws MessagingException {
+    public ResponseEntity<ApiResponse<UserResponse>> verify(@Valid @RequestBody VerifyLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account verified successfully",
                 userService.verifiedAccount(login),
@@ -135,7 +133,8 @@ public class AppUserController {
     }
 
     @PutMapping("/reset-password")
-    public ResponseEntity<ApiResponse<User>> resetPassword(@RequestBody ResetPassword change) throws MessagingException {
+    @Operation(summary = "Reset user password")
+    public ResponseEntity<ApiResponse<User>> resetPassword(@Valid @RequestBody ResetPassword change) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Password reset successfully",
                 userService.resetPassword(change),
@@ -144,7 +143,8 @@ public class AppUserController {
     }
 
     @PostMapping("/otp-reset-password")
-    public ResponseEntity<ApiResponse<RequestResetPassword>> otpResetPassword(@RequestBody RequestResetPassword reset) throws MessagingException {
+    @Operation(summary = "Sending otpCode to user")
+    public ResponseEntity<ApiResponse<RequestResetPassword>> otpResetPassword(@Valid @RequestBody RequestResetPassword reset) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "OtpCode sent successfully",
                 userService.sendOptCode(reset),
