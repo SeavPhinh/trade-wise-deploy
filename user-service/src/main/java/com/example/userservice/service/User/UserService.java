@@ -24,7 +24,7 @@ public interface UserService {
 
     List<User> findByUsername(String username);
 
-    User findByEmail(RequestResetPassword email);
+    List<User> findByEmail(String email);
 
     User postUser(UserRequest request);
 

@@ -27,8 +27,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().list();
         if(userRepresentations.stream().toList().isEmpty()){
-            throw new UsernameNotFoundException("User not found.");
+            throw new NotFoundExceptionClass("Waiting for user registration");
         }
 
         return userRepresentations.stream()
@@ -81,25 +79,31 @@ public class UserServiceImpl implements UserService {
         UsersResource usersResource = keycloak.realm(realm).users();
         CredentialRepresentation credentialRepresentation = createPasswordCredentials(request.getPassword());
 
+        // Validation Existing Account
+        existingAccount(request.getEmail(),request.getUsername());
+
         UserRepresentation userPre = new UserRepresentation();
-        userPre.setUsername(request.getUsername());
+        userPre.setUsername(request.getUsername().toLowerCase());
         userPre.setCredentials(Collections.singletonList(credentialRepresentation));
         userPre.setFirstName(request.getFirstname());
         userPre.setLastName(request.getLastname());
-        userPre.setEmail(request.getEmail());
-        userPre.singleAttribute("role", String.valueOf(request.getRoles()));
+        userPre.setEmail(request.getEmail().toLowerCase());
+        if (!request.getRoles().contains(Role.BUYER) && !request.getRoles().contains(Role.SELLER)) {
+            throw new NotFoundExceptionClass("Role must include BUYER or SELLER");
+        }
+        userPre.singleAttribute("role", String.valueOf(roles(String.valueOf(request.getRoles()))));
         userPre.singleAttribute("createdDate", String.valueOf(LocalDateTime.now()));
         userPre.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
         userPre.setEnabled(true);
         usersResource.create(userPre);
 
         UserRepresentation createdUserRepresentation =
-                keycloak.realm(realm).users().search(request.getUsername()).get(0);
+                keycloak.realm(realm).users().search(request.getUsername().toLowerCase()).get(0);
 
         return new User(
                 UUID.fromString(createdUserRepresentation.getId()),
-                createdUserRepresentation.getUsername(),
-                createdUserRepresentation.getEmail(),
+                createdUserRepresentation.getUsername().toLowerCase(),
+                createdUserRepresentation.getEmail().toLowerCase(),
                 createdUserRepresentation.getFirstName(),
                 createdUserRepresentation.getLastName(),
                 roles(userPre.getAttributes().get("role").get(0)),
@@ -108,18 +112,17 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    public User deleteUser(UUID userId){
-        User responseUser = new User();
-        responseUser.setId(UUID.fromString(resource(userId).toRepresentation().getId()));
-        responseUser.setUsername(resource(userId).toRepresentation().getUsername());
-        responseUser.setEmail(resource(userId).toRepresentation().getUsername());
-        responseUser.setFirstName(resource(userId).toRepresentation().getFirstName());
-        responseUser.setLastName(resource(userId).toRepresentation().getLastName());
-        responseUser.setRoles(roles(resource(userId).toRepresentation().getAttributes().get("role").get(0)));
-        responseUser.setCreatedDate(LocalDateTime.now());
-        responseUser.setLastModified(LocalDateTime.now());
-        keycloak.realm(realm).users().delete(String.valueOf(userId));
-        return responseUser;
+    public User deleteUser(UUID userId) {
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            User responseUser;
+            if (user.getId().equalsIgnoreCase(String.valueOf(getUserById(userId).getId()))) {
+                responseUser = getUserById(userId);
+                keycloak.realm(realm).users().delete(String.valueOf(userId));
+                return responseUser;
+            }
+        }
+        throw new NotFoundExceptionClass("User not found");
+
     }
 
     public User updateUser(UUID id, UserRequest request) {
@@ -175,11 +178,14 @@ public class UserServiceImpl implements UserService {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount();
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                setAttribute(user, login);
+                myKeyCloak(login.getAccount(),login.getPassword());
+                //setAttribute(user, login);
                 return returnUser(user);
+            } else if (!user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+                throw new NotFoundExceptionClass("User not found");
             }
         }
-        throw new UsernameNotFoundException("User not found");
+        throw new IllegalArgumentException("Incorrect password");
     }
 
     @Override
@@ -238,7 +244,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException {
-        User account = findByEmail(new RequestResetPassword(reset.getAccount()));
+        User account = findEmail(reset.getAccount());
         if (account.getEmail().equalsIgnoreCase(reset.getAccount()) || account.getUsername().equalsIgnoreCase(reset.getAccount())) {
             emailService.resetPassword(reset.getAccount());
             return reset;
@@ -254,18 +260,21 @@ public class UserServiceImpl implements UserService {
         return passwordCredentials;
     }
 
-    public User findByEmail(RequestResetPassword email) {
+    public List<User> findByEmail(String email) {
+        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().searchByEmail(email,true);
 
-        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().list();
-        for (UserRepresentation user : userRepresentations) {
-            if(user.getEmail().equalsIgnoreCase(email.getAccount())){
-                return returnUser(user);
-            }
+        if(userRepresentations.stream().toList().isEmpty()){
+            throw new NotFoundExceptionClass("User not found.");
         }
-        throw new UsernameNotFoundException("User not found");
+
+        return userRepresentations.stream()
+                .map(UserDto::toDto)
+                .collect(Collectors.toList());
     }
 
     public User getUserById(UUID id) {
+        // User Validation
+        resource(id);
         return new User(UUID.fromString(resource(id).toRepresentation().getId()),
                 resource(id).toRepresentation().getUsername(),
                 resource(id).toRepresentation().getEmail(),
@@ -280,12 +289,17 @@ public class UserServiceImpl implements UserService {
     public List<Role> roles(String role){
         List<String> rolesList = Arrays.asList(role.replaceAll("\\[|\\]", "").split(", "));
         return rolesList.stream()
-                .map(Role::valueOf)
+                .map(roleName -> Role.valueOf(roleName.toUpperCase()))
                 .collect(Collectors.toList());
     }
 
     // Returning UserResource by id
     public UserResource resource(UUID id){
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            if(!user.getId().equalsIgnoreCase(String.valueOf(id))){
+                throw new NotFoundExceptionClass("User not found");
+            }
+        }
         return keycloak.realm(realm).users().get(String.valueOf(id));
     }
 
@@ -306,9 +320,10 @@ public class UserServiceImpl implements UserService {
                 .grantType(OAuth2Constants.PASSWORD)
                 .clientId(clientId)
                 .clientSecret(secretKey)
-                .username(username)
+                .username(username.toLowerCase())
                 .password(password)
                 .build();
+
         AccessTokenResponse tok = keycloak.tokenManager().getAccessToken();
         return tok.getToken();
     }
@@ -333,17 +348,26 @@ public class UserServiceImpl implements UserService {
         resource(UUID.fromString(user.getId())).update(user);
     }
 
-
-    // Validating password ( Min 6 chars Max 8 chars one - uppercase letter, lowercase letter, number )
-    public static boolean isValidPassword(String password) {
-        if (password.length() < 6 || password.length() > 8) {
-            return false;
+    // Validating Existing Account
+    public boolean existingAccount(String email, String username){
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            if(user.getEmail().equalsIgnoreCase(email)){
+                throw new IllegalArgumentException("This email is already exist");
+            }else if(user.getUsername().equalsIgnoreCase(username)){
+                throw new IllegalArgumentException("This username is already exist");
+            }
         }
-        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).*$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(password);
+        return true;
+    }
 
-        return matcher.matches();
+    // Find Email
+    public User findEmail(String account){
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            if(user.getEmail().equalsIgnoreCase(account)){
+                return returnUser(user);
+            }
+        }
+        throw new NotFoundExceptionClass("User not found");
     }
 
 }

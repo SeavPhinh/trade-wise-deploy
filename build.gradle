@@ -328,6 +328,7 @@ project("user-service"){
         implementation libraries.springWeb
         implementation libraries.thymleaf
         implementation libraries.starterMail
+        implementation libraries.validation
 //        implementation libraries.zipkinTracking
 //        implementation libraries.zipkinReporter
     }
@@ -375,6 +376,7 @@ project("common-service"){
     dependencies {
         implementation libraries.circuitBreaker
         implementation libraries.webMvc
+        implementation libraries.validation
 
     }
 
