@@ -1,4 +1,5 @@
 package com.example.userservice.controller;
+import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.model.UserLogin;
@@ -49,7 +50,6 @@ public class AppUserController {
     }
 
     @GetMapping("/users/username")
-    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<User>>> getAllUserByUsername(@RequestParam String username){
         return new ResponseEntity<>(new ApiResponse<>(
                 "User search by username successfully",
@@ -59,7 +59,6 @@ public class AppUserController {
     }
 
     @PostMapping("/users/email")
-    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<User>> getAllUserByEmail(@RequestBody RequestResetPassword email){
         return new ResponseEntity<>(new ApiResponse<>(
                 "User search by email successfully",

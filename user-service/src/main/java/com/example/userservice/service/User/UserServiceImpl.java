@@ -1,8 +1,8 @@
 package com.example.userservice.service.User;
 
 import com.example.commonservice.enumeration.Role;
-import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.model.User;
+import com.example.userservice.exception.NotFoundExceptionClass;
 import com.example.userservice.model.UserDto;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
@@ -23,9 +23,12 @@ import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().list();
         if(userRepresentations.stream().toList().isEmpty()){
-            throw new NotFoundExceptionClass("User not found.");
+            throw new UsernameNotFoundException("User not found.");
         }
 
         return userRepresentations.stream()
@@ -176,7 +179,7 @@ public class UserServiceImpl implements UserService {
                 return returnUser(user);
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new UsernameNotFoundException("User not found");
     }
 
     @Override
@@ -187,7 +190,7 @@ public class UserServiceImpl implements UserService {
                 Map<String, List<String>> attributes = user.getAttributes();
 
                 if(attributes == null || !attributes.containsKey("otpCode")){
-                    throw new NotFoundExceptionClass("User not found");
+                    throw new UsernameNotFoundException("User not found");
 
                 }else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(login.getOtpCode())){
                     return new UserResponse(
@@ -206,7 +209,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new UsernameNotFoundException("User not found");
     }
 
     @Override
@@ -217,7 +220,7 @@ public class UserServiceImpl implements UserService {
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 Map<String, List<String>> attributes = user.getAttributes();
                 if(attributes == null || !attributes.containsKey("otpCode")){
-                    throw new NotFoundExceptionClass("User not found");
+                    throw new UsernameNotFoundException("User not found");
                 }else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode())){
                     CredentialRepresentation passwordCredential = new CredentialRepresentation();
                     passwordCredential.setType(CredentialRepresentation.PASSWORD);
@@ -230,7 +233,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new UsernameNotFoundException("User not found");
     }
 
     @Override
@@ -240,7 +243,7 @@ public class UserServiceImpl implements UserService {
             emailService.resetPassword(reset.getAccount());
             return reset;
         }
-        throw new NotFoundExceptionClass("User not found.");
+        throw new UsernameNotFoundException("User not found.");
     }
 
     private static CredentialRepresentation createPasswordCredentials(String password) {
@@ -259,7 +262,7 @@ public class UserServiceImpl implements UserService {
                 return returnUser(user);
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new UsernameNotFoundException("User not found");
     }
 
     public User getUserById(UUID id) {
@@ -273,6 +276,7 @@ public class UserServiceImpl implements UserService {
                 LocalDateTime.now());
     }
 
+    // Converting Role from Attribute as String to ArrayList
     public List<Role> roles(String role){
         List<String> rolesList = Arrays.asList(role.replaceAll("\\[|\\]", "").split(", "));
         return rolesList.stream()
@@ -280,10 +284,12 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    // Returning UserResource by id
     public UserResource resource(UUID id){
         return keycloak.realm(realm).users().get(String.valueOf(id));
     }
 
+    // Validating Account
     public String accessTokenResponse(VerifyLogin login){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             if(user.getEmail().equalsIgnoreCase(login.getAccount())){
@@ -292,6 +298,7 @@ public class UserServiceImpl implements UserService {
         return myKeyCloak(login.getAccount(),login.getPassword());
     }
 
+    // Returning Access Token
     public String myKeyCloak(String username, String password){
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(authUrl)
@@ -306,6 +313,7 @@ public class UserServiceImpl implements UserService {
         return tok.getToken();
     }
 
+    // Return User Object
     public User returnUser(UserRepresentation user){
         return new User(
                 UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
@@ -319,9 +327,23 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    // Set otp attribute for user
     public void setAttribute (UserRepresentation user, UserLogin login) throws MessagingException {
         user.singleAttribute("otpCode",String.valueOf(emailService.verifyCode(login.getAccount())));
         resource(UUID.fromString(user.getId())).update(user);
+    }
+
+
+    // Validating password ( Min 6 chars Max 8 chars one - uppercase letter, lowercase letter, number )
+    public static boolean isValidPassword(String password) {
+        if (password.length() < 6 || password.length() > 8) {
+            return false;
+        }
+        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).*$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(password);
+
+        return matcher.matches();
     }
 
 }
