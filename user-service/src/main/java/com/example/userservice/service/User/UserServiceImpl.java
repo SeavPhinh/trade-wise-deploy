@@ -144,9 +144,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User loginAccount(UserLogin login) throws MessagingException {
-//        if(whiteSpace(login.getPassword())){
-//            throw new IllegalArgumentException("Password cannot be whitespace");
-//        }
         if(myKeyCloak(login.getAccount(),login.getPassword()) == null){
             throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
@@ -164,13 +161,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse verifiedAccount(VerifyLogin login){
-
         String token = "";
-
-//        if(whiteSpace(login.getPassword())){
-//            throw new IllegalArgumentException("Password cannot be whitespace");
-//        }
-
         if(accessTokenResponse(login) == null){
             throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
