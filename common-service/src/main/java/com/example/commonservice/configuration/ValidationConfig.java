@@ -31,4 +31,6 @@ public class ValidationConfig {
     public static final String LASTNAME_RESPONSE_MESSAGE = "Lastname cannot exceed 50 characters";
     public static final int LASTNAME_VALIDATION_MAX = 50;
 
+    public static final String OTP_RESPONSE_MESSAGE = "OtpCode must be at least 6 characters";
+    public static final int OTP_VALIDATION_MIN = 6;
 }

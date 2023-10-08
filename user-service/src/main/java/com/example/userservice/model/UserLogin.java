@@ -1,5 +1,6 @@
 package com.example.userservice.model;
 
+import com.example.commonservice.configuration.ValidationConfig;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,8 @@ public class UserLogin {
     @NotBlank
     @NotEmpty
     private String account;
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = ValidationConfig.PASSWORD_REQUIRED_MESSAGE)
+    @NotEmpty(message = ValidationConfig.PASSWORD_RESPONSE_MESSAGE)
     private String password;
 
 }

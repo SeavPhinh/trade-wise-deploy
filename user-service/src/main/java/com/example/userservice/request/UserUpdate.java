@@ -1,4 +1,5 @@
 package com.example.userservice.request;
+import com.example.commonservice.configuration.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -13,21 +14,21 @@ import java.util.List;
 @NoArgsConstructor
 public class UserUpdate {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email must be a valid email address")
+    @NotBlank(message = ValidationConfig.EMAIL_REQUIRED_MESSAGE)
+    @Email(message = ValidationConfig.EMAIL_RESPONSE_MESSAGE)
     private String email;
 
-    @NotEmpty(message = "Roles are required")
+    @NotEmpty(message = ValidationConfig.ROLE_REQUIRED_MESSAGE)
     @Valid
-    @Size(min = 1, message = "At least one role must be specified")
+    @Size(min = ValidationConfig.ROLE_VALIDATION_MIN, message = ValidationConfig.ROLE_RESPONSE_MESSAGE)
     private List<Role> roles;
 
-    @NotEmpty(message = "Firstname cannot be empty")
-    @Size(max = 50, message = "Firstname cannot exceed 50 characters")
+    @NotEmpty(message = ValidationConfig.FIRSTNAME_REQUIRED_MESSAGE)
+    @Size(max = ValidationConfig.FIRSTNAME_VALIDATION_MAX, message = ValidationConfig.FIRSTNAME_RESPONSE_MESSAGE)
     private String firstname;
 
-    @NotEmpty(message = "Lastname are cannot be empty")
-    @Size(max = 50, message = "Lastname cannot exceed 50 characters")
+    @NotEmpty(message = ValidationConfig.LASTNAME_REQUIRED_MESSAGE)
+    @Size(max = ValidationConfig.LASTNAME_VALIDATION_MAX, message = ValidationConfig.LASTNAME_RESPONSE_MESSAGE)
     private String lastname;
 
 }

@@ -1,5 +1,6 @@
 package com.example.userservice.request;
 
+import com.example.commonservice.configuration.ValidationConfig;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -19,13 +20,13 @@ public class ResetPassword {
     @NotEmpty
     @NotBlank
     private String otpCode;
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,}$", message = "A valid password must at least 6 characters, and it must include at least one uppercase letter, one lowercase letter, and one number")
+    @NotBlank(message = ValidationConfig.PASSWORD_REQUIRED_MESSAGE)
+    @Size(min = ValidationConfig.PASSWORD_VALIDATION_MIN, message = ValidationConfig.FIRSTNAME_RESPONSE_MESSAGE)
+    @Pattern(regexp = ValidationConfig.PASSWORD_VALIDATION_REG, message = ValidationConfig.PASSWORD_RESPONSE_REG_MESSAGE)
     private String newPassword;
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,}$", message = "A valid password must at least 6 characters, and it must include at least one uppercase letter, one lowercase letter, and one number")
+    @NotBlank(message = ValidationConfig.PASSWORD_REQUIRED_MESSAGE)
+    @Size(min = ValidationConfig.PASSWORD_VALIDATION_MIN, message = ValidationConfig.FIRSTNAME_RESPONSE_MESSAGE)
+    @Pattern(regexp = ValidationConfig.PASSWORD_VALIDATION_REG, message = ValidationConfig.PASSWORD_RESPONSE_REG_MESSAGE)
     private String confirmPassword;
 
 }
