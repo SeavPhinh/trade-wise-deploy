@@ -1,6 +1,7 @@
 package com.example.userservice.request;
+
+import com.example.commonservice.configuration.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
-import com.fasterxml.jackson.databind.annotation.EnumNaming;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -14,13 +15,18 @@ import java.util.List;
 @NoArgsConstructor
 public class UserRequest {
 
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @NotBlank(message = ValidationConfig.USER_REQUIRED_MESSAGE)
+    @Size(min = ValidationConfig.USER_VALIDATION_MIN,
+          max = ValidationConfig.USER_VALIDATION_MAX,
+          message = ValidationConfig.USER_RESPONSE_MESSAGE)
     private String username;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters", max = 30)
-    @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\\-_=+{};:,<.>])(?!.*\\s).{6,}$", message = "A valid password must at least 6 characters, and it must include at least one uppercase letter, one lowercase letter, and one number")
+    @NotBlank(message = ValidationConfig.PASSWORD_REQUIRED_MESSAGE)
+    @Size(min = ValidationConfig.PASSWORD_VALIDATION_MIN,
+          message = ValidationConfig.PASSWORD_RESPONSE_MESSAGE,
+          max = ValidationConfig.USER_VALIDATION_MAX)
+    @Pattern(regexp = ValidationConfig.PASSWORD_VALIDATION_REG,
+            message = ValidationConfig.PASSWORD_RESPONSE_REG_MESSAGE)
     private String password;
 
     @NotBlank(message = "Email is required")
