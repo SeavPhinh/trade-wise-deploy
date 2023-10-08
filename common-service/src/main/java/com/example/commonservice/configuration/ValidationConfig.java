@@ -16,6 +16,19 @@ public class ValidationConfig {
     public static final int PASSWORD_VALIDATION_MIN = 6;
     public static final int PASSWORD_VALIDATION_MAX = 30;
 
+    public static final String EMAIL_REQUIRED_MESSAGE = "Email is required";
+    public static final String EMAIL_RESPONSE_MESSAGE = "Email must be a valid email address";
 
+    public static final String ROLE_REQUIRED_MESSAGE = "Roles are required";
+    public static final String ROLE_RESPONSE_MESSAGE = "At least one role must be specified";
+    public static final int ROLE_VALIDATION_MIN = 1;
+
+    public static final String FIRSTNAME_REQUIRED_MESSAGE = "Firstname cannot be empty";
+    public static final String FIRSTNAME_RESPONSE_MESSAGE = "Firstname cannot exceed 50 characters";
+    public static final int FIRSTNAME_VALIDATION_MAX = 50;
+
+    public static final String LASTNAME_REQUIRED_MESSAGE = "Lastname cannot be empty";
+    public static final String LASTNAME_RESPONSE_MESSAGE = "Lastname cannot exceed 50 characters";
+    public static final int LASTNAME_VALIDATION_MAX = 50;
 
 }
