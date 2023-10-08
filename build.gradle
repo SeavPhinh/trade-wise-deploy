@@ -102,7 +102,13 @@ project("chat-service"){
     }
 
     dependencies {
-
+        implementation project(':common-service')
+        implementation libraries.springWeb
+//        implementation libraries.webMvc
+        implementation libraries.validation
+        implementation libraries.amqpStarter
+        testImplementation libraries.rabbitMQtest
+        implementation libraries.webSocket
     }
 
 }

@@ -1,6 +1,6 @@
 package com.example.userservice.request;
 
-import com.example.commonservice.configuration.ValidationConfig;
+import com.example.commonservice.config.ValidationConfig;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;

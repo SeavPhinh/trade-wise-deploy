@@ -1,4 +1,5 @@
 ext.libraries = [
+
             springWeb: 'org.springframework.boot:spring-boot-starter-web',
             lombok: 'org.projectlombok:lombok',
             devtools: 'org.springframework.boot:spring-boot-devtools',
@@ -20,6 +21,10 @@ ext.libraries = [
             zipkinTracking: 'io.micrometer:micrometer-tracing-bridge-brave',
             thymleaf: 'org.springframework.boot:spring-boot-starter-thymeleaf:3.1.2',
             starterMail: 'org.springframework.boot:spring-boot-starter-mail:3.1.1',
-            'validation': 'org.springframework.boot:spring-boot-starter-validation'
+            validation: 'org.springframework.boot:spring-boot-starter-validation',
+            amqpStarter: 'org.springframework.boot:spring-boot-starter-amqp',
+            rabbitMQtest: 'org.springframework.amqp:spring-rabbit-test',
+            webSocket: 'org.springframework.boot:spring-boot-starter-websocket'
+
 
     ]

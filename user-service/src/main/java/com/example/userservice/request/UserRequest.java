@@ -1,6 +1,6 @@
 package com.example.userservice.request;
 
-import com.example.commonservice.configuration.ValidationConfig;
+import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;

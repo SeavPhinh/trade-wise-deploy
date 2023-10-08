@@ -1,4 +1,4 @@
-package com.example.commonservice.configuration;
+package com.example.commonservice.config;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import org.springframework.context.annotation.Bean;

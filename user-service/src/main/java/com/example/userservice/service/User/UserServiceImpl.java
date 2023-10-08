@@ -1,6 +1,6 @@
 package com.example.userservice.service.User;
 
-import com.example.commonservice.configuration.ValidationConfig;
+import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.userservice.exception.NotFoundExceptionClass;

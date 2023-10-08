@@ -1,4 +1,4 @@
-package com.example.commonservice.configuration;
+package com.example.commonservice.config;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration

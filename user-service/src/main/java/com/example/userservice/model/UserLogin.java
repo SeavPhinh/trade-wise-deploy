@@ -1,6 +1,6 @@
 package com.example.userservice.model;
 
-import com.example.commonservice.configuration.ValidationConfig;
+import com.example.commonservice.config.ValidationConfig;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

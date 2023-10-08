@@ -11,10 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RefreshScope
 public class KeycloakClientConfig {
-    @Value("${keycloak.credentials.username}")
-    private String username;
-    @Value("${keycloak.credentials.password}")
-    private String password;
+
     @Value("${keycloak.credentials.secret}")
     private String secretKey;
     @Value("${keycloak.resource}")
