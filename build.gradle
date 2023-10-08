@@ -106,6 +106,7 @@ project("chat-service"){
         implementation libraries.springWeb
 //        implementation libraries.webMvc
         implementation libraries.validation
+        implementation libraries.jpa
         implementation libraries.amqpStarter
         testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket
