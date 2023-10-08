@@ -19,8 +19,8 @@ public class UserRequest {
     private String username;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,}$", message = "A valid password must at least 6 characters, and it must include at least one uppercase letter, one lowercase letter, and one number")
+    @Size(min = 6, message = "Password must be at least 6 characters", max = 30)
+    @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\\-_=+{};:,<.>])(?!.*\\s).{6,}$", message = "A valid password must at least 6 characters, and it must include at least one uppercase letter, one lowercase letter, and one number")
     private String password;
 
     @NotBlank(message = "Email is required")
