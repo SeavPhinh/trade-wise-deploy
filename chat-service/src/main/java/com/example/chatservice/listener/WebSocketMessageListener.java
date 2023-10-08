@@ -1,6 +1,7 @@
 package com.example.chatservice.listener;
 
 import com.example.chatservice.config.RabbitMQConfig;
+import com.example.chatservice.model.ChatMessageEntity;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,8 +18,8 @@ public class WebSocketMessageListener {
     }
 
     @RabbitListener(queues = RabbitMQConfig.DIRECT_QUEUE)
-    public void receiveDirectMessage(Message message) {
-        messagingTemplate.convertAndSendToUser(message.getReceiver(), "/queue/direct", message);
+    public void receiveDirectMessage(ChatMessageEntity message) {
+        messagingTemplate.convertAndSendToUser(message.getReceiver().getUsername(), "/queue/direct", message);
     }
 }
 
