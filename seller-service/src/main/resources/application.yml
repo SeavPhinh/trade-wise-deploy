@@ -1,3 +1,5 @@
 spring:
   application:
     name: seller-service
+server:
+  port: 8085

@@ -1,3 +1,5 @@
 spring:
   application:
     name: buyer-service
+server:
+  port: 8083
