@@ -18,7 +18,7 @@ public class WebSocketController {
     private final ChatService chatService;
 
     @Autowired
-    WebSocketController(ChatService chatService) {
+    public WebSocketController(ChatService chatService) {
         this.chatService = chatService;
     }
 

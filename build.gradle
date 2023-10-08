@@ -91,6 +91,15 @@ project("chat-service"){
         sourceCompatibility = '17'
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
@@ -104,12 +113,12 @@ project("chat-service"){
     dependencies {
         implementation project(':common-service')
         implementation libraries.springWeb
-        implementation libraries.keycloak
+//        implementation libraries.keycloak
         implementation libraries.validation
         implementation libraries.jpa
         implementation libraries.postgresql
-//        implementation libraries.cloudClient
-        implementation libraries.keycloakAdmin
+        implementation libraries.cloudClient
+//        implementation libraries.keycloakAdmin
         implementation libraries.amqpStarter
         testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket

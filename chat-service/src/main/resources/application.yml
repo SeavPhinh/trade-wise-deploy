@@ -11,8 +11,8 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    username: rithysak
-    password: rithysak
+    username: guest
+    password: guest
     virtual-host: /
   main:
     allow-bean-definition-overriding: true
