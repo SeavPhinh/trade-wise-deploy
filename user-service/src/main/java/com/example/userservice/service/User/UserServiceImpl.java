@@ -1,5 +1,6 @@
 package com.example.userservice.service.User;
 
+import com.example.commonservice.configuration.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.userservice.exception.NotFoundExceptionClass;
@@ -50,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().list();
         if(userRepresentations.stream().toList().isEmpty()){
-            throw new NotFoundExceptionClass("Waiting for user registration");
+            throw new NotFoundExceptionClass(ValidationConfig.EMPTY_USER);
         }
 
         return userRepresentations.stream()
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(username.replaceAll("\\s+",""));
 
         if(userRepresentations.stream().toList().isEmpty()){
-            throw new NotFoundExceptionClass("User not found.");
+            throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
         }
 
         return userRepresentations.stream()
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
         UsersResource usersResource = keycloak.realm(realm).users();
 
         if(whiteSpace(request.getPassword())){
-            throw new IllegalArgumentException("Password cannot be whitespace");
+            throw new IllegalArgumentException(ValidationConfig.WHITE_SPACE);
         }
 
         CredentialRepresentation credentialRepresentation = createPasswordCredentials(request.getPassword());
@@ -90,7 +91,7 @@ public class UserServiceImpl implements UserService {
         userPre.setLastName(request.getLastname());
         userPre.setEmail(request.getEmail().toLowerCase());
         if (!request.getRoles().contains(Role.BUYER) && !request.getRoles().contains(Role.SELLER)) {
-            throw new NotFoundExceptionClass("Role must include BUYER or SELLER");
+            throw new NotFoundExceptionClass(ValidationConfig.WARNING_ROLE);
         }
         userPre.singleAttribute("role", String.valueOf(roles(String.valueOf(request.getRoles()))));
         userPre.singleAttribute("createdDate", String.valueOf(LocalDateTime.now()));
@@ -122,7 +123,7 @@ public class UserServiceImpl implements UserService {
                 return responseUser;
             }
         }
-        throw new NotFoundExceptionClass("User not found.");
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
 
     }
 
@@ -147,7 +148,7 @@ public class UserServiceImpl implements UserService {
 //            throw new IllegalArgumentException("Password cannot be whitespace");
 //        }
         if(myKeyCloak(login.getAccount(),login.getPassword()) == null){
-            throw new IllegalArgumentException("Email/Username or password is incorrect");
+            throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount().replaceAll("\\s+","");
@@ -155,10 +156,10 @@ public class UserServiceImpl implements UserService {
                 setAttribute(user, login.getAccount());
                 return returnUser(user);
             } else if (!user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                throw new NotFoundExceptionClass("User not found.");
+                throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
             }
         }
-        throw new IllegalArgumentException("Incorrect password");
+        throw new IllegalArgumentException(ValidationConfig.INVALID_PASSWORD);
     }
 
     @Override
@@ -171,7 +172,7 @@ public class UserServiceImpl implements UserService {
 //        }
 
         if(accessTokenResponse(login) == null){
-            throw new IllegalArgumentException("Email/Username or password is incorrect");
+            throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
         token = accessTokenResponse(login);
 
@@ -180,9 +181,9 @@ public class UserServiceImpl implements UserService {
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 Map<String, List<String>> attributes = user.getAttributes();
                 if(attributes == null){
-                    throw new NotFoundExceptionClass("User not found.");
+                    throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
                 } else if (!attributes.containsKey("otpCode")) {
-                    throw new IllegalArgumentException("Sending otpCode is required");
+                    throw new IllegalArgumentException(ValidationConfig.REQUIRED_OTP);
                 } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(login.getOtpCode().replaceAll("\\s+",""))){
                     return new UserResponse(
                             UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
@@ -196,31 +197,31 @@ public class UserServiceImpl implements UserService {
                             LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
                     );
                 }else{
-                    throw new IllegalArgumentException("Incorrect otpCode.");
+                    throw new IllegalArgumentException(ValidationConfig.INVALID_OTP);
                 }
             }
         }
-        throw new NotFoundExceptionClass("User not found.");
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     @Override
     public User resetPassword(ResetPassword change){
 
         if(whiteSpace(change.getNewPassword()) || whiteSpace(change.getConfirmPassword())){
-            throw new IllegalArgumentException("Password cannot be whitespace");
+            throw new IllegalArgumentException(ValidationConfig.WHITE_SPACE);
         }
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = change.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
                 Map<String, List<String>> attributes = user.getAttributes();
                 if(attributes == null){
-                    throw new NotFoundExceptionClass("User not found.");
+                    throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
                 } else if (!attributes.containsKey("otpCode")) {
-                    throw new IllegalArgumentException("Required to send otpCode");
+                    throw new IllegalArgumentException(ValidationConfig.REQUIRED_OTP);
                 } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode().replaceAll("\\s+",""))){
 
                     if(!change.getNewPassword().equalsIgnoreCase(change.getConfirmPassword())){
-                        throw new IllegalArgumentException("Password not matched");
+                        throw new IllegalArgumentException(ValidationConfig.NOT_MATCHES_PASSWORD);
                     }
                     CredentialRepresentation passwordCredential = new CredentialRepresentation();
                     passwordCredential.setType(CredentialRepresentation.PASSWORD);
@@ -229,11 +230,11 @@ public class UserServiceImpl implements UserService {
                     resource(UUID.fromString(user.getId())).resetPassword(passwordCredential);
                     return returnUser(user);
                 }else{
-                    throw new IllegalArgumentException("Incorrect otpCode");
+                    throw new IllegalArgumentException(ValidationConfig.INVALID_OTP);
                 }
             }
         }
-        throw new NotFoundExceptionClass("User not found.");
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     @Override
@@ -244,7 +245,7 @@ public class UserServiceImpl implements UserService {
             emailService.resetPassword(reset.getAccount().replaceAll("\\s+",""));
             return reset;
         }
-        throw new NotFoundExceptionClass("User not found.");
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     private static CredentialRepresentation createPasswordCredentials(String password) {
@@ -259,7 +260,7 @@ public class UserServiceImpl implements UserService {
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().searchByEmail(email.replaceAll("\\s+",""),true);
 
         if(userRepresentations.stream().toList().isEmpty()){
-            throw new NotFoundExceptionClass("User not found.");
+            throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
         }
 
         return userRepresentations.stream()
@@ -295,7 +296,7 @@ public class UserServiceImpl implements UserService {
                 return keycloak.realm(realm).users().get(String.valueOf(id));
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     // Validating Account
@@ -351,9 +352,9 @@ public class UserServiceImpl implements UserService {
     public void existingAccount(String email, String username){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             if(user.getEmail().equalsIgnoreCase(email)){
-                throw new IllegalArgumentException("This email is already exist");
+                throw new IllegalArgumentException(ValidationConfig.EXISTING_EMAIL);
             }else if(user.getUsername().equalsIgnoreCase(username)){
-                throw new IllegalArgumentException("This username is already exist");
+                throw new IllegalArgumentException(ValidationConfig.EXISTING_USERNAME);
             }
         }
     }
@@ -365,7 +366,7 @@ public class UserServiceImpl implements UserService {
                 return returnUser(user);
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     // Return UserRepresentation
@@ -375,7 +376,7 @@ public class UserServiceImpl implements UserService {
                 return user;
             }
         }
-        throw new NotFoundExceptionClass("User not found");
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     // Validation Whitespace
