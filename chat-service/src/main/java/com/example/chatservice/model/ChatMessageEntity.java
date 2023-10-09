@@ -18,18 +18,9 @@ public class ChatMessageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
     private String content;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserEntity sender;
-
-    @ManyToOne
-    @JoinColumn(name = "receiver_id")
-    private UserEntity receiver;
-
-    private MessageType type;
+    private UUID senderId;
+    private UUID receiverId;
     private LocalDateTime timestamp;
 
 }

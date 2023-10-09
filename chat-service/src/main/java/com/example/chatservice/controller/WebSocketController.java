@@ -1,5 +1,4 @@
 package com.example.chatservice.controller;
-
 import com.example.chatservice.model.ChatMessageEntity;
 import com.example.chatservice.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,7 @@ public class WebSocketController {
     public void sendDirectMessage(@Payload ChatMessageEntity message) {
         chatService.sendDirectMessage(message);
     }
+
 }
 
 
