@@ -1,5 +1,5 @@
 package com.example.chatservice.controller;
-import com.example.chatservice.model.ChatMessageEntity;
+import com.example.chatservice.model.MessageModel;
 import com.example.chatservice.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -22,7 +22,7 @@ public class WebSocketController {
     }
 
     @MessageMapping("/direct")
-    public void sendDirectMessage(@Payload ChatMessageEntity message) {
+    public void sendDirectMessage(@Payload MessageModel message) {
         chatService.sendDirectMessage(message);
     }
 
