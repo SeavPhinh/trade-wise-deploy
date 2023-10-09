@@ -1,4 +1,5 @@
 package com.example.userservice.controller;
+
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.model.UserLogin;
@@ -142,9 +143,6 @@ public class AppUserController {
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }
-
-
-
 
 
 
