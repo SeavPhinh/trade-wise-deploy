@@ -16,8 +16,9 @@ import java.util.UUID;
 public class MessageModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue
     private UUID id;
+    @Column(columnDefinition = "JSON")
     private String content;
     private UUID senderId;
     private UUID receiverId;

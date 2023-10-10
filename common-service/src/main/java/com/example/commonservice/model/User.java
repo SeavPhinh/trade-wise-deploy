@@ -1,6 +1,7 @@
 package com.example.commonservice.model;
 
 import com.example.commonservice.enumeration.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,9 @@ public class User {
     private String firstName;
     private String lastName;
     private List<Role> roles;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS")
     private LocalDateTime createdDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS")
     private LocalDateTime lastModified;
 
 }

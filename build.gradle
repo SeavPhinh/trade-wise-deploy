@@ -118,6 +118,10 @@ project("chat-service"){
         implementation libraries.postgresql
         implementation libraries.cloudClient
         implementation libraries.amqpStarter
+//        implementation libraries.latestHibernate
+//        implementation libraries.hibernateCore
+//        implementation libraries.jackson
+//        implementation libraries.jakatar
         testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket
     }
