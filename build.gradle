@@ -112,13 +112,11 @@ project("chat-service"){
 
     dependencies {
         implementation project(':common-service')
-        implementation libraries.springWeb
-//        implementation libraries.keycloak
+        implementation libraries.webFlux
         implementation libraries.validation
         implementation libraries.jpa
         implementation libraries.postgresql
         implementation libraries.cloudClient
-//        implementation libraries.keycloakAdmin
         implementation libraries.amqpStarter
         testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket
@@ -344,7 +342,7 @@ project("user-service"){
         implementation libraries.keycloakAdmin
         implementation libraries.webMvc
         implementation libraries.resourceServer
-        implementation libraries.springWeb
+//        implementation libraries.springWeb
         implementation libraries.thymleaf
         implementation libraries.starterMail
         implementation libraries.validation
@@ -393,6 +391,7 @@ project("common-service"){
     }
 
     dependencies {
+//        implementation libraries.webFlux
         implementation libraries.circuitBreaker
         implementation libraries.webMvc
         implementation libraries.validation

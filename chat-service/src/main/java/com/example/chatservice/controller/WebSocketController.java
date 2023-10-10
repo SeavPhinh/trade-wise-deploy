@@ -6,12 +6,13 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Controller
 @CrossOrigin(origins = "http://localhost:4200")
-@RequestMapping("api/chat")
 public class WebSocketController {
 
     private final ChatService chatService;
@@ -21,9 +22,10 @@ public class WebSocketController {
         this.chatService = chatService;
     }
 
-    @MessageMapping("/direct")
-    public void sendDirectMessage(@Payload MessageModel message) {
+    @MessageMapping("/private-message")
+    public MessageModel sendDirectMessage(@Payload MessageModel message) {
         chatService.sendDirectMessage(message);
+        return message;
     }
 
 }
