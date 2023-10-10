@@ -5,8 +5,8 @@ spring:
     config:
       server:
         git:
-          uri: git@github.com:goselling/go-selling-config.git
+          uri: https://github.com/goselling/go-selling-config.git
           clone-on-start: true
-          default-label: main
+          default-label: master
 server:
   port: 8585
