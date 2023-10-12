@@ -38,6 +38,7 @@ public class ValidationConfig {
     public static final String NOT_MATCHES_PASSWORD = "Password not matched";
     public static final String EXISTING_EMAIL = "This email is already exist";
     public static final String EXISTING_USERNAME = "This username is already exist";
+    public static final String PROFILE_IMAGE_RESPONSE = "profile cannot be empty";
 
 
 }

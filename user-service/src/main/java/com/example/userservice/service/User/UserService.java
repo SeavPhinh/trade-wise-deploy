@@ -23,13 +23,11 @@ public interface UserService {
 
     List<User> findByEmail(String email);
 
-    User postUser(UserRequest request);
+    User postUser(UserRequest request) throws MessagingException;
 
     User deleteUser(UUID id);
 
     User updateUser(UUID id, UserUpdate request);
-
-    User loginAccount(UserLogin login) throws MessagingException;
 
     UserResponse verifiedAccount(VerifyLogin login) throws MessagingException;
 

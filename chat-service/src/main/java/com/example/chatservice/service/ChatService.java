@@ -40,6 +40,11 @@ public class ChatService {
     public List<MessageModel> getHistoryMessage(UUID senderId, UUID receiverId) {
         return chatMessageRepository.findHistory(senderId,receiverId);
     }
+
+    public Boolean isContainDestination(UUID firstUser, UUID secondUser) {
+        return false;
+    }
+
 }
 
 

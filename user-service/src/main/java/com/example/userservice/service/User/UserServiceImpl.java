@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    public User postUser(UserRequest request) {
+    public User postUser(UserRequest request) throws MessagingException {
 
         UsersResource usersResource = keycloak.realm(realm).users();
 
@@ -94,8 +94,11 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundExceptionClass(ValidationConfig.WARNING_ROLE);
         }
         userPre.singleAttribute("role", String.valueOf(roles(String.valueOf(request.getRoles()))));
-        userPre.singleAttribute("createdDate", String.valueOf(LocalDateTime.now()));
-        userPre.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
+        userPre.singleAttribute("created_date", String.valueOf(LocalDateTime.now()));
+        userPre.singleAttribute("last_modified", String.valueOf(LocalDateTime.now()));
+        userPre.singleAttribute("otp_code",String.valueOf(emailService.verifyCode(request.getEmail())));
+        userPre.singleAttribute("is_verify",String.valueOf(false));
+        userPre.singleAttribute("profile_image",String.valueOf(request.getProfileImage()));
         userPre.setEnabled(true);
         usersResource.create(userPre);
 
@@ -108,9 +111,11 @@ public class UserServiceImpl implements UserService {
                 createdUserRepresentation.getEmail().toLowerCase(),
                 createdUserRepresentation.getFirstName(),
                 createdUserRepresentation.getLastName(),
+                userPre.getAttributes().get("profile_image").get(0).equalsIgnoreCase("null")? null : userPre.getAttributes().get("profile_image").get(0),
+                Boolean.valueOf(userPre.getAttributes().get("is_verify").get(0)),
                 roles(userPre.getAttributes().get("role").get(0)),
-                LocalDateTime.parse(userPre.getAttributes().get("createdDate").get(0)),
-                LocalDateTime.parse(userPre.getAttributes().get("lastModified").get(0))
+                LocalDateTime.parse(userPre.getAttributes().get("created_date").get(0)),
+                LocalDateTime.parse(userPre.getAttributes().get("last_modified").get(0))
         );
     }
 
@@ -135,28 +140,11 @@ public class UserServiceImpl implements UserService {
         updatedUser.setLastName(request.getLastname().replaceAll("\\s+",""));
         updatedUser.setEmail(request.getEmail());
         updatedUser.singleAttribute("role", String.valueOf(request.getRoles()));
-        updatedUser.singleAttribute("createdDate", String.valueOf(resource(id).toRepresentation().getAttributes().get("createdDate").get(0)));
-        updatedUser.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
+        updatedUser.singleAttribute("created_date", String.valueOf(resource(id).toRepresentation().getAttributes().get("createdDate").get(0)));
+        updatedUser.singleAttribute("last_modified", String.valueOf(LocalDateTime.now()));
         resource(id).update(updatedUser);
 
         return getUserById(id);
-    }
-
-    @Override
-    public User loginAccount(UserLogin login) throws MessagingException {
-        if(myKeyCloak(login.getAccount(),login.getPassword()) == null){
-            throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
-        }
-        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            String accountId = login.getAccount().replaceAll("\\s+","");
-            if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                setAttribute(user, login.getAccount());
-                return returnUser(user);
-            } else if (!user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
-                throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
-            }
-        }
-        throw new IllegalArgumentException(ValidationConfig.INVALID_PASSWORD);
     }
 
     @Override
@@ -173,9 +161,11 @@ public class UserServiceImpl implements UserService {
                 Map<String, List<String>> attributes = user.getAttributes();
                 if(attributes == null){
                     throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
-                } else if (!attributes.containsKey("otpCode")) {
+                } else if (!attributes.containsKey("otp_code")) {
                     throw new IllegalArgumentException(ValidationConfig.REQUIRED_OTP);
-                } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(login.getOtpCode().replaceAll("\\s+",""))){
+                } else if(user.getAttributes().get("otp_code").get(0).equalsIgnoreCase(login.getOtpCode().replaceAll("\\s+",""))){
+                    user.singleAttribute("is_verify", String.valueOf(true));
+                    resource(UUID.fromString(user.getId())).update(user);
                     return new UserResponse(
                             UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
                             resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
@@ -184,8 +174,8 @@ public class UserServiceImpl implements UserService {
                             resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
                             roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
                             token,
-                            LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
-                            LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
+                            LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
+                            LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
                     );
                 }else{
                     throw new IllegalArgumentException(ValidationConfig.INVALID_OTP);
@@ -207,10 +197,9 @@ public class UserServiceImpl implements UserService {
                 Map<String, List<String>> attributes = user.getAttributes();
                 if(attributes == null){
                     throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
-                } else if (!attributes.containsKey("otpCode")) {
+                } else if (!attributes.containsKey("otp_code")) {
                     throw new IllegalArgumentException(ValidationConfig.REQUIRED_OTP);
-                } else if(user.getAttributes().get("otpCode").get(0).equalsIgnoreCase(change.getOtpCode().replaceAll("\\s+",""))){
-
+                } else if(user.getAttributes().get("otp_code").get(0).equalsIgnoreCase(change.getOtpCode().replaceAll("\\s+",""))){
                     if(!change.getNewPassword().equalsIgnoreCase(change.getConfirmPassword())){
                         throw new IllegalArgumentException(ValidationConfig.NOT_MATCHES_PASSWORD);
                     }
@@ -267,6 +256,9 @@ public class UserServiceImpl implements UserService {
                 resource(id).toRepresentation().getEmail(),
                 resource(id).toRepresentation().getFirstName(),
                 resource(id).toRepresentation().getLastName(),
+                resource(id).toRepresentation().getAttributes().get("profile_image").get(0).equalsIgnoreCase("null") ?
+                null : resource(id).toRepresentation().getAttributes().get("profile_image").get(0),
+                Boolean.valueOf(resource(id).toRepresentation().getAttributes().get("is_verify").get(0)),
                 roles(resource(id).toRepresentation().getAttributes().get("role").get(0)),
                 LocalDateTime.now(),
                 LocalDateTime.now());
@@ -327,15 +319,18 @@ public class UserServiceImpl implements UserService {
                 resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
                 resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
                 resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
+                resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("profile_image").get(0).equalsIgnoreCase("null") ?
+                null: resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("profile_image").get(0),
+                Boolean.valueOf(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("is_verify").get(0)),
                 roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
-                LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
-                LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
+                LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
+                LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
         );
     }
 
     // Set otp attribute for user
     public void setAttribute (UserRepresentation user, String email) throws MessagingException {
-        user.singleAttribute("otpCode",String.valueOf(emailService.verifyCode(email)));
+        user.singleAttribute("otp_code",String.valueOf(emailService.verifyCode(email)));
         resource(UUID.fromString(user.getId())).update(user);
     }
 

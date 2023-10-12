@@ -32,10 +32,14 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
             if(!keycloak.realm(realm).users().get(user.getId()).toRepresentation().getFederatedIdentities().isEmpty()){
                 Map<String, List<String>> attributes = user.getAttributes();
                 if(attributes == null){
+
                     user.singleAttribute("role", String.valueOf(List.of(Role.BUYER,Role.SELLER)));
-                    user.singleAttribute("createdDate", String.valueOf(LocalDateTime.now()));
-                    user.singleAttribute("lastModified", String.valueOf(LocalDateTime.now()));
+                    user.singleAttribute("profile_image", null);
+                    user.singleAttribute("is_verify", String.valueOf(true));
+                    user.singleAttribute("created_date", String.valueOf(LocalDateTime.now()));
+                    user.singleAttribute("last_modified", String.valueOf(LocalDateTime.now()));
                     user.setEnabled(true);
+
                     keycloak.realm(realm).users().get(user.getId()).update(user);
                     responses.add(new User(
                             UUID.fromString(user.getId()),
@@ -43,10 +47,14 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
                             user.getEmail(),
                             user.getFirstName(),
                             user.getLastName(),
+                            user.getAttributes().get("profile_image").get(0).equalsIgnoreCase("null")?
+                            null: user.getAttributes().get("profile_image").get(0),
+                            Boolean.valueOf(user.getAttributes().get("is_verify").get(0)),
                             roles(user.getAttributes().get("role").get(0)),
-                            LocalDateTime.parse(user.getAttributes().get("createdDate").get(0)),
-                            LocalDateTime.parse(user.getAttributes().get("lastModified").get(0))
+                            LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
+                            LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
                     ));
+
                 }
             }
         }

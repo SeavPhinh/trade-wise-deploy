@@ -26,9 +26,11 @@ public class UserDto {
         user.setEmail(userRepresentation.getEmail());
         user.setFirstName(userRepresentation.getFirstName());
         user.setLastName(userRepresentation.getLastName());
+        user.setProfileImage(userRepresentation.getAttributes().get("profile_image").get(0).equalsIgnoreCase("null")?null:userRepresentation.getAttributes().get("profile_image").get(0));
+        user.setIsVerify(Boolean.valueOf(userRepresentation.getAttributes().get("is_verify").get(0)));
         user.setRoles(roles);
-        user.setCreatedDate(LocalDateTime.parse(userRepresentation.getAttributes().get("createdDate").get(0)));
-        user.setLastModified(LocalDateTime.parse(userRepresentation.getAttributes().get("lastModified").get(0)));
+        user.setCreatedDate(LocalDateTime.parse(userRepresentation.getAttributes().get("created_date").get(0)));
+        user.setLastModified(LocalDateTime.parse(userRepresentation.getAttributes().get("last_modified").get(0)));
         return user;
     }
 

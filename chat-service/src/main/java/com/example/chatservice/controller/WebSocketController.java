@@ -1,7 +1,6 @@
 package com.example.chatservice.controller;
 import com.example.chatservice.model.MessageModel;
 import com.example.chatservice.service.ChatService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -38,6 +37,11 @@ public class WebSocketController {
         return chatService.getHistoryMessage(firstUser,secondUser);
     }
 
+    @GetMapping("/destination/{firstUser}/{secondUser}")
+    public Boolean findDestination(@PathVariable UUID firstUser,
+                                   @PathVariable UUID secondUser){
+        return chatService.isContainDestination(firstUser,secondUser);
+    }
 }
 
 

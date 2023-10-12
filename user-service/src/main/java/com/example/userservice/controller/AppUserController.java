@@ -72,7 +72,7 @@ public class AppUserController {
 
     @PostMapping("/users")
     @Operation(summary = "register user to keycloak")
-    public ResponseEntity<ApiResponse<User>> postUser(@Valid @RequestBody UserRequest request){
+    public ResponseEntity<ApiResponse<User>> postUser(@Valid @RequestBody UserRequest request) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "User posted successfully",
                 userService.postUser(request),
@@ -104,21 +104,11 @@ public class AppUserController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/login")
-    @Operation(summary = "login account for sending otpCode")
-    public ResponseEntity<ApiResponse<User>> login(@Valid @RequestBody UserLogin login) throws MessagingException {
-        return new ResponseEntity<>(new ApiResponse<>(
-                "Account logged successfully",
-                userService.loginAccount(login),
-                HttpStatus.OK
-        ), HttpStatus.OK);
-    }
-
     @PostMapping("/verify")
     @Operation(summary = "verified account to get token")
     public ResponseEntity<ApiResponse<UserResponse>> verify(@Valid @RequestBody VerifyLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
-                "Account verified successfully",
+                "Account logged successfully",
                 userService.verifiedAccount(login),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
