@@ -1,5 +1,11 @@
 spring:
   application:
     name: shop-service
+  config:
+    import: "optional:configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8585
+      name: seller-service
 server:
   port: 8088
