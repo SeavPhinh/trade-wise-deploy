@@ -1,5 +1,6 @@
 package com.example.shopservice.model;
 
+import com.example.shopservice.response.ShopResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,11 +23,15 @@ public class Shop {
     private String name;
     private String profileImage;
     private UUID userId;
-    @OneToOne
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address address;
 
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
 
+    public ShopResponse toDto(){
+        return new ShopResponse(this.id,this.name,this.profileImage,this.userId,this.address,this.createdDate,this.lastModified);
+    }
 }
