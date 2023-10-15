@@ -17,7 +17,7 @@ public class PostRequest {
     private String title;
     private List<String> file;
     private String description;
-    private Double budget;
+    private Float budget;
     private UUID subCategoryId;
     private Boolean status;
 

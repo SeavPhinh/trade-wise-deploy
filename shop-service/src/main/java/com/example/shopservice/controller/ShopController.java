@@ -63,6 +63,16 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
+    @GetMapping("/shops/owner/{ownerId}")
+    @Operation(summary = "fetch shop by owner id")
+    public ResponseEntity<ApiResponse<ShopResponse>> getShopByOwnerId(@PathVariable UUID ownerId){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Shop fetched by owner id successfully",
+                shopService.getShopByOwnerId(ownerId),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
     @DeleteMapping("/shops/{id}")
     @Operation(summary = "delete shop by id")
     public ResponseEntity<ApiResponse<ShopResponse>> deleteShopById(@PathVariable UUID id){

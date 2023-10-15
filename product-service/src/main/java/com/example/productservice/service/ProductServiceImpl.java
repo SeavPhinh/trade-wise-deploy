@@ -1,17 +1,19 @@
-package com.example.shopservice.service.shop;
+package com.example.productservice.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.commonservice.config.ValidationConfig;
+import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
-import com.example.shopservice.config.FileStorageProperties;
-import com.example.shopservice.model.Address;
-import com.example.shopservice.model.FileStorage;
-import com.example.shopservice.model.Shop;
-import com.example.shopservice.repository.ShopRepository;
-import com.example.shopservice.request.FileRequest;
-import com.example.shopservice.request.ShopRequest;
-import com.example.shopservice.response.ShopResponse;
+import com.example.productservice.config.FileStorageProperties;
+import com.example.productservice.exception.NotFoundExceptionClass;
+import com.example.productservice.model.FileStorage;
+import com.example.productservice.model.Product;
+import com.example.productservice.repository.ProductRepository;
+import com.example.productservice.request.FileRequest;
+import com.example.productservice.request.ProductRequest;
+import com.example.productservice.response.ProductResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,21 +28,21 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
-public class ShopServiceImpl implements ShopService {
+public class ProductServiceImpl implements ProductService{
 
-    private final ShopRepository shopRepository;
+    private final ProductRepository productRepository;
     private final FileStorageProperties fileStorageProperties;
     private final WebClient webClient;
+    private final WebClient shopClient;
 
-    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient) {
-        this.shopRepository = shopRepository;
+    public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, WebClient.Builder shopClient) {
+        this.productRepository = productRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
+        this.shopClient = shopClient.baseUrl("http://localhost:8088/").build();
     }
 
 
@@ -72,55 +74,13 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public ShopResponse setUpShop(ShopRequest request) {
-        return shopRepository.save(request.toEntity(request.getAddress().toEntity(), createdBy(UUID.fromString(currentUser())).getId())).toDto();
-    }
-
-    @Override
-    public List<ShopResponse> getAllShop() {
-        return shopRepository.findAll().stream().map(Shop::toDto).collect(Collectors.toList());
-    }
-
-    @Override
-    public ShopResponse getShopById(UUID id) {
-        return shopRepository.findById(id).orElseThrow().toDto();
-    }
-
-    @Override
-    public ShopResponse deleteShopById(UUID id) {
-        ShopResponse response = getShopById(id);
-        shopRepository.deleteById(id);
-        return response;
-    }
-
-    @Override
-    public ShopResponse updateShopById(UUID id, ShopRequest request) {
-
-        Shop preShop = shopRepository.findById(id).orElseThrow();
-
-        Address address = preShop.getAddress();
-
-        address.setProvince(request.getAddress().getProvince());
-        address.setStreet(request.getAddress().getStreet());
-        address.setUrl(request.getAddress().getUrl());
-
-        // Update Previous Data
-        preShop.setName(request.getName());
-        preShop.setAddress(address);
-        preShop.setProfileImage(request.getProfileImage());
-        preShop.setLastModified(LocalDateTime.now());
-
-        return shopRepository.save(preShop).toDto();
-    }
-
-    @Override
-    public ShopResponse getShopByOwnerId(UUID ownerId) {
-        return shopRepository.getShopByOwnerId(ownerId).toDto();
+    public ProductResponse addProduct(ProductRequest postRequest) {
+        return productRepository.save(postRequest.toEntity(shop(createdBy(UUID.fromString(currentUser())).getId()).getId())).toDto(postRequest.getFiles());
     }
 
     // Returning Token
     public String currentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             // Decode to Get User Id
 //            DecodedJWT decodedJWT = JWT.decode(jwt.getTokenValue());
@@ -144,4 +104,30 @@ public class ShopServiceImpl implements ShopService {
                 .bodyToMono(ApiResponse.class)
                 .block()).getPayload(), User.class);
     }
+
+    // Return Shop
+    public Shop shop(UUID id){
+
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication.getPrincipal() instanceof Jwt jwt){
+            return covertSpecificClass.convertValue(Objects.requireNonNull(shopClient
+                    .get()
+                    .uri("api/v1/shops/owner/{id}", id)
+                    .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
+                    .retrieve()
+                    .bodyToMono(ApiResponse.class)
+                    .block()).getPayload(), Shop.class);
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+    }
+
+    // Separate file -> List
+    private List<String> getFiles(Product product) {
+        return Arrays.asList(product.getFile().replaceAll("\\[|\\]", "").split(", "));
+    }
+
+
 }

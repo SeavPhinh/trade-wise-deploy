@@ -1,5 +1,5 @@
-package com.example.postservice.response;
-import com.example.commonservice.model.User;
+package com.example.productservice.response;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,17 +11,16 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostResponse {
+public class ProductResponse {
 
     private UUID id;
     private String title;
     private List<String> file;
     private String description;
-    private Float budget;
-    private UUID subCategoryId;
+    private Float price;
     private Boolean status;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
-    private User createdBy;
+    private UUID shopId;
 
 }

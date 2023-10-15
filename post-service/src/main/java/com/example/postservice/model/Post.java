@@ -27,7 +27,7 @@ public class Post {
     @Column(nullable = false)
     private String description;
     @Column(nullable = false)
-    private Double budget;
+    private Float budget;
     private UUID subCategoryId;
     private Boolean status;
     private LocalDateTime createdDate;

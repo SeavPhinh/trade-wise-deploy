@@ -25,4 +25,6 @@ public interface ShopService {
     ShopResponse deleteShopById(UUID id);
 
     ShopResponse updateShopById(UUID id, ShopRequest request);
+
+    ShopResponse getShopByOwnerId(UUID ownerId);
 }
