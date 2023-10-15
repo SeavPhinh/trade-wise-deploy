@@ -2,7 +2,6 @@ package com.example.userservice.controller;
 
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
-import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.*;

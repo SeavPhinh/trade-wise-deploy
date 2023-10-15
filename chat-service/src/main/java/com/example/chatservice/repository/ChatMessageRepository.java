@@ -23,5 +23,6 @@ public interface ChatMessageRepository extends JpaRepository<MessageModel, UUID>
     @Modifying
     @Query(value = "SELECT * FROM chats WHERE sender_id = :#{#senderId} AND receiver_id = :#{#receiverId} OR receiver_id = :#{#senderId} AND sender_id = :#{#receiverId} ORDER BY :#{#timestamp} ", nativeQuery = true)
     List<MessageModel> findHistory(UUID senderId, UUID receiverId);
+
 }
 

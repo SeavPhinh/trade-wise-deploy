@@ -39,6 +39,7 @@ public class ValidationConfig {
     public static final String EXISTING_EMAIL = "This email is already exist";
     public static final String EXISTING_USERNAME = "This username is already exist";
     public static final String PROFILE_IMAGE_RESPONSE = "profile cannot be empty";
+    public static final String MESSAGE_NOT_FOUND = "Message not found";
 
 
 }

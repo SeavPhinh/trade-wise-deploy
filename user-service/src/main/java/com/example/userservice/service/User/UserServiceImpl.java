@@ -5,7 +5,6 @@ import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.userservice.exception.NotFoundExceptionClass;
 import com.example.userservice.model.UserDto;
-import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.*;

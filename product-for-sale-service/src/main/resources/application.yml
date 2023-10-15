@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: product-for-sale-service
+server:
+  port: 8090
+

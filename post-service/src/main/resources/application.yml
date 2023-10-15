@@ -1,0 +1,13 @@
+spring:
+  config:
+    import: "optional:configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8585
+      name: buyer-service
+  application:
+    name: post-service
+  main:
+    allow-bean-definition-overriding: true
+server:
+  port: 8083

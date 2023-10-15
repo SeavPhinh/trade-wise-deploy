@@ -28,7 +28,8 @@ ext.libraries = [
             jackson: 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',
             latestHibernate: 'com.vladmihalcea:hibernate-types-52:2.12.1',
             hibernateCore: 'org.hibernate:hibernate-core:5.5.6.Final',
-            jakatar: 'jakarta.platform:jakarta.jakartaee-api:9.1.0'
+            jakatar: 'jakarta.platform:jakarta.jakartaee-api:9.1.0',
+            auth0: 'com.auth0:java-jwt:3.18.1'
 
 
     ]
