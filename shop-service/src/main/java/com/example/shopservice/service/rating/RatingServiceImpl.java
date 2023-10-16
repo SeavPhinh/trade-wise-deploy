@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Service
-public class RatingServiceImpl implements RatingService{
+public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
     private final ShopRepository service;
@@ -32,10 +32,14 @@ public class RatingServiceImpl implements RatingService{
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
     }
 
-
     @Override
     public RatingResponse ratingShop(RatingRequest request) {
         return ratingRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId(),service.findById(request.getShopId()).orElseThrow())).toDto(request.getShopId());
+    }
+
+    @Override
+    public RatingResponse updateRating(UUID id, RatingRequest request) {
+        return null;
     }
 
     // Returning Token

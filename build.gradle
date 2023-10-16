@@ -290,12 +290,32 @@ project("product-for-sale-service"){
         }
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     repositories {
         mavenCentral()
     }
 
     dependencies {
-
+        implementation project(':common-service')
+        implementation libraries.auth0
+        implementation libraries.webFlux
+        implementation libraries.webMvc
+        implementation libraries.validation
+        implementation libraries.jpa
+        implementation libraries.postgresql
+        implementation libraries.actuator
+        implementation libraries.keycloak
+        implementation libraries.keycloakAdmin
+        implementation libraries.cloudClient
+        implementation libraries.resourceServer
     }
 
 }

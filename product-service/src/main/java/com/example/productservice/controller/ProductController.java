@@ -2,7 +2,6 @@ package com.example.productservice.controller;
 
 import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.response.ApiResponse;
-import com.example.productservice.model.Product;
 import com.example.productservice.request.ProductRequest;
 import com.example.productservice.response.ProductResponse;
 import com.example.productservice.service.ProductService;
@@ -35,7 +34,7 @@ public class ProductController {
 
     @PostMapping(value = "/products")
     @Operation(summary = "shop adding a product")
-    public ResponseEntity<ApiResponse<ProductResponse>> addProduct(@Valid @RequestBody ProductRequest postRequest) throws IOException {
+    public ResponseEntity<ApiResponse<ProductResponse>> addProduct(@Valid @RequestBody ProductRequest postRequest){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop has added new product successfully",
                 productService.addProduct(postRequest),
@@ -43,47 +42,58 @@ public class ProductController {
         ), HttpStatus.CREATED);
     }
 
-//    @GetMapping("/posts")
-//    @Operation(summary = "fetch all posts")
-//    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPost(){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "Posts fetched successfully",
-//                postService.getAllPost(),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/posts/{id}")
-//    @Operation(summary = "fetch post by id")
-//    public ResponseEntity<ApiResponse<PostResponse>> getPostById(@PathVariable UUID id){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "User fetched by id successfully",
-//                postService.getPostById(id),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
-//
-//    @DeleteMapping("/posts/{id}")
-//    @Operation(summary = "delete post by id")
-//    public ResponseEntity<ApiResponse<PostResponse>> deletePostById(@PathVariable UUID id){
-//
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "post delete by id successfully",
-//                postService.deletePostById(id),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
-//
-//    @PutMapping("/posts/{id}")
-//    @Operation(summary = "update post by id")
-//    public ResponseEntity<ApiResponse<PostResponse>> updatePostById(@PathVariable UUID id,
-//                                                                    @Valid @RequestBody PostRequest request){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                " Updated post by id successfully",
-//                postService.updatePostById(id, request),
-//                HttpStatus.ACCEPTED
-//        ), HttpStatus.ACCEPTED);
-//    }
+    @GetMapping("/products")
+    @Operation(summary = "fetch all products")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProduct(){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "products fetched successfully",
+                productService.getAllProduct(),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/products/{id}")
+    @Operation(summary = "fetch product by id")
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable UUID id){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "product fetched by id successfully",
+                productService.getProductById(id),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/products/shop/{id}")
+    @Operation(summary = "fetch product by shop id")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProductByShopId(@PathVariable UUID id){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "product fetched by shop id successfully",
+                productService.getAllProductByShopId(id),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/products/{id}")
+    @Operation(summary = "delete product by id")
+    public ResponseEntity<ApiResponse<ProductResponse>> deleteProductById(@PathVariable UUID id){
+
+        return new ResponseEntity<>(new ApiResponse<>(
+                "product delete by id successfully",
+                productService.deleteProductById(id),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+    @PutMapping("/products/{id}")
+    @Operation(summary = "update products by id")
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProductById(@PathVariable UUID id,
+                                                                    @Valid @RequestBody ProductRequest request){
+        return new ResponseEntity<>(new ApiResponse<>(
+                " Updated products by id successfully",
+                productService.updateProductById(id, request),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
 
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

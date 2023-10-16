@@ -1,19 +1,19 @@
-package com.example.productservice.service;
+package com.example.productforsaleservice.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
+import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
-import com.example.productservice.config.FileStorageProperties;
-import com.example.productservice.exception.NotFoundExceptionClass;
-import com.example.productservice.model.FileStorage;
-import com.example.productservice.model.Product;
-import com.example.productservice.repository.ProductRepository;
-import com.example.productservice.request.FileRequest;
-import com.example.productservice.request.ProductRequest;
-import com.example.productservice.response.ProductResponse;
+import com.example.productforsaleservice.config.FileStorageProperties;
+import com.example.productforsaleservice.model.FileStorage;
+import com.example.productforsaleservice.model.ProductForSale;
+import com.example.productforsaleservice.repository.ProductForSaleRepository;
+import com.example.productforsaleservice.request.FileRequest;
+import com.example.productforsaleservice.request.ProductForSaleRequest;
+import com.example.productforsaleservice.response.ProductForSaleResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,20 +33,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+public class ProductForSaleServiceImpl implements ProductForSaleService {
 
-    private final ProductRepository productRepository;
+    private final ProductForSaleRepository productForSaleRepository;
     private final FileStorageProperties fileStorageProperties;
     private final WebClient webClient;
     private final WebClient shopClient;
 
-    public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, WebClient.Builder shopClient) {
-        this.productRepository = productRepository;
+    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, WebClient.Builder shopClient) {
+        this.productForSaleRepository = productForSaleRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
         this.shopClient = shopClient.baseUrl("http://localhost:8088/").build();
     }
-
 
     @Override
     public List<FileRequest> saveListFile(List<MultipartFile> files, HttpServletRequest request) throws IOException {
@@ -76,32 +75,31 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductResponse addProduct(ProductRequest postRequest) {
-        return productRepository.save(postRequest.toEntity(shop(createdBy(UUID.fromString(currentUser())).getId()).getId())).toDto(postRequest.getFiles());
+    public ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest) {
+        return productForSaleRepository.save(postRequest.toEntity()).toDto(postRequest.getFiles());
     }
 
     @Override
-    public List<ProductResponse> getAllProduct() {
-        return productRepository.findAll().stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
+    public List<ProductForSaleResponse> getAllProduct() {
+        return productForSaleRepository.findAll().stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
     }
 
     @Override
-    public ProductResponse getProductById(UUID id) {
-        return productRepository.findById(id).orElseThrow().toDto(getFiles(productRepository.findById(id).orElseThrow()));
+    public ProductForSaleResponse getProductById(UUID id) {
+        return productForSaleRepository.findById(id).orElseThrow().toDto(getFiles(productForSaleRepository.findById(id).orElseThrow()));
     }
 
     @Override
-    public ProductResponse deleteProductById(UUID id) {
+    public ProductForSaleResponse deleteProductById(UUID id) {
         // Create new object to store before delete
-        ProductResponse response = getProductById(id);
-        productRepository.deleteById(id);
+        ProductForSaleResponse response = getProductById(id);
+        productForSaleRepository.deleteById(id);
         return response;
     }
 
     @Override
-    public ProductResponse updateProductById(UUID id, ProductRequest request) {
-
-        Product preData = productRepository.findById(id).orElseThrow();
+    public ProductForSaleResponse updatePostById(UUID id, ProductForSaleRequest request) {
+        ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
         // Update Previous Data
         preData.setTitle(request.getTitle());
         preData.setFile(request.getFiles().toString());
@@ -109,12 +107,12 @@ public class ProductServiceImpl implements ProductService{
         preData.setStatus(request.getStatus());
         preData.setLastModified(LocalDateTime.now());
 
-        return productRepository.save(preData).toDto(getFiles(preData));
+        return productForSaleRepository.save(preData).toDto(getFiles(preData));
     }
 
     @Override
-    public List<ProductResponse> getAllProductByShopId(UUID id) {
-        return productRepository.getAllProductByShopId(id).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
+    public List<ProductForSaleResponse> getProductByPostId(UUID id) {
+        return productForSaleRepository.getProductByPostId(id).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
     }
 
     // Returning Token
@@ -164,9 +162,8 @@ public class ProductServiceImpl implements ProductService{
     }
 
     // Separate file -> List
-    private List<String> getFiles(Product product) {
+    private List<String> getFiles(ProductForSale product) {
         return Arrays.asList(product.getFile().replaceAll("\\[|\\]", "").split(", "));
     }
-
 
 }

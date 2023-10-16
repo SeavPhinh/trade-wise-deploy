@@ -1,4 +1,4 @@
-package com.example.productservice.config;
+package com.example.productforsaleservice.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
 @OpenAPIDefinition(
         servers = @Server(url = "/", description = "Default Server URL"),
         info = @Info(
-                title = "Product Service",
+                title = "Product For Sales Service",
                 description = "Started From 04/10/2023",
                 version = "1.0.0"
         )
