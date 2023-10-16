@@ -98,7 +98,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     }
 
     @Override
-    public ProductForSaleResponse updatePostById(UUID id, ProductForSaleRequest request) {
+    public ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequest request) {
         ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
         // Update Previous Data
         preData.setTitle(request.getTitle());

@@ -44,7 +44,7 @@ public class ProductForSaleController {
 
     @GetMapping("/product-for-sales")
     @Operation(summary = "fetch all products")
-    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getAllProduct(){
+    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getAllProductForSale(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "products fetched successfully",
                 productForSaleService.getAllProduct(),
@@ -54,7 +54,7 @@ public class ProductForSaleController {
 
     @GetMapping("/product-for-sales/{id}")
     @Operation(summary = "fetch product by id")
-    public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by id successfully",
                 productForSaleService.getProductById(id),
@@ -64,7 +64,7 @@ public class ProductForSaleController {
 
     @GetMapping("/product-for-sales/post/{id}")
     @Operation(summary = "fetch product by posted id")
-    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductByPostId(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by posted id successfully",
                 productForSaleService.getProductByPostId(id),
@@ -74,7 +74,7 @@ public class ProductForSaleController {
 
     @DeleteMapping("/product-for-sales/{id}")
     @Operation(summary = "delete product by id")
-    public ResponseEntity<ApiResponse<ProductForSaleResponse>> deleteProductById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> deleteProductForSaleById(@PathVariable UUID id){
 
         return new ResponseEntity<>(new ApiResponse<>(
                 "product delete by id successfully",
@@ -85,11 +85,11 @@ public class ProductForSaleController {
 
     @PutMapping("/product-for-sales/{id}")
     @Operation(summary = "update post by id")
-    public ResponseEntity<ApiResponse<ProductForSaleResponse>> updatePostById(@PathVariable UUID id,
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> updateProductForSaleById(@PathVariable UUID id,
                                                                        @Valid @RequestBody ProductForSaleRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
-                " Updated post by id successfully",
-                productForSaleService.updatePostById(id, request),
+                " updated product by id successfully",
+                productForSaleService.updateProductById(id, request),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }

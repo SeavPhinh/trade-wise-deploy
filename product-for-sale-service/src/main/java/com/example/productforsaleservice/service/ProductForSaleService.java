@@ -23,7 +23,7 @@ public interface ProductForSaleService {
 
     ProductForSaleResponse deleteProductById(UUID id);
 
-    ProductForSaleResponse updatePostById(UUID id, ProductForSaleRequest request);
+    ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequest request);
 
     List<ProductForSaleResponse> getProductByPostId(UUID id);
 }

@@ -12,4 +12,5 @@ include 'user-service'
 include 'config-service'
 include 'manage-user-service'
 include 'notification-service'
+include 'newsfeed-service'
 
