@@ -73,16 +73,16 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-    @DeleteMapping("/shops/{id}")
-    @Operation(summary = "delete shop by id")
-    public ResponseEntity<ApiResponse<ShopResponse>> deleteShopById(@PathVariable UUID id){
-
-        return new ResponseEntity<>(new ApiResponse<>(
-                "post shop by id successfully",
-                shopService.deleteShopById(id),
-                HttpStatus.OK
-        ), HttpStatus.OK);
-    }
+//    @DeleteMapping("/shops/{id}")
+//    @Operation(summary = "delete shop by id")
+//    public ResponseEntity<ApiResponse<ShopResponse>> deleteShopById(@PathVariable UUID id){
+//
+//        return new ResponseEntity<>(new ApiResponse<>(
+//                "post shop by id successfully",
+//                shopService.deleteShopById(id),
+//                HttpStatus.OK
+//        ), HttpStatus.OK);
+//    }
 
     @PutMapping("/shops/{id}")
     @Operation(summary = "update shop by id")

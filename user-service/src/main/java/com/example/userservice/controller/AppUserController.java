@@ -71,7 +71,7 @@ public class AppUserController {
 
     @PostMapping("/users")
     @Operation(summary = "register user to keycloak")
-    public ResponseEntity<ApiResponse<User>> postUser(@Valid @RequestBody UserRequest request) throws MessagingException {
+    public ResponseEntity<ApiResponse<User>> addingUser(@Valid @RequestBody UserRequest request) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "User posted successfully",
                 userService.postUser(request),
@@ -82,7 +82,7 @@ public class AppUserController {
     @DeleteMapping("/users/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "delete user by id from keycloak")
-    public ResponseEntity<ApiResponse<User>> deleteUser(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<User>> deleteUserById(@PathVariable UUID id){
 
         return new ResponseEntity<>(new ApiResponse<>(
                 "User delete by id successfully",
@@ -94,7 +94,7 @@ public class AppUserController {
     @PutMapping("/users/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "update user by id from keycloak")
-    public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable UUID id,
+    public ResponseEntity<ApiResponse<User>> updateUserById(@PathVariable UUID id,
                            @Valid @RequestBody UserUpdate request){
         return new ResponseEntity<>(new ApiResponse<>(
                 "User updated by id successfully",

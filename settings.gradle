@@ -10,7 +10,7 @@ include 'gateway-service'
 include 'eureka-service'
 include 'user-service'
 include 'config-service'
-include 'manage-user-service'
+include 'user-info-service'
 include 'notification-service'
 include 'newsfeed-service'
 

@@ -37,8 +37,6 @@ public class UserRequest {
     @Email(message = ValidationConfig.EMAIL_RESPONSE_MESSAGE)
     private String email;
 
-    private String profileImage;
-
     @NotEmpty(message = ValidationConfig.ROLE_REQUIRED_MESSAGE)
     @Valid
     @Size(min = ValidationConfig.ROLE_VALIDATION_MIN, message = ValidationConfig.ROLE_RESPONSE_MESSAGE)

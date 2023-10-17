@@ -97,7 +97,6 @@ public class UserServiceImpl implements UserService {
         userPre.singleAttribute("last_modified", String.valueOf(LocalDateTime.now()));
         userPre.singleAttribute("otp_code",String.valueOf(emailService.verifyCode(request.getEmail())));
         userPre.singleAttribute("is_verify",String.valueOf(false));
-        userPre.singleAttribute("profile_image",String.valueOf(request.getProfileImage()));
         userPre.setEnabled(true);
         usersResource.create(userPre);
 
@@ -110,7 +109,6 @@ public class UserServiceImpl implements UserService {
                 createdUserRepresentation.getEmail().toLowerCase(),
                 createdUserRepresentation.getFirstName(),
                 createdUserRepresentation.getLastName(),
-                userPre.getAttributes().get("profile_image").get(0).equalsIgnoreCase("null")? null : userPre.getAttributes().get("profile_image").get(0),
                 Boolean.valueOf(userPre.getAttributes().get("is_verify").get(0)),
                 roles(userPre.getAttributes().get("role").get(0)),
                 LocalDateTime.parse(userPre.getAttributes().get("created_date").get(0)),
@@ -255,8 +253,6 @@ public class UserServiceImpl implements UserService {
                 resource(id).toRepresentation().getEmail(),
                 resource(id).toRepresentation().getFirstName(),
                 resource(id).toRepresentation().getLastName(),
-                resource(id).toRepresentation().getAttributes().get("profile_image").get(0).equalsIgnoreCase("null") ?
-                null : resource(id).toRepresentation().getAttributes().get("profile_image").get(0),
                 Boolean.valueOf(resource(id).toRepresentation().getAttributes().get("is_verify").get(0)),
                 roles(resource(id).toRepresentation().getAttributes().get("role").get(0)),
                 LocalDateTime.now(),
@@ -318,8 +314,6 @@ public class UserServiceImpl implements UserService {
                 resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
                 resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
                 resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
-                resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("profile_image").get(0).equalsIgnoreCase("null") ?
-                null: resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("profile_image").get(0),
                 Boolean.valueOf(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("is_verify").get(0)),
                 roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
                 LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),

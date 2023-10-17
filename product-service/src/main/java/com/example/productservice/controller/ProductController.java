@@ -44,7 +44,7 @@ public class ProductController {
 
     @GetMapping("/products")
     @Operation(summary = "fetch all products")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProduct(){
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "products fetched successfully",
                 productService.getAllProduct(),
@@ -71,7 +71,6 @@ public class ProductController {
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
-
 
     @DeleteMapping("/products/{id}")
     @Operation(summary = "delete product by id")

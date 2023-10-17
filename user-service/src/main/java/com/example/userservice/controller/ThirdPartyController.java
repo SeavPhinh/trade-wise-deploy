@@ -24,7 +24,7 @@ public class ThirdPartyController {
 
     @PutMapping("/modify")
     @Operation(summary = "modified to set attribute account")
-    public ResponseEntity<ApiResponse<List<User>>> modifyGmailAccount(){
+    public ResponseEntity<ApiResponse<List<User>>> modifyingAccount(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account modified successfully",
                 thirdPartyService.modifyGmailAccount(),

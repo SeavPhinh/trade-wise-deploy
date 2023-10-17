@@ -177,7 +177,7 @@ project("notification-service"){
     }
 
 }
-project("manage-user-service"){
+project("user-info-service"){
 
     // Apply external plugin
     apply from: "$rootProject.projectDir/plugin.gradle"
@@ -202,12 +202,33 @@ project("manage-user-service"){
         }
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     repositories {
         mavenCentral()
     }
 
     dependencies {
-
+        implementation project(':common-service')
+        implementation libraries.auth0
+        implementation libraries.webFlux
+        implementation libraries.webMvc
+        implementation libraries.validation
+        implementation libraries.jpa
+        implementation libraries.postgresql
+        implementation libraries.actuator
+        implementation libraries.keycloak
+        implementation libraries.keycloakAdmin
+        implementation libraries.cloudClient
+        implementation libraries.resourceServer
     }
 
 }
@@ -533,6 +554,7 @@ project("user-service"){
     ext {
         set('springCloudVersion', "2022.0.4")
     }
+
     dependencyManagement {
         imports {
             mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"

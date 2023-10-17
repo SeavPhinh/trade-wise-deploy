@@ -26,7 +26,6 @@ public class UserDto {
         user.setEmail(userRepresentation.getEmail());
         user.setFirstName(userRepresentation.getFirstName());
         user.setLastName(userRepresentation.getLastName());
-        user.setProfileImage(userRepresentation.getAttributes().get("profile_image").get(0).equalsIgnoreCase("null")?null:userRepresentation.getAttributes().get("profile_image").get(0));
         user.setIsVerify(Boolean.valueOf(userRepresentation.getAttributes().get("is_verify").get(0)));
         user.setRoles(roles);
         user.setCreatedDate(LocalDateTime.parse(userRepresentation.getAttributes().get("created_date").get(0)));
