@@ -73,6 +73,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         file.transferTo(dest);
 
         UserInfo preUserInfo = userInfoRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+
         preUserInfo.setProfileImage(obj.getFileName());
         userInfoRepository.save(preUserInfo);
 

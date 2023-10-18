@@ -1,5 +1,6 @@
 package com.example.postservice.controller;
 
+import com.example.postservice.exception.CustomErrorResponse;
 import com.example.postservice.request.PostRequest;
 import com.example.postservice.response.PostResponse;
 import com.example.postservice.service.PostService;
@@ -34,7 +35,7 @@ public class PostController {
 
     @PostMapping(value = "/posts")
     @Operation(summary = "user created post")
-    public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody PostRequest postRequest) throws IOException {
+    public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody PostRequest postRequest)  {
         return new ResponseEntity<>(new ApiResponse<>(
                 "User created post successfully",
                 postService.createPost(postRequest),
@@ -74,7 +75,7 @@ public class PostController {
     }
 
     @PutMapping("/posts/{id}")
-    @Operation(summary = "update post by id")
+    @Operation(summary = "update post and drafted post by id")
     public ResponseEntity<ApiResponse<PostResponse>> updatePostById(@PathVariable UUID id,
                                                         @Valid @RequestBody PostRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -85,15 +86,36 @@ public class PostController {
     }
 
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/upload/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "upload multiple file")
     public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) List<MultipartFile> files,
-                                           HttpServletRequest request) throws IOException {
+                                           HttpServletRequest request,
+                                           @PathVariable UUID postId) throws IOException {
         if(files != null){
-            return ResponseEntity.status(200).body(postService.saveListFile(files,request));
+            return ResponseEntity.status(200).body(postService.saveListFile(files,request,postId));
         }
         throw new NotFoundExceptionClass("No filename to upload");
     }
 
+
+    @GetMapping("/posts/drafted")
+    @Operation(summary = "fetch all drafted posts ")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllDraftPosts(){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Drafted posts fetched successfully",
+                postService.getAllDraftPosts(),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/drafted/{id}")
+    @Operation(summary = "fetch drafted post by id")
+    public ResponseEntity<ApiResponse<PostResponse>> getDraftedPostById(@PathVariable UUID id){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Drafted post fetched by id successfully",
+                postService.getDraftedPostById(id),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
 
 }

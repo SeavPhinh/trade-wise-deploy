@@ -6,6 +6,13 @@ public class ValidationConfig {
 
     public static final String USER_REQUIRED_MESSAGE = "Username is required";
     public static final String USER_RESPONSE_MESSAGE = "Username must be between 3 and 50 characters";
+    public static final String POST_TITLE_MESSAGE = "Title must be between 3 and 25 characters";
+    public static final String POST_TITLE_REQUIRE = "Title is required";
+    public static final String POST_DESCRIPTION_MESSAGE = "Description mustn't be more than 200 characters ";
+    public static final String NUMBER_ONLY_REGEX = "\\d{0,3}(,\\d{3})*(\\.\\d+)?";
+
+    public static final int POST_DESCRIPTION_MAX = 200;
+
     public static final int USER_VALIDATION_MIN = 3;
     public static final int USER_VALIDATION_MAX = 50;
     public static final String PASSWORD_REQUIRED_MESSAGE = "Password is required";
@@ -16,6 +23,8 @@ public class ValidationConfig {
     public static final int PASSWORD_VALIDATION_MAX = 30;
     public static final String EMAIL_REQUIRED_MESSAGE = "Email is required";
     public static final String EMAIL_RESPONSE_MESSAGE = "Email must be a valid email address";
+
+
     public static final String ROLE_REQUIRED_MESSAGE = "Roles are required";
     public static final String ROLE_RESPONSE_MESSAGE = "At least one role must be specified";
     public static final int ROLE_VALIDATION_MIN = 1;
@@ -41,6 +50,7 @@ public class ValidationConfig {
     public static final String PROFILE_IMAGE_RESPONSE = "profile cannot be empty";
     public static final String MESSAGE_NOT_FOUND = "Message not found";
     public static final String INVALID_FILE = "Only JPEG, PNG, and TIFF images are allowed";
+    public static final String STATUS_REQUIRE = "Status is required";
 
 
 }

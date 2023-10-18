@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomErrorResponse {
+public class CustomErrorResponse extends Throwable {
     private int status;
     private String error;
     private String message;
