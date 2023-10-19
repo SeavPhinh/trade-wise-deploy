@@ -1,5 +1,6 @@
 package com.example.manageuserservice.model;
 
+import com.example.commonservice.model.User;
 import com.example.manageuserservice.response.UserInfoResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,17 +25,11 @@ public class UserInfo {
     private LocalDateTime dob;
     private String phoneNumber;
     @Column(nullable = false)
-    private String street;
-    @Column(nullable = false)
-    private String province;
-    @Column(nullable = false)
-    private String country;
-    @Column(nullable = false)
     private String profileImage;
     private UUID userId;
 
-    public UserInfoResponse toDto(){
-        return new UserInfoResponse(this.userId,this.gender,this.dob,this.phoneNumber,this.street,this.province,this.country,this.profileImage,this.userId);
+    public UserInfoResponse toDto(User user){
+        return new UserInfoResponse(this.userId,this.gender,this.dob,this.phoneNumber,this.profileImage,user);
     }
 
 }

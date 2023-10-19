@@ -573,6 +573,7 @@ project("user-service"){
 
     dependencies {
         implementation project(':common-service')
+        implementation libraries.auth0
         implementation libraries.actuator
         implementation libraries.keycloak
         implementation libraries.cloudClient

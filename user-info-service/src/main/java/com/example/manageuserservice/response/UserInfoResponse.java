@@ -1,5 +1,6 @@
 package com.example.manageuserservice.response;
 
+import com.example.commonservice.model.User;
 import com.example.manageuserservice.model.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,9 +17,6 @@ public class UserInfoResponse {
     private Gender gender;
     private LocalDateTime dob;
     private String phoneNumber;
-    private String street;
-    private String province;
-    private String country;
     private String profileImage;
-    private UUID userId;
+    private User user;
 }

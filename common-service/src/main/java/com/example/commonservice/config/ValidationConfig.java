@@ -76,6 +76,7 @@ public class ValidationConfig {
     public static final String INACTIVE_SHOP = "This shop is inactive now";
     public static final String NOT_RATING = "No record of rating shop";
     public static final String FILE_NOTFOUND = "File image is not found in storage";
+    public static final String NOTFOUND_USER_INFO = "user information is not found";
 
 
 }

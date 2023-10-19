@@ -27,7 +27,7 @@ public interface UserService {
 
     User deleteUser(UUID id);
 
-    User updateUser(UUID id, UserUpdate request);
+    User updateUser(UserUpdate request);
 
     UserResponse verifiedAccount(VerifyLogin login) throws MessagingException;
 
@@ -36,4 +36,6 @@ public interface UserService {
     RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException;
 
     UserResponse loginAccount(UserLogin login);
+
+    User getCurrentUser();
 }

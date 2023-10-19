@@ -1,9 +1,9 @@
 package com.example.manageuserservice.service.userinfo;
 
 import com.example.manageuserservice.request.UserInfoRequest;
-import com.example.manageuserservice.response.FileResponse;
 import com.example.manageuserservice.response.UserInfoResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,13 +12,15 @@ import java.util.UUID;
 
 @Service
 public interface UserInfoService {
-    FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException;
+    UserInfoResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException;
 
     UserInfoResponse addUserDetail(UserInfoRequest request) throws Exception;
 
-    UserInfoResponse getUserInfoByOwnerId(UUID id);
+    UserInfoResponse getUserInfoByUserId(UUID id);
 
     UserInfoResponse getCurrentUserInfo();
 
     UserInfoResponse updateCurrentUserInfo(UserInfoRequest request);
+
+    ByteArrayResource getImage(String fileName) throws IOException;
 }

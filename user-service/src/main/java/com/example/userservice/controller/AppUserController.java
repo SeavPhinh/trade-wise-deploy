@@ -50,6 +50,17 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
+    @GetMapping("/users/current")
+    @Operation(summary = "fetch current from keycloak")
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<User>> getCurrentUser(){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Current User fetched successfully",
+                userService.getCurrentUser(),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
     @GetMapping("/users/username")
     @Operation(summary = "fetch user by username from keycloak")
     public ResponseEntity<ApiResponse<List<User>>> getAllUserByUsername(@RequestParam String username){
@@ -92,14 +103,13 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/users/{id}")
+    @PutMapping("/users/current")
     @SecurityRequirement(name = "oAuth2")
-    @Operation(summary = "update user by id from keycloak")
-    public ResponseEntity<ApiResponse<User>> updateUserById(@PathVariable UUID id,
-                           @Valid @RequestBody UserUpdate request){
+    @Operation(summary = "update current user from keycloak")
+    public ResponseEntity<ApiResponse<User>> updateCurrentUser(@Valid @RequestBody UserUpdate request){
         return new ResponseEntity<>(new ApiResponse<>(
-                "User updated by id successfully",
-                userService.updateUser(id, request),
+                "Current user updated by id successfully",
+                userService.updateUser(request),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }

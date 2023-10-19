@@ -2,7 +2,6 @@ package com.example.manageuserservice.controller;
 
 import com.example.commonservice.response.ApiResponse;
 import com.example.manageuserservice.request.UserInfoRequest;
-import com.example.manageuserservice.response.FileResponse;
 import com.example.manageuserservice.response.UserInfoResponse;
 import com.example.manageuserservice.service.userinfo.UserInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,12 +41,12 @@ public class UserInfoController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("/user-info/{id}")
-    @Operation(summary = "fetched user information by owner id")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfoByOwnerId(@PathVariable UUID id){
+    @GetMapping("/user-info/{userId}")
+    @Operation(summary = "fetched user information by user id")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfoByUserId(@PathVariable UUID userId){
         return new ResponseEntity<>(new ApiResponse<>(
                 "user information fetched by id successfully",
-                userInfoService.getUserInfoByOwnerId(id),
+                userInfoService.getUserInfoByUserId(userId),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
@@ -73,10 +73,10 @@ public class UserInfoController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping(value = "/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "upload file")
-    public ResponseEntity<ApiResponse<FileResponse>> saveFile(@RequestParam(required = false) MultipartFile file,
+    public ResponseEntity<ApiResponse<UserInfoResponse>> saveFile(@RequestParam(required = false) MultipartFile file,
                                                               HttpServletRequest request) throws IOException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "image upload to user information successfully",
@@ -85,8 +85,10 @@ public class UserInfoController {
         ), HttpStatus.OK);
     }
 
-
-
-
+    @GetMapping("/image")
+    @Operation(summary = "fetched image")
+    public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(userInfoService.getImage(fileName));
+    }
 
 }

@@ -7,17 +7,14 @@ import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.manageuserservice.config.FileStorageProperties;
 import com.example.manageuserservice.exception.NotFoundExceptionClass;
-import com.example.manageuserservice.model.FileStorage;
 import com.example.manageuserservice.model.UserInfo;
-import com.example.manageuserservice.repository.FileRepository;
 import com.example.manageuserservice.repository.UserInfoRepository;
-import com.example.manageuserservice.request.FileRequest;
 import com.example.manageuserservice.request.UserInfoRequest;
-import com.example.manageuserservice.response.FileResponse;
 import com.example.manageuserservice.response.UserInfoResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -37,26 +35,19 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     private final UserInfoRepository userInfoRepository;
     private final FileStorageProperties fileStorageProperties;
-    private final FileRepository fileRepository;
     private final WebClient userWeb;
 
-    public UserInfoServiceImpl(UserInfoRepository userInfoRepository, FileStorageProperties fileStorageProperties, FileRepository fileRepository, WebClient.Builder userWeb) {
+    public UserInfoServiceImpl(UserInfoRepository userInfoRepository, FileStorageProperties fileStorageProperties, WebClient.Builder userWeb) {
         this.userInfoRepository = userInfoRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.fileRepository = fileRepository;
         this.userWeb = userWeb.baseUrl("http://localhost:8081/").build();
     }
 
     @Override
-    public FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException {
+    public UserInfoResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException {
         if (file != null && !isImageFile(file)) {
             throw new IllegalArgumentException(ValidationConfig.INVALID_FILE);
         }
-        FileStorage obj = new FileStorage();
-        obj.setFileName(UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+",""));
-        obj.setFileType(file.getContentType());
-        obj.setSize(file.getSize());
-        obj.setFileUrl(String.valueOf(request.getRequestURL()).substring(0,22)+"images/"+obj.getFileName());
         String uploadPath = fileStorageProperties.getUploadPath();
         Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
 
@@ -65,13 +56,13 @@ public class UserInfoServiceImpl implements UserInfoService {
             directory.mkdirs();
         }
 
-        String fileName = file.getOriginalFilename();
+        String fileName = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+","");
         File dest = new File(directoryPath.toFile(), fileName);
         file.transferTo(dest);
         UserInfo preUserInfo = userInfoRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
-        preUserInfo.setProfileImage(obj.getFileName());
+        preUserInfo.setProfileImage(fileName);
         userInfoRepository.save(preUserInfo);
-        return fileRepository.save(new FileRequest(obj.getFileName(),obj.getFileUrl(),obj.getFileType(),obj.getSize()).toEntity()).toDto();
+        return preUserInfo.toDto(createdBy(preUserInfo.getUserId()));
     }
 
     @Override
@@ -84,11 +75,11 @@ public class UserInfoServiceImpl implements UserInfoService {
             throw new IllegalArgumentException(ValidationConfig.FOUND_DETAIL);
         }
         validateFile(request.getProfileImage());
-        return userInfoRepository.save(request.toEntity(isAccept(request.getPhoneNumber()),createdBy(UUID.fromString(currentUser())).getId())).toDto();
+        return userInfoRepository.save(request.toEntity(isAccept(request.getPhoneNumber()),createdBy(UUID.fromString(currentUser())).getId())).toDto(createdBy(createdBy(UUID.fromString(currentUser())).getId()));
     }
 
     @Override
-    public UserInfoResponse getUserInfoByOwnerId(UUID id) {
+    public UserInfoResponse getUserInfoByUserId(UUID id) {
         return isNotExisting(id);
     }
 
@@ -102,21 +93,31 @@ public class UserInfoServiceImpl implements UserInfoService {
         UserInfo preUserInfo = userInfoRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         preUserInfo.setGender(request.getGender());
         preUserInfo.setDob(request.getDob());
-        preUserInfo.setStreet(request.getStreet());
-        preUserInfo.setCountry(request.getCountry());
-        preUserInfo.setProvince(request.getProvince());
         preUserInfo.setPhoneNumber(request.getPhoneNumber());
         preUserInfo.setProfileImage(request.getProfileImage());
-        return userInfoRepository.save(preUserInfo).toDto();
+        return userInfoRepository.save(preUserInfo).toDto(createdBy(preUserInfo.getUserId()));
+    }
+
+    @Override
+    public ByteArrayResource getImage(String fileName) throws IOException {
+        String filePath = "user-info-service/src/main/resources/storage/" + fileName;
+        Path path = Paths.get(filePath);
+
+        if(!Files.exists(path)){
+            throw new NotFoundExceptionClass(ValidationConfig.FILE_NOTFOUND);
+        }
+        String uploadPath = fileStorageProperties.getUploadPath();
+        Path paths = Paths.get(uploadPath + fileName);
+        return new ByteArrayResource(Files.readAllBytes(paths));
     }
 
     // User doesn't exist
     public UserInfoResponse isNotExisting(UUID id){
         UserInfo isFound = userInfoRepository.findByOwnerId(id);
         if(isFound != null){
-            return userInfoRepository.findByOwnerId(id).toDto();
+            return userInfoRepository.findByOwnerId(id).toDto(createdBy(isFound.getUserId()));
         }
-        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER_INFO);
     }
 
     // Phone Number Validating

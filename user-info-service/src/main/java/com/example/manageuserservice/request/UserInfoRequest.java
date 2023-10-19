@@ -22,17 +22,11 @@ public class UserInfoRequest {
     private Gender gender;
     private LocalDateTime dob;
     private String phoneNumber;
-    @NotEmpty(message = ValidationConfig.STREET_REQUIRED_MESSAGE)
-    private String street;
-    @NotEmpty(message = ValidationConfig.PROVINCE_REQUIRED_MESSAGE)
-    private String province;
-    @NotEmpty(message = ValidationConfig.COUNTRY_REQUIRED_MESSAGE)
-    private String country;
     @NotEmpty(message = ValidationConfig.PROFILE_IMAGE_RESPONSE)
     private String profileImage;
 
     public UserInfo toEntity(String phoneNumber,UUID createdBy){
-        return new UserInfo(null, this.gender,this.dob,phoneNumber,this.street.trim(),this.province.trim(),this.country.trim(),this.profileImage.trim(),createdBy);
+        return new UserInfo(null, this.gender,this.dob,phoneNumber,this.profileImage.trim(),createdBy);
     }
 
 }
