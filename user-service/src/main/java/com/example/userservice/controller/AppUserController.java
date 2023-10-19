@@ -2,6 +2,7 @@ package com.example.userservice.controller;
 
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.*;
@@ -104,11 +105,21 @@ public class AppUserController {
     }
 
     @PostMapping("/verify")
-    @Operation(summary = "verified account to get token")
+    @Operation(summary = "verified account first login")
     public ResponseEntity<ApiResponse<UserResponse>> verify(@Valid @RequestBody VerifyLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
-                "Account logged successfully",
+                "Account verified successfully",
                 userService.verifiedAccount(login),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "logging account")
+    public ResponseEntity<ApiResponse<UserResponse>> login(@Valid @RequestBody UserLogin login) throws MessagingException {
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Account logged successfully",
+                userService.loginAccount(login),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }

@@ -1,4 +1,4 @@
-package com.example.manageuserservice.service;
+package com.example.manageuserservice.service.userinfo;
 
 import com.example.manageuserservice.request.FileRequest;
 import com.example.manageuserservice.request.UserInfoRequest;
@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface UserInfoService {
     FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException;
 
-    UserInfoResponse addUserDetail(UserInfoRequest request);
+    UserInfoResponse addUserDetail(UserInfoRequest request) throws Exception;
 
     UserInfoResponse getUserInfoByOwnerId(UUID id);
 

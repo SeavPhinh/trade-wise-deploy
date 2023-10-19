@@ -35,7 +35,7 @@ public class ShopController {
 
     @PostMapping("/shops")
     @Operation(summary = "set up shop")
-    public ResponseEntity<ApiResponse<ShopResponse>> setUpShop(@Valid @RequestBody ShopRequest request) {
+    public ResponseEntity<ApiResponse<ShopResponse>> setUpShop(@Valid @RequestBody ShopRequest request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop has set up successfully",
                 shopService.setUpShop(request),

@@ -16,11 +16,9 @@ import java.util.List;
 public class UserRequest {
 
     @NotBlank(message = ValidationConfig.USER_REQUIRED_MESSAGE)
-
     @Size(min = ValidationConfig.USER_VALIDATION_MIN,
           max = ValidationConfig.USER_VALIDATION_MAX,
           message = ValidationConfig.USER_RESPONSE_MESSAGE)
-
     private String username;
 
     @NotBlank(message = ValidationConfig.PASSWORD_REQUIRED_MESSAGE)

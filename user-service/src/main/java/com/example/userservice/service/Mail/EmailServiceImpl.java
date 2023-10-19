@@ -1,8 +1,5 @@
 package com.example.userservice.service.Mail;
 
-import com.example.commonservice.model.User;
-import com.example.userservice.model.UserLogin;
-import com.example.userservice.model.VerifyLogin;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;

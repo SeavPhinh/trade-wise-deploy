@@ -10,14 +10,15 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Shop {
-
+public class Post {
     private UUID id;
-    private String name;
-    private String profileImage;
-    private UUID userId;
-    private Address address;
+    private String title;
+    private String file;
+    private String description;
+    private Float budget;
+    private UUID subCategoryId;
+    private Boolean status;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
-
+    private UUID userId;
 }

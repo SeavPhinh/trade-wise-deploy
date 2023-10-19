@@ -16,7 +16,7 @@ public interface ShopService {
 
     public List<FileRequest> saveListFile(List<MultipartFile> files, HttpServletRequest request) throws IOException;
 
-    ShopResponse setUpShop(ShopRequest request);
+    ShopResponse setUpShop(ShopRequest request) throws Exception;
 
     List<ShopResponse> getAllShop();
 

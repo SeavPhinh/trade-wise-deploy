@@ -1,12 +1,10 @@
 package com.example.manageuserservice.controller;
 
 import com.example.commonservice.response.ApiResponse;
-import com.example.manageuserservice.exception.NotFoundExceptionClass;
-import com.example.manageuserservice.request.FileRequest;
 import com.example.manageuserservice.request.UserInfoRequest;
 import com.example.manageuserservice.response.FileResponse;
 import com.example.manageuserservice.response.UserInfoResponse;
-import com.example.manageuserservice.service.UserInfoService;
+import com.example.manageuserservice.service.userinfo.UserInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,13 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1")
 @Tag(name = "User Info")
-@SecurityRequirement(name = "oAuth2")
 public class UserInfoController {
 
     private final UserInfoService userInfoService;
@@ -35,8 +31,9 @@ public class UserInfoController {
     }
 
     @PostMapping(value = "/user-info")
+    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "user adding user information")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> addUserDetail(@Valid @RequestBody UserInfoRequest request){
+    public ResponseEntity<ApiResponse<UserInfoResponse>> addUserDetail(@Valid @RequestBody UserInfoRequest request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 "user has added information successfully",
                 userInfoService.addUserDetail(request),
@@ -55,6 +52,7 @@ public class UserInfoController {
     }
 
     @GetMapping("/user-info/current")
+    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetched current user information")
     public ResponseEntity<ApiResponse<UserInfoResponse>> getCurrentUserInfo(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -65,6 +63,7 @@ public class UserInfoController {
     }
 
     @PutMapping("/user-info/current")
+    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "update current user's information")
     public ResponseEntity<ApiResponse<UserInfoResponse>> updateCurrentUserInfo( @Valid @RequestBody UserInfoRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -75,6 +74,7 @@ public class UserInfoController {
     }
 
     @PostMapping(value = "/file-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "upload file")
     public ResponseEntity<ApiResponse<FileResponse>> saveFile(@RequestParam(required = false) MultipartFile file,
                                                               HttpServletRequest request) throws IOException {
@@ -83,7 +83,6 @@ public class UserInfoController {
                 userInfoService.saveFile(file,request),
                 HttpStatus.OK
         ), HttpStatus.OK);
-
     }
 
 

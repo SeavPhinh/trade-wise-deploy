@@ -5,6 +5,7 @@ import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.userservice.exception.NotFoundExceptionClass;
 import com.example.userservice.model.UserDto;
+import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.*;
@@ -147,10 +148,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse verifiedAccount(VerifyLogin login){
         String token = "";
-        if(accessTokenResponse(login) == null){
+        if(accessTokenResponse(login.getAccount(),login.getPassword()) == null){
             throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
-        token = accessTokenResponse(login);
+        token = accessTokenResponse(login.getAccount(),login.getPassword());
 
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount().replaceAll("\\s+","");
@@ -163,17 +164,7 @@ public class UserServiceImpl implements UserService {
                 } else if(user.getAttributes().get("otp_code").get(0).equalsIgnoreCase(login.getOtpCode().replaceAll("\\s+",""))){
                     user.singleAttribute("is_verify", String.valueOf(true));
                     resource(UUID.fromString(user.getId())).update(user);
-                    return new UserResponse(
-                            UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
-                            resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
-                            resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
-                            resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
-                            resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
-                            roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
-                            token,
-                            LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
-                            LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
-                    );
+                     return responseUser(user,token);
                 }else{
                     throw new IllegalArgumentException(ValidationConfig.INVALID_OTP);
                 }
@@ -223,6 +214,45 @@ public class UserServiceImpl implements UserService {
             return reset;
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+    }
+
+    @Override
+    public UserResponse loginAccount(UserLogin login) {
+
+        String token = "";
+        if(accessTokenResponse(login.getAccount(),login.getPassword()) == null){
+            throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
+        }
+        token = accessTokenResponse(login.getAccount(),login.getPassword());
+
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            String accountId = login.getAccount().replaceAll("\\s+","");
+            if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+                Map<String, List<String>> attributes = user.getAttributes();
+                if(attributes == null){
+                    throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+                } else if (user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")) {
+                    return responseUser(user,token);
+                }else{
+                    throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+                }
+            }
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+    }
+
+    public UserResponse responseUser(UserRepresentation user, String token){
+        return new UserResponse(
+                UUID.fromString(resource(UUID.fromString(user.getId())).toRepresentation().getId()),
+                resource(UUID.fromString(user.getId())).toRepresentation().getUsername(),
+                resource(UUID.fromString(user.getId())).toRepresentation().getEmail(),
+                resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
+                resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
+                roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
+                token,
+                LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
+                LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
+        );
     }
 
     private static CredentialRepresentation createPasswordCredentials(String password) {
@@ -278,12 +308,12 @@ public class UserServiceImpl implements UserService {
     }
 
     // Validating Account
-    public String accessTokenResponse(VerifyLogin login){
+    public String accessTokenResponse(String account, String password){
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            if(user.getEmail().equalsIgnoreCase(login.getAccount().replaceAll("\\s+",""))){
-               return myKeyCloak(user.getUsername(),login.getPassword());
+            if(user.getEmail().equalsIgnoreCase(account.replaceAll("\\s+",""))){
+               return myKeyCloak(user.getUsername(),password);
             }}
-        return myKeyCloak(login.getAccount().replaceAll("\\s+",""),login.getPassword());
+        return myKeyCloak(account.replaceAll("\\s+",""),password);
     }
 
     // Returning Access Token

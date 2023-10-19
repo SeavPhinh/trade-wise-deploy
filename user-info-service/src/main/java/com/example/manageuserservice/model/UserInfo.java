@@ -23,9 +23,13 @@ public class UserInfo {
     private Gender gender;
     private LocalDateTime dob;
     private String phoneNumber;
+    @Column(nullable = false)
     private String street;
+    @Column(nullable = false)
     private String province;
+    @Column(nullable = false)
     private String country;
+    @Column(nullable = false)
     private String profileImage;
     private UUID userId;
 

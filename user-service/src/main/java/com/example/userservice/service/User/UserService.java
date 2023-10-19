@@ -34,4 +34,6 @@ public interface UserService {
     User resetPassword(ResetPassword change) throws MessagingException;
 
     RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException;
+
+    UserResponse loginAccount(UserLogin login);
 }
