@@ -1,8 +1,8 @@
 package com.example.postservice.service;
 
+
 import com.example.commonservice.enumeration.Role;
 import com.example.postservice.config.FileStorageProperties;
-import com.example.postservice.exception.CustomErrorResponse;
 import com.example.postservice.exception.NotFoundExceptionClass;
 import com.example.postservice.model.FileStorage;
 import com.example.postservice.model.Post;
@@ -17,9 +17,6 @@ import com.example.commonservice.response.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
-import org.aspectj.weaver.ast.Not;
-import org.keycloak.authorization.client.util.Http;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.ws.rs.BadRequestException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -53,6 +49,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponse createPost(PostRequest postRequest) {
+
+
         User tempUser= createdBy(UUID.fromString(currentUser()));
         //cut white spaces left and right
         String trimmedTitle= postRequest.getTitle().trim();
@@ -68,6 +66,7 @@ public class PostServiceImpl implements PostService {
         if(!matcher.matches()){
             throw new NotFoundExceptionClass("not working");
         }
+
 
         if(tempUser.getRoles().contains(Role.BUYER) ){
             postRequest.setTitle(trimmedTitle);
@@ -99,6 +98,17 @@ public class PostServiceImpl implements PostService {
         List<FileRequest> filesResponses = new ArrayList<>();
         List<String> listFiles = new ArrayList<>();
         for (MultipartFile file : files) {
+
+                   if(!file.getContentType().equals("image/png")
+                    || file.getContentType().equals("image/tiff")
+                    || file.getContentType().equals("image/jpeg")
+                    || file.getContentType().equals("video/mp4")
+                    || file.getContentType().equals("video/avi")
+                    || file.getContentType().equals("video/quicktime")
+            ) {
+                throw new IllegalArgumentException("Opps. please input the valid images or videos.");
+            }
+
             String uploadPath = fileStorageProperties.getUploadPath();
             Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
             java.io.File directory = directoryPath.toFile();
@@ -111,6 +121,7 @@ public class PostServiceImpl implements PostService {
             FileStorage obj = new FileStorage();
             obj.setFileName(fileName);
             obj.setFileType(file.getContentType());
+
             obj.setSize(file.getSize());
             obj.setFileUrl(String.valueOf(request.getRequestURL()).substring(0,22)+"images/"+fileName);
             listFiles.add(obj.getFileName());
@@ -125,8 +136,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponse> getAllPost() {
-
-        return postRepository.findAllPosts().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+        List<PostResponse> posts= postRepository.findAllPosts().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).toList();
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("not working");
+        }
+        return posts;
     }
 
     @Override
@@ -141,6 +155,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponse deletePostById(UUID id) {
+        Optional<Post> post= postRepository.findById(id);
+        if(post.isEmpty()){
+            throw new NotFoundExceptionClass("not working");
+        }
+
         User tempUser = createdBy(UUID.fromString(currentUser()));
         if(!tempUser.getRoles().contains(Role.BUYER) ){
             throw new NotFoundExceptionClass("not working");
@@ -158,6 +177,12 @@ public class PostServiceImpl implements PostService {
         if(!tempUser.getRoles().contains(Role.BUYER) ){
             throw new NotFoundExceptionClass("not working");
         }
+
+        Optional<Post> post= postRepository.findById(id);
+        if(post.isEmpty()){
+            throw new NotFoundExceptionClass("not working");
+        }
+
 
         String trimmedTitles= postRequest.getTitle().trim();
         String trimmedDescription= postRequest.getDescription().trim();
@@ -193,7 +218,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponse> getAllDraftPosts() {
-        return postRepository.getAllDraftPosts().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString( currentUser())))).collect(Collectors.toList());
+        List<PostResponse> draftedposts = postRepository.getAllDraftPosts().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString( currentUser())))).toList();
+       if(draftedposts.isEmpty()){
+           throw  new NotFoundExceptionClass("not working");
+       }
+        return draftedposts;
     }
 
     @Override

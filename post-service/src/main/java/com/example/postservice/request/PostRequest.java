@@ -4,7 +4,7 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.postservice.model.Post;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,13 +24,18 @@ public class PostRequest {
     @Size(min = 5,max =25,message = ValidationConfig.POST_TITLE_MESSAGE)
     private String title;
 
+    @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private List<String> file;
     @Size(max =ValidationConfig.POST_DESCRIPTION_MAX ,message = ValidationConfig.POST_DESCRIPTION_MESSAGE)
+    @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private String description;
 
+    @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private Float budget;
+    @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private UUID subCategoryId;
 
+    @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private Boolean status;
 
 
