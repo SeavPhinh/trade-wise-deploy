@@ -59,6 +59,23 @@ public class ValidationConfig {
     public static final String EMPTY_FAV_LIST = "Your favorite list is empty";
     public static final String SHOP_NOTFOUND_IN_LIST = "shop is not found in your list";
     public static final String ILLEGAL_TO_FAV = "you can only favorite to shop";
+    public static final String EMPTY_SHOP = "shop name cannot be empty";
+    public static final String NULL_SHOP = "shop name cannot be null";
+    public static final String EMPTY_IMAGE = "Image cannot be empty";
+    public static final String NULL_IMAGE = "Image name cannot be null";
+    public static final String EMPTY_ADDRESS = "Address cannot be null";
+    public static final String NULL_ADDRESS = "Address name cannot be null";
+    public static final String EMPTY_URL = "Url name cannot be null";
+    public static final String NULL_URL = "Url name cannot be null";
+    public static final String ILLEGAL_WHITESPACE = "You cannot input whitespace";
+    public static final String SHOP_NOT_CONTAIN = "Shop is not containing";
+    public static final String USER_CONTAIN_SHOP = "You already set up a shop";
+    public static final String ILLEGAL_SHOP_UPDATE = "You are not owner of this shop";
+    public static final String NULL_FIELD = "this field cannot be empty";
+    public static final String EMPTY_FIELD = "this field cannot be null";
+    public static final String INACTIVE_SHOP = "This shop is inactive now";
+    public static final String NOT_RATING = "No record of rating shop";
+    public static final String FILE_NOTFOUND = "File image is not found in storage";
 
 
 }

@@ -1,6 +1,5 @@
 package com.example.manageuserservice.service.userinfo;
 
-import com.example.manageuserservice.request.FileRequest;
 import com.example.manageuserservice.request.UserInfoRequest;
 import com.example.manageuserservice.response.FileResponse;
 import com.example.manageuserservice.response.UserInfoResponse;

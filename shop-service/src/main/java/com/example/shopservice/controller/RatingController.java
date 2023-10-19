@@ -3,6 +3,7 @@ package com.example.shopservice.controller;
 import com.example.commonservice.response.ApiResponse;
 import com.example.shopservice.request.RatingRequest;
 import com.example.shopservice.response.RatingResponse;
+import com.example.shopservice.response.ShopResponse;
 import com.example.shopservice.service.rating.RatingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,13 +38,13 @@ public class RatingController {
         ), HttpStatus.CREATED);
     }
 
-    @PutMapping("/ratings/{id}")
-    @Operation(summary = "update ratings shop by id")
-    public ResponseEntity<ApiResponse<RatingResponse>> updateRating(@PathVariable UUID id,
-                                                                    @Valid @RequestBody RatingRequest request) {
+    @GetMapping("/ratings/shops/current")
+    @Operation(summary = "fetch rated shop by owner id")
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<List<ShopResponse>>> getRatedShopByCurrentId(){
         return new ResponseEntity<>(new ApiResponse<>(
-                "Rating updated successfully",
-                ratingService.updateRating(id,request),
+                "Rated Shop fetched by owner id successfully",
+                ratingService.getRatedShopByCurrentId(),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }

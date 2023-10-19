@@ -2,6 +2,7 @@ package com.example.shopservice.controller;
 
 import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.FileResponse;
 import com.example.shopservice.request.ShopRequest;
 import com.example.shopservice.response.ShopResponse;
 import com.example.shopservice.service.shop.ShopService;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.apache.http.protocol.HTTP;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +20,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1")
 @Tag(name = "Shop")
-@SecurityRequirement(name = "oAuth2")
 public class ShopController {
 
     private final ShopService shopService;
@@ -35,6 +40,7 @@ public class ShopController {
 
     @PostMapping("/shops")
     @Operation(summary = "set up shop")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ShopResponse>> setUpShop(@Valid @RequestBody ShopRequest request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop has set up successfully",
@@ -63,47 +69,56 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/shops/owner/{ownerId}")
+    @GetMapping("/shops/current")
     @Operation(summary = "fetch shop by owner id")
-    public ResponseEntity<ApiResponse<ShopResponse>> getShopByOwnerId(@PathVariable UUID ownerId){
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<ShopResponse>> getShopByOwnerId(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop fetched by owner id successfully",
-                shopService.getShopByOwnerId(ownerId),
+                shopService.getShopByOwnerId(),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
-//    @DeleteMapping("/shops/{id}")
-//    @Operation(summary = "delete shop by id")
-//    public ResponseEntity<ApiResponse<ShopResponse>> deleteShopById(@PathVariable UUID id){
-//
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "post shop by id successfully",
-//                shopService.deleteShopById(id),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
-
-    @PutMapping("/shops/{id}")
+    @PutMapping("/shops/current")
     @Operation(summary = "update shop by id")
-    public ResponseEntity<ApiResponse<ShopResponse>> updateShopById(@PathVariable UUID id,
-                                                                    @Valid @RequestBody ShopRequest request){
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<ShopResponse>> updateShopById(@Valid @RequestBody ShopRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
                 " Updated shop by id successfully",
-                shopService.updateShopById(id, request),
+                shopService.updateShopById(request),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/shops/current/action")
+    @Operation(summary = "change to shop's shopAction")
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<ShopResponse>> shopAction(@RequestParam(defaultValue = "false") Boolean isActive){
+        return new ResponseEntity<>(new ApiResponse<>(
+                " shop has set to inactive successfully",
+                shopService.shopAction(isActive),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }
 
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "upload multiple file")
-    public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) List<MultipartFile> files,
-                                           HttpServletRequest request) throws IOException {
-        if(files != null){
-            return ResponseEntity.status(200).body(shopService.saveListFile(files,request));
-        }
-        throw new NotFoundExceptionClass("No filename to upload");
+    @SecurityRequirement(name = "oAuth2")
+    @Operation(summary = "upload file")
+    public ResponseEntity<ApiResponse<ShopResponse>> saveFile(@RequestParam(required = false) MultipartFile file,
+                                                              HttpServletRequest request) throws IOException {
+        return new ResponseEntity<>(new ApiResponse<>(
+                "image upload to shop successfully",
+                shopService.saveFile(file,request),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/image")
+    @Operation(summary = "fetched image")
+    public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(shopService.getImage(fileName));
     }
 
 }

@@ -23,6 +23,7 @@ public class Shop {
     private String name;
     private String profileImage;
     private UUID userId;
+    private Boolean status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
@@ -32,6 +33,6 @@ public class Shop {
     private LocalDateTime lastModified;
 
     public ShopResponse toDto(){
-        return new ShopResponse(this.id,this.name,this.profileImage,this.userId,this.address,this.createdDate,this.lastModified);
+        return new ShopResponse(this.id,this.name,this.profileImage,this.userId,this.status,this.address,this.createdDate,this.lastModified);
     }
 }

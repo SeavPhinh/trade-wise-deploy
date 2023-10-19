@@ -1,8 +1,11 @@
 package com.example.shopservice.request;
 
+import com.example.commonservice.config.ValidationConfig;
 import com.example.shopservice.enumeration.Level;
 import com.example.shopservice.model.Rating;
 import com.example.shopservice.model.Shop;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

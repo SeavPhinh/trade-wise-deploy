@@ -3,20 +3,20 @@ package com.example.shopservice.service.shop;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
-import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.shopservice.config.FileStorageProperties;
+import com.example.shopservice.exception.NotFoundExceptionClass;
 import com.example.shopservice.model.Address;
-import com.example.shopservice.model.FileStorage;
 import com.example.shopservice.model.Shop;
 import com.example.shopservice.repository.ShopRepository;
-import com.example.shopservice.request.FileRequest;
 import com.example.shopservice.request.ShopRequest;
 import com.example.shopservice.response.ShopResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -47,78 +48,105 @@ public class ShopServiceImpl implements ShopService {
 
 
     @Override
-    public List<FileRequest> saveListFile(List<MultipartFile> files, HttpServletRequest request) throws IOException {
-        List<FileRequest> filesResponses = new ArrayList<>();
+    public ShopResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException {
 
-        for (MultipartFile file : files) {
-
-            String uploadPath = fileStorageProperties.getUploadPath();
-            Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
-            java.io.File directory = directoryPath.toFile();
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-            String fileName = file.getOriginalFilename();
-            File dest = new File(directoryPath.toFile(), fileName);
-            file.transferTo(dest);
-
-            FileStorage obj = new FileStorage();
-            obj.setFileName(file.getOriginalFilename());
-            obj.setFileType(file.getContentType());
-            obj.setSize(file.getSize());
-            obj.setFileUrl(String.valueOf(request.getRequestURL()).substring(0,22)+"images/"+obj.getFileName());
-            filesResponses.add(new FileRequest(obj.getFileName(), obj.getFileUrl(),obj.getFileType(),obj.getSize()));
+        if (file != null && !isImageFile(file)) {
+            throw new IllegalArgumentException(ValidationConfig.INVALID_FILE);
         }
 
-        return filesResponses;
+        String uploadPath = fileStorageProperties.getUploadPath();
+        Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
+
+        java.io.File directory = directoryPath.toFile();
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        String fileName = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+","");
+        File dest = new File(directoryPath.toFile(), fileName);
+        file.transferTo(dest);
+        Shop preUserInfo = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+        preUserInfo.setProfileImage(fileName);
+        shopRepository.save(preUserInfo);
+        return preUserInfo.toDto();
     }
 
     @Override
     public ShopResponse setUpShop(ShopRequest request) throws Exception {
+        isExistingShop(createdBy(UUID.fromString(currentUser())).getId());
+        isContainWhitespace(request.getAddress().getUrl());
         validateFile(request.getProfileImage());
         return shopRepository.save(request.toEntity(request.getAddress().toEntity(), createdBy(UUID.fromString(currentUser())).getId())).toDto();
     }
 
     @Override
     public List<ShopResponse> getAllShop() {
-        return shopRepository.findAll().stream().map(Shop::toDto).collect(Collectors.toList());
+        List<ShopResponse> shops = shopRepository.getAllActiveShop().stream().map(Shop::toDto).collect(Collectors.toList());
+        if(!shops.isEmpty()){
+            return shops;
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
     }
 
     @Override
-    public ShopResponse getShopById(UUID id) {
-        return shopRepository.findById(id).orElseThrow().toDto();
+    public ShopResponse getShopById(UUID id){
+        Shop shop = shopRepository.getActiveShopById(id);
+        if(shop != null){
+            return shop.toDto();
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
     }
 
     @Override
-    public ShopResponse deleteShopById(UUID id) {
-        ShopResponse response = getShopById(id);
-        shopRepository.deleteById(id);
-        return response;
+    public ShopResponse updateShopById(ShopRequest request) {
+        Shop preShop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+        if(preShop != null){
+            if(!preShop.getUserId().toString().equalsIgnoreCase(createdBy(UUID.fromString(currentUser())).getId().toString())){
+                throw new IllegalArgumentException(ValidationConfig.ILLEGAL_SHOP_UPDATE);
+            }
+            Address address = preShop.getAddress();
+            address.setAddress(request.getAddress().getAddress());
+            address.setUrl(request.getAddress().getUrl());
+            // Update Previous Data
+            preShop.setName(request.getName());
+            preShop.setAddress(address);
+            preShop.setProfileImage(request.getProfileImage());
+            preShop.setLastModified(LocalDateTime.now());
+            return shopRepository.save(preShop).toDto();
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
     }
 
     @Override
-    public ShopResponse updateShopById(UUID id, ShopRequest request) {
-
-        Shop preShop = shopRepository.findById(id).orElseThrow();
-
-        Address address = preShop.getAddress();
-
-        address.setProvince(request.getAddress().getProvince());
-        address.setStreet(request.getAddress().getStreet());
-        address.setUrl(request.getAddress().getUrl());
-
-        // Update Previous Data
-        preShop.setName(request.getName());
-        preShop.setAddress(address);
-        preShop.setProfileImage(request.getProfileImage());
-        preShop.setLastModified(LocalDateTime.now());
-
-        return shopRepository.save(preShop).toDto();
+    public ShopResponse getShopByOwnerId() {
+        return shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).toDto();
     }
 
     @Override
-    public ShopResponse getShopByOwnerId(UUID ownerId) {
-        return shopRepository.getShopByOwnerId(ownerId).toDto();
+    public ShopResponse shopAction(Boolean isActive) {
+        Shop preShop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+        if(preShop != null){
+            if(!preShop.getUserId().toString().equalsIgnoreCase(createdBy(UUID.fromString(currentUser())).getId().toString())){
+                throw new IllegalArgumentException(ValidationConfig.ILLEGAL_SHOP_UPDATE);
+            }
+            // Update Previous Data;
+            preShop.setStatus(isActive);
+            return shopRepository.save(preShop).toDto();
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+    }
+
+    @Override
+    public ByteArrayResource getImage(String fileName) throws IOException {
+        String filePath = "shop-service/src/main/resources/storage/" + fileName;
+        Path path = Paths.get(filePath);
+
+        if(!Files.exists(path)){
+            throw new NotFoundExceptionClass(ValidationConfig.FILE_NOTFOUND);
+        }
+        String uploadPath = fileStorageProperties.getUploadPath();
+        Path paths = Paths.get(uploadPath + fileName);
+        return new ByteArrayResource(Files.readAllBytes(paths));
     }
 
     // Returning Token
@@ -164,5 +192,32 @@ public class ShopServiceImpl implements ShopService {
         if (!isValidExtension) {
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_FILE);
         }
+    }
+
+    // Validation Whitespace
+    public void isContainWhitespace(String text){
+
+        if(text.contains(" ")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_WHITESPACE);
+        }
+    }
+
+    // Validation Existing Shop
+    public void isExistingShop(UUID id){
+        Shop shop = shopRepository.getShopByOwnerId(id);
+        if(shop != null){
+            throw new IllegalArgumentException(ValidationConfig.USER_CONTAIN_SHOP);
+        }
+    }
+
+    // Validation Image
+    private boolean isImageFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType != null) {
+            return contentType.equals("image/jpeg") ||
+                    contentType.equals("image/png") ||
+                    contentType.equals("image/tiff");
+        }
+        return false;
     }
 }

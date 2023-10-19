@@ -1,9 +1,11 @@
 package com.example.shopservice.service.shop;
 
+import com.example.commonservice.response.FileResponse;
 import com.example.shopservice.request.FileRequest;
 import com.example.shopservice.request.ShopRequest;
 import com.example.shopservice.response.ShopResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +16,7 @@ import java.util.UUID;
 @Service
 public interface ShopService {
 
-    public List<FileRequest> saveListFile(List<MultipartFile> files, HttpServletRequest request) throws IOException;
+    ShopResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException;
 
     ShopResponse setUpShop(ShopRequest request) throws Exception;
 
@@ -22,9 +24,10 @@ public interface ShopService {
 
     ShopResponse getShopById(UUID id);
 
-    ShopResponse deleteShopById(UUID id);
+    ShopResponse updateShopById(ShopRequest request);
 
-    ShopResponse updateShopById(UUID id, ShopRequest request);
+    ShopResponse getShopByOwnerId();
 
-    ShopResponse getShopByOwnerId(UUID ownerId);
+    ShopResponse shopAction(Boolean isActive);
+    ByteArrayResource getImage(String fileName) throws IOException;
 }

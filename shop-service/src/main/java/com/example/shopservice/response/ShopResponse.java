@@ -17,6 +17,7 @@ public class ShopResponse {
     private String name;
     private String profileImage;
     private UUID userId;
+    private Boolean status;
     private Address address;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
