@@ -1,4 +1,4 @@
-package com.example.postservice.exception;
+package com.example.newsfeedservice.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomErrorResponse {
+public class CustomErrorResponse{
     private int status;
     private String error;
     private String message;

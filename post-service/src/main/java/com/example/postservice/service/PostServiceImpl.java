@@ -1,6 +1,7 @@
 package com.example.postservice.service;
 
 
+import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.postservice.config.FileStorageProperties;
 import com.example.postservice.exception.NotFoundExceptionClass;
@@ -64,7 +65,7 @@ public class PostServiceImpl implements PostService {
         // Create a Matcher to match the input against the pattern
         Matcher matcher = pattern.matcher(postRequest.getBudget().toString());
         if(!matcher.matches()){
-            throw new NotFoundExceptionClass("not working");
+            throw new IllegalArgumentException("Opps, please input the valid budget");
         }
 
 
@@ -76,7 +77,7 @@ public class PostServiceImpl implements PostService {
                     .toDto(postRequest.getFile(),createdBy(UUID.fromString(currentUser())));
         }
         else{
-        throw new NotFoundExceptionClass("not working");
+        throw new IllegalArgumentException("Opps, only BUYER can create post.");
         }
     }
 
@@ -85,13 +86,13 @@ public class PostServiceImpl implements PostService {
         User tempUser = createdBy(UUID.fromString(currentUser()));
 
         if(!tempUser.getRoles().contains(Role.BUYER) ){
-            throw new NotFoundExceptionClass("not working");
+            throw new IllegalArgumentException("Opps, only BUYER can create post.");
         }
         Post post = postRepository.findPostById(postId);
         Post drafted = postRepository.findDraftedPostById(postId);
 
         if(post==null && drafted==null){
-            throw new NotFoundExceptionClass("not working");
+            throw new NotFoundExceptionClass("Opps, this id doesn't exist.");
         }
 
 
@@ -138,7 +139,7 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getAllPost() {
         List<PostResponse> posts= postRepository.findAllPosts().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).toList();
         if(posts.isEmpty()){
-            throw new NotFoundExceptionClass("not working");
+            throw new NotFoundExceptionClass("Opps, post is currently empty.");
         }
         return posts;
     }
@@ -147,7 +148,7 @@ public class PostServiceImpl implements PostService {
     public PostResponse getPostById(UUID id) {
         Post post = postRepository.findPostById(id);
         if(post==null){
-            throw new NotFoundExceptionClass("not working");
+            throw new NotFoundExceptionClass("Opps, this post cannot be found.");
         }else
             return postRepository.findPostById(id).toDto(getFiles(postRepository.findPostById(id)),createdBy(UUID.fromString(currentUser())));
 
@@ -157,12 +158,12 @@ public class PostServiceImpl implements PostService {
     public PostResponse deletePostById(UUID id) {
         Optional<Post> post= postRepository.findById(id);
         if(post.isEmpty()){
-            throw new NotFoundExceptionClass("not working");
+            throw new NotFoundExceptionClass("Opps, this post cannot be found.");
         }
 
         User tempUser = createdBy(UUID.fromString(currentUser()));
         if(!tempUser.getRoles().contains(Role.BUYER) ){
-            throw new NotFoundExceptionClass("not working");
+            throw new IllegalArgumentException("Opps, only BUYER can use this endpoint.");
         }
         // Create new object to store before delete
         PostResponse response = getPostById(id);
@@ -175,12 +176,12 @@ public class PostServiceImpl implements PostService {
     public PostResponse updatePostById(UUID id, PostRequest postRequest) {
         User tempUser = createdBy(UUID.fromString(currentUser()));
         if(!tempUser.getRoles().contains(Role.BUYER) ){
-            throw new NotFoundExceptionClass("not working");
+            throw new IllegalArgumentException("Opps, only BUYER can use this endpoint.");
         }
 
         Optional<Post> post= postRepository.findById(id);
         if(post.isEmpty()){
-            throw new NotFoundExceptionClass("not working");
+            throw new NotFoundExceptionClass("Opps, this id cannot be found.");
         }
 
 
@@ -195,7 +196,7 @@ public class PostServiceImpl implements PostService {
         // Create a Matcher to match the input against the pattern
         Matcher matcher = pattern.matcher(postRequest.getBudget().toString());
         if(!matcher.matches()){
-            throw new NotFoundExceptionClass("not working");
+            throw new IllegalArgumentException("Opps, please input the valid budget.");
         }
 
 
@@ -220,7 +221,7 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getAllDraftPosts() {
         List<PostResponse> draftedposts = postRepository.getAllDraftPosts().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString( currentUser())))).toList();
        if(draftedposts.isEmpty()){
-           throw  new NotFoundExceptionClass("not working");
+           throw new NotFoundExceptionClass("Opps, the drafted post is currently empty.");
        }
         return draftedposts;
     }
@@ -229,7 +230,7 @@ public class PostServiceImpl implements PostService {
     public PostResponse getDraftedPostById(UUID id) {
         Post post = postRepository.findDraftedPostById(id);
         if(post==null){
-            throw new NotFoundExceptionClass("not working");
+            throw new NotFoundExceptionClass("Opps, this drafted post cannot be found.");
         }
         else return postRepository.findDraftedPostById(id).toDto(getFiles(postRepository.findDraftedPostById(id)),createdBy(UUID.fromString(currentUser())));
     }
