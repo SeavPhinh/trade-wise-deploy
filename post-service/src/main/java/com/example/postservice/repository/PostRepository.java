@@ -40,7 +40,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
 
     @Transactional
-    @Query("SELECT p from Post p where (p.budgetFrom >= :budgetFrom AND p.budgetFrom <= :budgetTo) or (p.budgetFrom <= :budgetFrom and  p.budgetTo >= :budgetFrom )  ")
+    @Query("SELECT p from Post p where p.status = true and (p.budgetFrom >= :budgetFrom AND p.budgetFrom <= :budgetTo) or (p.budgetFrom <= :budgetFrom and  p.budgetTo >= :budgetFrom )  ")
     List<Post> findByBudgetFromAndBudgetTo( @Param("budgetFrom") Float budgetFrom, @Param("budgetTo") Float budgetTo);
 
 
@@ -61,11 +61,11 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     List<Post> findAllSortedByZA();
 
     @Transactional
-    @Query("select p from Post p  where p.subCategory= :subCategory")
+    @Query("select p from Post p  where  p.status = true and p.subCategory= :subCategory")
     List<Post> getAllPostSortedBySubCategory(String subCategory);
 
 
     @Transactional
-    @Query("select p from Post p  where p.subCategory like %:subCategory% ")
+    @Query("select p from Post p  where p.status = true and p.subCategory like %:subCategory% ")
     List<Post> searchPostBySubCategory(String subCategory);
 }
