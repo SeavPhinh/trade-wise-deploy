@@ -44,4 +44,9 @@ public interface PostService {
     List<PostResponse> getAllPostSortedByAZ();
     List<PostResponse> getAllPostSortedByZA();
 
+    List<PostResponse> getAllPostSortedBySubCategory(String subCategory);
+
+    List<PostResponse> searchPostBySubCategory(String subCategory);
+
+    List<PostResponse> getPostsForCurrentUser();
 }

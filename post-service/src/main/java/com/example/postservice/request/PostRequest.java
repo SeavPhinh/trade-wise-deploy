@@ -35,14 +35,14 @@ public class PostRequest {
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private Float budgetTo;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
-    private UUID subCategoryId;
+    private String subCategory;
 
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private Boolean status;
 
 
     public Post toEntity(UUID userId){
-        return new Post(null,this.title,this.file.toString(),this.description, this.budgetFrom,this.budgetTo,this.subCategoryId,this.status, LocalDateTime.now(),LocalDateTime.now(),userId);
+        return new Post(null,this.title,this.file.toString(),this.description, this.budgetFrom,this.budgetTo,this.subCategory,this.status, LocalDateTime.now(),LocalDateTime.now(),userId);
     }
 
 }

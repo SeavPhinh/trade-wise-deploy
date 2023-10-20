@@ -178,4 +178,34 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
+    @GetMapping("/posts/sub-category")
+    @Operation(summary = "get all post sorted sub-category")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedBySubCategory(@RequestParam String subCategory){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "posts filtered by sub-category fetched successfully",
+                postService.getAllPostSortedBySubCategory(subCategory),
+                HttpStatus.OK
+        ),HttpStatus.OK);
+    }
+
+    @GetMapping("/posts/sub-category/search")
+    @Operation(summary = "search all post by sub-category")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> searchPostBySubCategory(@RequestParam String subCategory){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "posts searched by sub-category fetched successfully",
+                postService.searchPostBySubCategory(subCategory),
+                HttpStatus.OK
+        ),HttpStatus.OK);
+    }
+
+    @GetMapping("/posts/currentUser")
+    @Operation(summary = "get all post for current user")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getPostsForCurrentUser(){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "posts for current user fetched successfully",
+                postService.getPostsForCurrentUser(),
+                HttpStatus.OK
+        ),HttpStatus.OK);
+    }
+
 }

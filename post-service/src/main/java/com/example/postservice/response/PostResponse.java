@@ -20,10 +20,11 @@ public class PostResponse {
     private Float budgetFrom;
     private Float budgetTo;
 
-    private UUID subCategoryId;
+    private String subCategory;
     private Boolean status;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
     private User createdBy;
+
 
 }

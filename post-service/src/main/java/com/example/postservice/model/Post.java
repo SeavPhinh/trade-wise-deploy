@@ -30,14 +30,14 @@ public class Post {
     private Float budgetFrom;
     @Column(nullable = false)
     private Float budgetTo;
-    private UUID subCategoryId;
+    private String subCategory;
     private Boolean status;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
     private UUID userId;
 
     public PostResponse toDto(List<String> files, User createdBy){
-        return new PostResponse(this.id,this.title, files, this.description, this.budgetFrom,this.budgetTo, this.subCategoryId, this.status,this.createdDate,this.lastModified,createdBy);
+        return new PostResponse(this.id,this.title, files, this.description, this.budgetFrom,this.budgetTo, this.subCategory, this.status,this.createdDate,this.lastModified,createdBy);
     }
 
 

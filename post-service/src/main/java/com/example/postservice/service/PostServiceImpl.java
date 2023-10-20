@@ -77,7 +77,7 @@ public class PostServiceImpl implements PostService {
         }
 
 
-        if(tempUser.getRoles().contains(Role.BUYER) ){
+        if(tempUser.getRoles().contains(Role.BUYER) ){ // check if not role BUYER throw an exception
             postRequest.setTitle(trimmedTitle);
             postRequest.setDescription(trimmedDescription);
 
@@ -147,6 +147,12 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostResponse> getAllPost() {
         List<PostResponse> posts= postRepository.findAllPosts().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).toList();
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+
         if(posts.isEmpty()){
             throw new NotFoundExceptionClass("Opps, post is currently empty.");
         }
@@ -223,7 +229,7 @@ public class PostServiceImpl implements PostService {
         preData.setBudgetTo(postRequest.getBudgetTo());
         preData.setStatus(postRequest.getStatus());
         preData.setLastModified(LocalDateTime.now());
-        preData.setSubCategoryId(postRequest.getSubCategoryId());
+        preData.setSubCategory(postRequest.getSubCategory());
 
         return postRepository.save(preData).toDto(getFiles(preData),createdBy(UUID.fromString(currentUser())));
 
@@ -249,42 +255,139 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public byte[] getImageByName(String name) throws IOException {
+
          FileStorage imageData=  fileRepository.findByName(name);
+         if(imageData==null){
+             throw new NotFoundExceptionClass("Opps, image cannot be found.");
+         }
 
         return Files.readAllBytes(new File(imageData.getFilePath()).toPath());
     }
 
     @Override
     public List<PostResponse> findByBudgetFromAndBudgetTo(Float budgetFrom, Float budgetTo) {
+        String numberPattern = "^[+]?(?:\\d+\\.?\\d*|\\d*\\.\\d+|\\d+)$";
+        // Compile the pattern
+        Pattern pattern = Pattern.compile(numberPattern);
 
-        if(budgetFrom >= budgetTo){
+        // Create a Matcher to match the input against the pattern
+        Matcher matcher1 = pattern.matcher(budgetFrom.toString());
+        Matcher matcher2 = pattern.matcher(budgetTo.toString());
+
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+
+        if(!(matcher1.matches() && matcher2.matches())){
+            throw new IllegalArgumentException("Opps, please input the valid number of budget.");
+        }
+        if(budgetFrom >= budgetTo ){
             throw new IllegalArgumentException("Opps, budget-from has to be smaller than budget-to");
         }
-        List<Post> postsTemp = postRepository.findByBudgetFromAndBudgetTo(budgetFrom,budgetTo);
-        if(postsTemp.isEmpty()){
+
+        List<Post> posts = postRepository.findByBudgetFromAndBudgetTo(budgetFrom,budgetTo);
+        if(posts.isEmpty()){
             throw new NotFoundExceptionClass("Posts not found");
         }
-        return postRepository.findByBudgetFromAndBudgetTo(budgetFrom,budgetTo).stream().map(post-> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+        return posts.stream().map(post-> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
     }
 
     @Override
     public List<PostResponse> getAllPostSortedByNewest() {
-        return postRepository.findAllSortedByNewest().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+        List<Post> posts =postRepository.findAllSortedByNewest();
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("Opps, post is currently empty.");
+        }
+        return posts.stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
     }
 
     @Override
     public List<PostResponse> getAllPostSortedByOldest() {
-        return postRepository.findAllSortedByOldest().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+        List<Post> posts =postRepository.findAllSortedByOldest();
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("Opps, post is currently empty.");
+        }
+        return posts.stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
     }
 
     @Override
     public List<PostResponse> getAllPostSortedByAZ() {
-        return postRepository.findAllSortedByAZ().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+        List<Post> posts =postRepository.findAllSortedByAZ();
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("Opps, post is currently empty.");
+        }
+        return posts.stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
     }
 
     @Override
     public List<PostResponse> getAllPostSortedByZA() {
-        return postRepository.findAllSortedByZA().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+        List<Post> posts =postRepository.findAllSortedByZA();
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("Opps, post is currently empty.");
+        }
+        return posts.stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+    }
+
+
+
+    @Override
+    public List<PostResponse> getAllPostSortedBySubCategory(String subCategory) {
+        List<Post> posts= postRepository.getAllPostSortedBySubCategory(subCategory);
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("Opps, post is currently empty.");
+        }
+        return posts.stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostResponse> searchPostBySubCategory(String subCategory) {
+        List<Post> posts = postRepository.searchPostBySubCategory(subCategory);
+        //check if not role SELLER throw an exception
+        User tempUser = createdBy(UUID.fromString(currentUser()));
+        if(!tempUser.getRoles().contains(Role.SELLER) ){
+            throw new IllegalArgumentException("Opps, only SELLER can use this endpoint.");
+        }
+
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("Opps, post cannot be found.");
+        }
+        return posts.stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostResponse> getPostsForCurrentUser() {
+        List<Post> posts =postRepository.findAllPostForCurrentUser(UUID.fromString(currentUser()));
+        if(posts.isEmpty()){
+            throw new NotFoundExceptionClass("Opps, you haven't posted anything yet.");
+        }
+        return posts.stream().map(post-> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
     }
 
 

@@ -26,6 +26,11 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Transactional
     @Query("SELECT p from Post p where p.status = true ")
     List<Post> findAllPosts();
+
+    @Transactional
+    @Query("SELECT p from Post p where p.status = true and p.userId= :currentUserId")
+    List<Post> findAllPostForCurrentUser(UUID currentUserId);
+
     @Transactional
     @Query("SELECT p from Post p where p.status = true and p.id= :id  ")
     Post findPostById(@Param("id") UUID id);
@@ -54,4 +59,13 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Transactional
     @Query("select p from Post p  where p.status = true order by p.title desc ")
     List<Post> findAllSortedByZA();
+
+    @Transactional
+    @Query("select p from Post p  where p.subCategory= :subCategory")
+    List<Post> getAllPostSortedBySubCategory(String subCategory);
+
+
+    @Transactional
+    @Query("select p from Post p  where p.subCategory like %:subCategory% ")
+    List<Post> searchPostBySubCategory(String subCategory);
 }
