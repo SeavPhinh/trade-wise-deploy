@@ -77,6 +77,8 @@ public class ValidationConfig {
     public static final String NOT_RATING = "No record of rating shop";
     public static final String FILE_NOTFOUND = "File image is not found in storage";
     public static final String NOTFOUND_USER_INFO = "user information is not found";
+    public static final String ILLEGAL_PROCESS = "your role is illegal to process";
+    public static final String SHOP_NOT_CREATED = "your shop is not set up yet";
 
 
 }

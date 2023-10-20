@@ -48,6 +48,7 @@ public class ThirdPartyServiceImpl implements ThirdPartyService {
                             user.getLastName(),
                             Boolean.valueOf(user.getAttributes().get("is_verify").get(0)),
                             roles(user.getAttributes().get("role").get(0)),
+                            user.getAttributes().get("logged_as").get(0),
                             LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
                             LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
                     ));

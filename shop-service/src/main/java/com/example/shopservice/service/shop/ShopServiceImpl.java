@@ -3,6 +3,7 @@ package com.example.shopservice.service.shop;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.shopservice.config.FileStorageProperties;
@@ -50,6 +51,8 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public ShopResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException {
 
+        isLegal(UUID.fromString(currentUser()));
+
         if (file != null && !isImageFile(file)) {
             throw new IllegalArgumentException(ValidationConfig.INVALID_FILE);
         }
@@ -66,13 +69,18 @@ public class ShopServiceImpl implements ShopService {
         File dest = new File(directoryPath.toFile(), fileName);
         file.transferTo(dest);
         Shop preUserInfo = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
-        preUserInfo.setProfileImage(fileName);
-        shopRepository.save(preUserInfo);
-        return preUserInfo.toDto();
+        if(preUserInfo != null){
+            preUserInfo.setProfileImage(fileName);
+            shopRepository.save(preUserInfo);
+            return preUserInfo.toDto();
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
+
     }
 
     @Override
     public ShopResponse setUpShop(ShopRequest request) throws Exception {
+        isLegal(UUID.fromString(currentUser()));
         isExistingShop(createdBy(UUID.fromString(currentUser())).getId());
         isContainWhitespace(request.getAddress().getUrl());
         validateFile(request.getProfileImage());
@@ -80,7 +88,7 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public List<ShopResponse> getAllShop() {
+    public List<ShopResponse> getAllShop(){
         List<ShopResponse> shops = shopRepository.getAllActiveShop().stream().map(Shop::toDto).collect(Collectors.toList());
         if(!shops.isEmpty()){
             return shops;
@@ -99,6 +107,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public ShopResponse updateShopById(ShopRequest request) {
+        isLegal(UUID.fromString(currentUser()));
         Shop preShop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(preShop != null){
             if(!preShop.getUserId().toString().equalsIgnoreCase(createdBy(UUID.fromString(currentUser())).getId().toString())){
@@ -114,16 +123,22 @@ public class ShopServiceImpl implements ShopService {
             preShop.setLastModified(LocalDateTime.now());
             return shopRepository.save(preShop).toDto();
         }
-        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
 
     @Override
     public ShopResponse getShopByOwnerId() {
-        return shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).toDto();
+        isLegal(UUID.fromString(currentUser()));
+        Shop shop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+        if(shop != null){
+            return shop.toDto();
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
 
     @Override
     public ShopResponse shopAction(Boolean isActive) {
+        isLegal(UUID.fromString(currentUser()));
         Shop preShop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(preShop != null){
             if(!preShop.getUserId().toString().equalsIgnoreCase(createdBy(UUID.fromString(currentUser())).getId().toString())){
@@ -133,7 +148,7 @@ public class ShopServiceImpl implements ShopService {
             preShop.setStatus(isActive);
             return shopRepository.save(preShop).toDto();
         }
-        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
 
     @Override
@@ -167,7 +182,6 @@ public class ShopServiceImpl implements ShopService {
 
     // Return User
     public User createdBy(UUID id){
-
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
 
@@ -219,5 +233,12 @@ public class ShopServiceImpl implements ShopService {
                     contentType.equals("image/tiff");
         }
         return false;
+    }
+
+    // Validation legal Role
+    public void isLegal(UUID id){
+        if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.SELLER))){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
+        }
     }
 }

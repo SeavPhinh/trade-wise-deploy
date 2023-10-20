@@ -117,6 +117,7 @@ public class UserServiceImpl implements UserService {
                 createdUserRepresentation.getLastName(),
                 Boolean.valueOf(userPre.getAttributes().get("is_verify").get(0)),
                 roles(userPre.getAttributes().get("role").get(0)),
+                userPre.getAttributes().get("logged_as").get(0),
                 LocalDateTime.parse(userPre.getAttributes().get("created_date").get(0)),
                 LocalDateTime.parse(userPre.getAttributes().get("last_modified").get(0))
         );
@@ -306,6 +307,7 @@ public class UserServiceImpl implements UserService {
                 resource(id).toRepresentation().getLastName(),
                 Boolean.valueOf(resource(id).toRepresentation().getAttributes().get("is_verify").get(0)),
                 roles(resource(id).toRepresentation().getAttributes().get("role").get(0)),
+                resource(id).toRepresentation().getAttributes().get("logged_as").get(0),
                 LocalDateTime.now(),
                 LocalDateTime.now());
     }
@@ -374,6 +376,7 @@ public class UserServiceImpl implements UserService {
                 resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
                 Boolean.valueOf(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("is_verify").get(0)),
                 roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
+                resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("logged_as").get(0),
                 LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
                 LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
         );

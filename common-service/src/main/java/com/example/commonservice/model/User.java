@@ -22,6 +22,7 @@ public class User {
     private String lastName;
     private Boolean isVerify;
     private List<Role> roles;
+    private String loggedAs;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS")
     private LocalDateTime createdDate;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS")

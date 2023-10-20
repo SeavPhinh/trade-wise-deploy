@@ -3,6 +3,7 @@ package com.example.shopservice.service.rating;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.shopservice.exception.NotFoundExceptionClass;
@@ -59,6 +60,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public List<ShopResponse> getRatedShopByCurrentId() {
+        isLegal(UUID.fromString(currentUser()));
         List<Rating> ratings = ratingRepository.findAll();
         if(!ratings.isEmpty()){
             List<ShopResponse> shops = new ArrayList<>();
@@ -104,6 +106,13 @@ public class RatingServiceImpl implements RatingService {
                 .retrieve()
                 .bodyToMono(ApiResponse.class)
                 .block()).getPayload(), User.class);
+    }
+
+    // Validation legal Role
+    public void isLegal(UUID id){
+        if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.BUYER))){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
+        }
     }
 
 }
