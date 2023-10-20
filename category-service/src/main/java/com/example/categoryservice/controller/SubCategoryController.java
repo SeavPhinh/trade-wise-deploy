@@ -58,18 +58,18 @@ public class SubCategoryController {
         ), HttpStatus.OK);
     }
 
-//
-//    @PutMapping("/subcategories/{id}")
-//    @Operation(summary = "update categories by id")
-//    @SecurityRequirement(name = "oAuth2")
-//    public ResponseEntity<ApiResponse<CategoryResponse>> updateSubCategoryById(@PathVariable UUID id,
-//                                                                            @Valid @RequestBody CategoryRequest request){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "SubCategories updated by id successfully",
-//                subCategoryService.updateSubCategoryById(id,request),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
+
+    @PutMapping("/subcategories/{id}")
+    @Operation(summary = "update subcategories by id")
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> updateSubCategoryById(@PathVariable UUID id,
+                                                                            @Valid @RequestBody SubCategoryRequest request){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "SubCategories updated by id successfully",
+                subCategoryService.updateSubCategoryById(id,request),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
 
 
 }

@@ -13,4 +13,6 @@ public interface SubCategoryService {
     CategorySubCategoryResponse addSubCategory(UUID categoryId, SubCategoryRequest request);
 
     CategorySubCategoryResponse deleteSubCategoryById(UUID id);
+
+    CategorySubCategoryResponse updateSubCategoryById(UUID id, SubCategoryRequest request);
 }

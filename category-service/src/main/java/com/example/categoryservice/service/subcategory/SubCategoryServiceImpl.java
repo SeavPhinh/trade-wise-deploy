@@ -6,10 +6,7 @@ import com.example.categoryservice.model.SubCategory;
 import com.example.categoryservice.repository.CategoryRepository;
 import com.example.categoryservice.repository.SubCategoryRepository;
 import com.example.categoryservice.request.SubCategoryRequest;
-import com.example.categoryservice.response.CategoryResponse;
-import com.example.categoryservice.response.CategorySubCategory;
 import com.example.categoryservice.response.CategorySubCategoryResponse;
-import com.example.categoryservice.response.SubCategoryResponse;
 import com.example.commonservice.config.ValidationConfig;
 import org.springframework.stereotype.Service;
 
@@ -43,34 +40,45 @@ public class SubCategoryServiceImpl implements SubCategoryService{
 
     @Override
     public CategorySubCategoryResponse addSubCategory(UUID categoryId, SubCategoryRequest request) {
-        CategorySubCategoryResponse response = new CategorySubCategoryResponse();
+        List<SubCategory> subCat = subCategoryRepository.findAll();
+        for (SubCategory sub: subCat) {
+            if(sub.getName().equalsIgnoreCase(request.getName())){
+                throw new IllegalArgumentException(ValidationConfig.EXISTING_SUB_CATEGORIES);
+            }
+        }
+        Optional<Category> category = categoryRepository.findById(categoryId);
+        if(category.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_CATEGORIES);
+        }
 
-        Category category = categoryRepository.findById(categoryId).orElseThrow();
-        CategoryResponse categoryResponse = category.toDto();
-
-        SubCategory subCategory = subCategoryRepository.save(request.toEntity(category));
-        SubCategoryResponse subCategoryResponse = subCategory.toDto();
-
-        response.setCategoryResponse(categoryResponse);
-        response.setSubCategory(subCategoryResponse);
-
-        return response;
+        return new CategorySubCategoryResponse(category.get().toDto(),subCategoryRepository.save(request.toEntity(category.get())).toDto());
     }
 
     @Override
     public CategorySubCategoryResponse deleteSubCategoryById(UUID id) {
-        CategorySubCategoryResponse response = new CategorySubCategoryResponse();
-
         Optional<SubCategory> subCategory = subCategoryRepository.findById(id);
-        if(!subCategory.isPresent()){
+        if(subCategory.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
         }
-
-        response.setCategoryResponse(categoryRepository.findById(subCategory.get().getCategory().getId()).orElseThrow().toDto());
-        response.setSubCategory(subCategory.get().toDto());
-
         subCategoryRepository.deleteById(id);
-        return response;
+        return new CategorySubCategoryResponse(categoryRepository.findById(subCategory.get().getCategory().getId()).orElseThrow().toDto(),subCategory.get().toDto());
+    }
+
+    @Override
+    public CategorySubCategoryResponse updateSubCategoryById(UUID id, SubCategoryRequest request) {
+        List<SubCategory> subCat = subCategoryRepository.findAll();
+        for (SubCategory sub: subCat) {
+            if(sub.getName().equalsIgnoreCase(request.getName())){
+                throw new IllegalArgumentException(ValidationConfig.EXISTING_SUB_CATEGORIES);
+            }
+        }
+        Optional<SubCategory> subCategory = subCategoryRepository.findById(id);
+        if(subCategory.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+        }
+        subCategory.get().setName(request.getName());
+        subCategoryRepository.save(subCategory.get());
+        return new CategorySubCategoryResponse(categoryRepository.findById(subCategory.get().getCategory().getId()).orElseThrow().toDto(),subCategory.get().toDto());
     }
 
 }
