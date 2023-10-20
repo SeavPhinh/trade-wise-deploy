@@ -81,6 +81,9 @@ public class ValidationConfig {
     public static final String SHOP_NOT_CREATED = "your shop is not set up yet";
     public static final String ALREADY_FAV_TO_POST = "This post is already added to favorite";
     public static final String POST_NOTFOUND_IN_LIST = "This post is not found in your favorite list";
+    public static final String NOT_FOUND_CATEGORIES = "Categories are not found";
+    public static final String EMPTY_CATEGORIES = "Categories are empty";
+    public static final String EXISTING_CATEGORIES = "This category is already exist";
 
 
 }

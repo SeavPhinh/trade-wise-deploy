@@ -1,6 +1,12 @@
 spring:
   application:
     name: category-service
+  config:
+    import: "optional:configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8585
+      name: category-service
 server:
   port: 8087
 
