@@ -79,6 +79,8 @@ public class ValidationConfig {
     public static final String NOTFOUND_USER_INFO = "user information is not found";
     public static final String ILLEGAL_PROCESS = "your role is illegal to process";
     public static final String SHOP_NOT_CREATED = "your shop is not set up yet";
+    public static final String ALREADY_FAV_TO_POST = "This post is already added to favorite";
+    public static final String POST_NOTFOUND_IN_LIST = "This post is not found in your favorite list";
 
 
 }

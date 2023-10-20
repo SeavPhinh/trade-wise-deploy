@@ -64,7 +64,7 @@ public class SellerFavoriteController {
 
     @GetMapping("/seller/favorite/{id}")
     @SecurityRequirement(name = "oAuth2")
-    @Operation(summary = "fetched posted from favorite's list by shop id and current id")
+    @Operation(summary = "fetched posted from favorite's list by post id and current id")
     public ResponseEntity<ApiResponse<SellerFavoriteResponse>> getPostedFromFavoriteListByPostedIdAndOwnerId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "fetched posted by id from favorite's list successfully",

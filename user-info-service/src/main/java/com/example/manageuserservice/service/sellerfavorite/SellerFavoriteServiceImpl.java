@@ -2,7 +2,7 @@ package com.example.manageuserservice.service.sellerfavorite;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
-import com.example.commonservice.model.Post;
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.PostResponse;
@@ -39,9 +39,10 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     @Override
     public SellerFavoriteResponse addedShopToFavoriteList(SellerFavoriteRequest request) {
+        isLegal(UUID.fromString(currentUser()));
         SellerFavorite buyerFav = sellerFavoriteRepository.findByUserIdAndPostId(request.getPostId(),createdBy(UUID.fromString(currentUser())).getId());
         if(buyerFav != null){
-            throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_SHOP);
+            throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_POST);
         }
         PostResponse post = post(request.getPostId());
         return sellerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(post);
@@ -49,6 +50,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     @Override
     public List<SellerFavoriteResponse> getAllPostedFromSellerFavoriteListByOwnerId() {
+        isLegal(UUID.fromString(currentUser()));
         List<SellerFavoriteResponse> list = sellerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(post(h.getPostId()))).collect(Collectors.toList());
         if(list.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.EMPTY_FAV_LIST);
@@ -58,6 +60,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     @Override
     public SellerFavoriteResponse removePostedFromFavoriteList(UUID id) {
+        isLegal(UUID.fromString(currentUser()));
         SellerFavoriteResponse delete = getPostedFromFavoriteList(id);
         sellerFavoriteRepository.deleteById(delete.getId());
         return delete;
@@ -65,11 +68,12 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     @Override
     public SellerFavoriteResponse getPostedFromFavoriteList(UUID id) {
+        isLegal(UUID.fromString(currentUser()));
         SellerFavorite seller = sellerFavoriteRepository.findByPostIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(seller != null){
             return seller.toDto(post(id));
         }
-        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND_IN_LIST);
+        throw new NotFoundExceptionClass(ValidationConfig.POST_NOTFOUND_IN_LIST);
     }
 
     // Return Shop
@@ -119,6 +123,13 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
                 .retrieve()
                 .bodyToMono(ApiResponse.class)
                 .block()).getPayload(), User.class);
+    }
+
+    // Validation legal Role
+    public void isLegal(UUID id){
+        if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.SELLER))){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
+        }
     }
 
 }

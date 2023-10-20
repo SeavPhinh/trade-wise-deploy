@@ -28,7 +28,7 @@ public class BuyerFavoriteController {
 
     @PostMapping(value = "/buyer/favorite")
     @SecurityRequirement(name = "oAuth2")
-    @Operation(summary = "added shop from user to favorite list")
+    @Operation(summary = "added shop by user to favorite list")
     public ResponseEntity<ApiResponse<BuyerFavoriteResponse>> addedShopToFavoriteList(@Valid @RequestBody BuyerFavoriteRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
                 "added shop to favorite list successfully",

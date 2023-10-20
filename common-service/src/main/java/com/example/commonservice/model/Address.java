@@ -10,9 +10,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Address {
+
     private UUID id;
-    private String street;
-    private String province;
+    private String address;
     private String url;
 
 }

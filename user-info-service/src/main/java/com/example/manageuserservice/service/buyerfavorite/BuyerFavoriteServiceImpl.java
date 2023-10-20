@@ -3,6 +3,8 @@ package com.example.manageuserservice.service.buyerfavorite;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
+import com.example.commonservice.enumeration.Role;
+import com.example.commonservice.model.Address;
 import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
@@ -19,9 +21,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +41,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     @Override
     public BuyerFavoriteResponse addedShopToFavoriteList(BuyerFavoriteRequest request) {
+        isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyerFav = buyerFavoriteRepository.findByUserIdAndShopId(request.getShopId(),createdBy(UUID.fromString(currentUser())).getId());
         if(buyerFav != null){
             throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_SHOP);
@@ -49,6 +52,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     @Override
     public List<BuyerFavoriteResponse> getCurrentUserInfo() {
+        isLegal(UUID.fromString(currentUser()));
         List<BuyerFavoriteResponse> list = buyerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(shop(h.getShopId()))).collect(Collectors.toList());
         if(list.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.EMPTY_FAV_LIST);
@@ -58,6 +62,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     @Override
     public BuyerFavoriteResponse removeShopFromFavoriteList(UUID id) {
+        isLegal(UUID.fromString(currentUser()));
         BuyerFavoriteResponse delete = getShopFromFavoriteList(id);
         buyerFavoriteRepository.deleteById(delete.getId());
         return delete;
@@ -65,6 +70,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     @Override
     public BuyerFavoriteResponse getShopFromFavoriteList(UUID id) {
+        isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyer = buyerFavoriteRepository.findByShopIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(buyer != null){
             return buyer.toDto(shop(id));
@@ -77,7 +83,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication.getPrincipal() instanceof Jwt jwt){
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             try {
                 return covertSpecificClass.convertValue(Objects.requireNonNull(shopWeb
                         .get()
@@ -86,6 +92,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(),Shop.class);
+
             }catch (Exception e){
                 throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
             }
@@ -119,6 +126,13 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
                 .retrieve()
                 .bodyToMono(ApiResponse.class)
                 .block()).getPayload(), User.class);
+    }
+
+    // Validation legal Role
+    public void isLegal(UUID id){
+        if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.BUYER))){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
+        }
     }
 
 
