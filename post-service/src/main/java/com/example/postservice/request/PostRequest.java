@@ -31,7 +31,9 @@ public class PostRequest {
     private String description;
 
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
-    private Float budget;
+    private Float budgetFrom;
+    @NotNull(message = ValidationConfig.NULL_MESSAGE)
+    private Float budgetTo;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private UUID subCategoryId;
 
@@ -40,7 +42,7 @@ public class PostRequest {
 
 
     public Post toEntity(UUID userId){
-        return new Post(null,this.title,this.file.toString(),this.description, this.budget,this.subCategoryId,this.status, LocalDateTime.now(),LocalDateTime.now(),userId);
+        return new Post(null,this.title,this.file.toString(),this.description, this.budgetFrom,this.budgetTo,this.subCategoryId,this.status, LocalDateTime.now(),LocalDateTime.now(),userId);
     }
 
 }

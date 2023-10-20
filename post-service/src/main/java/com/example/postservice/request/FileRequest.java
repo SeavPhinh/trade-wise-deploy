@@ -12,6 +12,7 @@ public class FileRequest {
     private String fileName;
     private String fileUrl;
     private String fileType;
+    private String filePath;
     private Long size;
 
 }

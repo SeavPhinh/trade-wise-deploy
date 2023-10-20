@@ -17,7 +17,9 @@ public class PostResponse {
     private String title;
     private List<String> file;
     private String description;
-    private Float budget;
+    private Float budgetFrom;
+    private Float budgetTo;
+
     private UUID subCategoryId;
     private Boolean status;
     private LocalDateTime createdDate;

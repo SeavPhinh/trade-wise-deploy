@@ -1,12 +1,12 @@
 package com.example.postservice.service;
 
 
-import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.postservice.config.FileStorageProperties;
 import com.example.postservice.exception.NotFoundExceptionClass;
 import com.example.postservice.model.FileStorage;
 import com.example.postservice.model.Post;
+import com.example.postservice.repository.FileRepository;
 import com.example.postservice.repository.PostRepository;
 import com.example.postservice.request.FileRequest;
 import com.example.postservice.request.PostRequest;
@@ -18,6 +18,8 @@ import com.example.commonservice.response.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -25,8 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -41,11 +45,13 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final FileStorageProperties fileStorageProperties;
     private final WebClient webClient;
+    private final FileRepository fileRepository;
 
-    public PostServiceImpl(PostRepository postRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient) {
+    public PostServiceImpl(PostRepository postRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, FileRepository fileRepository) {
         this.postRepository = postRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
+        this.fileRepository = fileRepository;
     }
 
     @Override
@@ -63,8 +69,10 @@ public class PostServiceImpl implements PostService {
         Pattern pattern = Pattern.compile(numberPattern);
 
         // Create a Matcher to match the input against the pattern
-        Matcher matcher = pattern.matcher(postRequest.getBudget().toString());
-        if(!matcher.matches()){
+        Matcher matcher = pattern.matcher(postRequest.getBudgetFrom().toString());
+        Matcher matcher2 = pattern.matcher(postRequest.getBudgetTo().toString());
+
+        if(!(matcher.matches() && matcher2.matches())){
             throw new IllegalArgumentException("Opps, please input the valid budget");
         }
 
@@ -101,11 +109,11 @@ public class PostServiceImpl implements PostService {
         for (MultipartFile file : files) {
 
                    if(!file.getContentType().equals("image/png")
-                    || file.getContentType().equals("image/tiff")
-                    || file.getContentType().equals("image/jpeg")
-                    || file.getContentType().equals("video/mp4")
-                    || file.getContentType().equals("video/avi")
-                    || file.getContentType().equals("video/quicktime")
+                           || file.getContentType().equals("image/tiff")
+                           || file.getContentType().equals("image/jpeg")
+                           || file.getContentType().equals("video/mp4")
+                           || file.getContentType().equals("video/avi")
+                           || file.getContentType().equals("video/quicktime")
             ) {
                 throw new IllegalArgumentException("Opps. please input the valid images or videos.");
             }
@@ -122,11 +130,12 @@ public class PostServiceImpl implements PostService {
             FileStorage obj = new FileStorage();
             obj.setFileName(fileName);
             obj.setFileType(file.getContentType());
-
+            obj.setFilePath(directoryPath + "\\" + fileName);
             obj.setSize(file.getSize());
             obj.setFileUrl(String.valueOf(request.getRequestURL()).substring(0,22)+"images/"+fileName);
             listFiles.add(obj.getFileName());
-            filesResponses.add(new FileRequest(fileName, obj.getFileUrl(),obj.getFileType(),obj.getSize()));
+            filesResponses.add(new FileRequest(fileName, obj.getFileUrl(),obj.getFileType(),obj.getFilePath(),obj.getSize()));
+            fileRepository.save(obj);
         }
 
         Post prePost = postRepository.findById(postId).orElseThrow();
@@ -194,8 +203,10 @@ public class PostServiceImpl implements PostService {
         Pattern pattern = Pattern.compile(numberPattern);
 
         // Create a Matcher to match the input against the pattern
-        Matcher matcher = pattern.matcher(postRequest.getBudget().toString());
-        if(!matcher.matches()){
+        Matcher matcher = pattern.matcher(postRequest.getBudgetFrom().toString());
+        Matcher matcher2 = pattern.matcher(postRequest.getBudgetTo().toString());
+
+        if(!(matcher.matches() && matcher2.matches())){
             throw new IllegalArgumentException("Opps, please input the valid budget.");
         }
 
@@ -208,7 +219,8 @@ public class PostServiceImpl implements PostService {
         preData.setTitle(trimmedTitles);
         preData.setFile(postRequest.getFile().toString());
         preData.setDescription(trimmedDescription);
-        preData.setBudget(postRequest.getBudget());
+        preData.setBudgetFrom(postRequest.getBudgetFrom());
+        preData.setBudgetTo(postRequest.getBudgetTo());
         preData.setStatus(postRequest.getStatus());
         preData.setLastModified(LocalDateTime.now());
         preData.setSubCategoryId(postRequest.getSubCategoryId());
@@ -233,6 +245,46 @@ public class PostServiceImpl implements PostService {
             throw new NotFoundExceptionClass("Opps, this drafted post cannot be found.");
         }
         else return postRepository.findDraftedPostById(id).toDto(getFiles(postRepository.findDraftedPostById(id)),createdBy(UUID.fromString(currentUser())));
+    }
+
+    @Override
+    public byte[] getImageByName(String name) throws IOException {
+         FileStorage imageData=  fileRepository.findByName(name);
+
+        return Files.readAllBytes(new File(imageData.getFilePath()).toPath());
+    }
+
+    @Override
+    public List<PostResponse> findByBudgetFromAndBudgetTo(Float budgetFrom, Float budgetTo) {
+
+        if(budgetFrom >= budgetTo){
+            throw new IllegalArgumentException("Opps, budget-from has to be smaller than budget-to");
+        }
+        List<Post> postsTemp = postRepository.findByBudgetFromAndBudgetTo(budgetFrom,budgetTo);
+        if(postsTemp.isEmpty()){
+            throw new NotFoundExceptionClass("Posts not found");
+        }
+        return postRepository.findByBudgetFromAndBudgetTo(budgetFrom,budgetTo).stream().map(post-> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostResponse> getAllPostSortedByNewest() {
+        return postRepository.findAllSortedByNewest().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostResponse> getAllPostSortedByOldest() {
+        return postRepository.findAllSortedByOldest().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostResponse> getAllPostSortedByAZ() {
+        return postRepository.findAllSortedByAZ().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostResponse> getAllPostSortedByZA() {
+        return postRepository.findAllSortedByZA().stream().map(post -> post.toDto(getFiles(post),createdBy(UUID.fromString(currentUser())))).collect(Collectors.toList());
     }
 
 

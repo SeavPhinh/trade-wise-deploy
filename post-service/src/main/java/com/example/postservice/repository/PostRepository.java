@@ -1,5 +1,6 @@
 package com.example.postservice.repository;
 
+import com.example.postservice.model.FileStorage;
 import com.example.postservice.model.Post;
 import com.example.postservice.response.PostResponse;
 import jakarta.transaction.Transactional;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -30,4 +32,26 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Transactional
     @Query("SELECT p from Post p where p.status = false and p.id= :id  ")
     Post findDraftedPostById(@Param("id") UUID id);
+
+
+    @Transactional
+    @Query("SELECT p from Post p where (p.budgetFrom >= :budgetFrom AND p.budgetFrom <= :budgetTo) or (p.budgetFrom <= :budgetFrom and  p.budgetTo >= :budgetFrom )  ")
+    List<Post> findByBudgetFromAndBudgetTo( @Param("budgetFrom") Float budgetFrom, @Param("budgetTo") Float budgetTo);
+
+
+    @Transactional
+    @Query("select p from Post p  where p.status = true order by p.createdDate desc ")
+    List<Post> findAllSortedByNewest();
+
+    @Transactional
+    @Query("select p from Post p  where p.status = true order by p.createdDate asc ")
+    List<Post> findAllSortedByOldest();
+
+    @Transactional
+    @Query("select p from Post p  where p.status = true order by p.title asc ")
+    List<Post> findAllSortedByAZ();
+
+    @Transactional
+    @Query("select p from Post p  where p.status = true order by p.title desc ")
+    List<Post> findAllSortedByZA();
 }
