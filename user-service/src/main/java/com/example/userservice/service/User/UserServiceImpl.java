@@ -149,8 +149,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse verifiedAccount(VerifyLogin login){
+    public UserResponse verifiedAccount(Role role, VerifyLogin login){
+
+        roleCheck(role);
         String token = "";
+
         if(accessTokenResponse(login.getAccount(),login.getPassword()) == null){
             throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
@@ -159,6 +162,7 @@ public class UserServiceImpl implements UserService {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = login.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+                user.singleAttribute("logged_as", role.name());
                 Map<String, List<String>> attributes = user.getAttributes();
                 if(attributes == null){
                     throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
@@ -220,21 +224,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse loginAccount(UserLogin login) {
+    public UserResponse loginAccount(Role role, UserLogin login) {
 
+        roleCheck(role);
         String token = "";
+
         if(accessTokenResponse(login.getAccount(),login.getPassword()) == null){
             throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
+
         token = accessTokenResponse(login.getAccount(),login.getPassword());
 
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+
             String accountId = login.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
+
+                user.singleAttribute("logged_as", role.name());
                 Map<String, List<String>> attributes = user.getAttributes();
+                System.out.println("Att: " + attributes);
                 if(attributes == null){
                     throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
                 } else if (user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")) {
+                    resource(UUID.fromString(user.getId())).update(user);
                     return responseUser(user,token);
                 }else{
                     throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
@@ -257,6 +269,7 @@ public class UserServiceImpl implements UserService {
                 resource(UUID.fromString(user.getId())).toRepresentation().getFirstName(),
                 resource(UUID.fromString(user.getId())).toRepresentation().getLastName(),
                 roles(resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("role").get(0)),
+                resource(UUID.fromString(user.getId())).toRepresentation().getAttributes().get("logged_as").get(0),
                 token,
                 LocalDateTime.parse(user.getAttributes().get("created_date").get(0)),
                 LocalDateTime.parse(user.getAttributes().get("last_modified").get(0))
@@ -303,6 +316,13 @@ public class UserServiceImpl implements UserService {
         return rolesList.stream()
                 .map(roleName -> Role.valueOf(roleName.toUpperCase()))
                 .collect(Collectors.toList());
+    }
+
+    // Validation Role
+    public void roleCheck(Role role){
+        if(role == null){
+            throw new IllegalArgumentException(ValidationConfig.ROLE_REQUIRED_MESSAGE);
+        }
     }
 
     // Returning UserResource by id

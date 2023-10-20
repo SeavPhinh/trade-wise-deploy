@@ -20,6 +20,7 @@ public class UserResponse {
     private String firstName;
     private String lastName;
     private List<Role> roles;
+    private String loggedAs;
     private String accessToken;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;

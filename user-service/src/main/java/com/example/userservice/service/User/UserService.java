@@ -1,6 +1,7 @@
 package com.example.userservice.service.User;
 
 
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
@@ -29,13 +30,13 @@ public interface UserService {
 
     User updateUser(UserUpdate request);
 
-    UserResponse verifiedAccount(VerifyLogin login) throws MessagingException;
+    UserResponse verifiedAccount(Role role, VerifyLogin login) throws MessagingException;
 
     User resetPassword(ResetPassword change) throws MessagingException;
 
     RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException;
 
-    UserResponse loginAccount(UserLogin login);
+    UserResponse loginAccount(Role role, UserLogin login);
 
     User getCurrentUser();
 }

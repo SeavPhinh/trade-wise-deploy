@@ -1,5 +1,6 @@
 package com.example.userservice.controller;
 
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.userservice.model.UserLogin;
@@ -116,20 +117,20 @@ public class AppUserController {
 
     @PostMapping("/verify")
     @Operation(summary = "verified account first login")
-    public ResponseEntity<ApiResponse<UserResponse>> verify(@Valid @RequestBody VerifyLogin login) throws MessagingException {
+    public ResponseEntity<ApiResponse<UserResponse>> verify(@RequestParam(defaultValue = "BUYER") Role role, @Valid @RequestBody VerifyLogin login) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account verified successfully",
-                userService.verifiedAccount(login),
+                userService.verifiedAccount(role,login),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/login")
     @Operation(summary = "logging account")
-    public ResponseEntity<ApiResponse<UserResponse>> login(@Valid @RequestBody UserLogin login) throws MessagingException {
+    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestParam(defaultValue = "BUYER") Role role, @Valid @RequestBody UserLogin login){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account logged successfully",
-                userService.loginAccount(login),
+                userService.loginAccount(role,login),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }
