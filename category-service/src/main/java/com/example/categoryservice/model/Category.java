@@ -1,11 +1,14 @@
 package com.example.categoryservice.model;
 
 import com.example.categoryservice.response.CategoryResponse;
+import com.example.categoryservice.response.CategorySubCategory;
+import com.example.categoryservice.response.SubCategoryResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -24,5 +27,7 @@ public class Category {
     public CategoryResponse toDto(){
         return new CategoryResponse(this.id,this.name);
     }
-
+    public CategorySubCategory csToDto(List<SubCategoryResponse> response){
+        return new CategorySubCategory(this.id,this.name,response);
+    }
 }

@@ -84,6 +84,7 @@ public class ValidationConfig {
     public static final String NOT_FOUND_CATEGORIES = "Categories are not found";
     public static final String EMPTY_CATEGORIES = "Categories are empty";
     public static final String EXISTING_CATEGORIES = "This category is already exist";
+    public static final String NOT_FOUND_SUB_CATEGORIES = "This subcategories are empty";
 
 
 }

@@ -2,7 +2,8 @@ package com.example.categoryservice.controller;
 
 import com.example.categoryservice.request.CategoryRequest;
 import com.example.categoryservice.response.CategoryResponse;
-import com.example.categoryservice.service.CategoryService;
+import com.example.categoryservice.response.CategorySubCategory;
+import com.example.categoryservice.service.category.CategoryService;
 import com.example.commonservice.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -41,6 +42,16 @@ public class CategoryController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Categories fetched by id successfully",
                 categoryService.getCategoryById(id),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/category/subcategories/{id}")
+    @Operation(summary = "fetch category with sub categories by id")
+    public ResponseEntity<ApiResponse<CategorySubCategory>> getCategoryAndSubCategoryById(@PathVariable UUID id){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Category and SubCategory fetched by id successfully",
+                categoryService.getCategoryAndSubCategoryById(id),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }

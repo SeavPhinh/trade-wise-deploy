@@ -1,7 +1,8 @@
-package com.example.categoryservice.service;
+package com.example.categoryservice.service.category;
 
 import com.example.categoryservice.request.CategoryRequest;
 import com.example.categoryservice.response.CategoryResponse;
+import com.example.categoryservice.response.CategorySubCategory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface CategoryService {
     CategoryResponse deleteCategoryById(UUID id);
 
     CategoryResponse updateCategoryById(UUID id,CategoryRequest request);
+
+    CategorySubCategory getCategoryAndSubCategoryById(UUID id);
 }
