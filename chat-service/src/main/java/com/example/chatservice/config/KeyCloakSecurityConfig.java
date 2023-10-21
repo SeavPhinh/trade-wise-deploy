@@ -19,7 +19,7 @@ public class KeyCloakSecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
                     authorize.requestMatchers("chat-service/v3/api-docs/**", "chat-service/swagger-ui/**", "chat-service/swagger-ui.html").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"**").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"/api/v1/chats/**").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();

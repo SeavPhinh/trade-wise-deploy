@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/third-party")
 @Tag(name = "Third Party")
 public class ThirdPartyController {
 

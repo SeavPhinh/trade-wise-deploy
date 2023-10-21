@@ -476,17 +476,26 @@
         "realm-management": [
           "query-users",
           "view-users",
+          "manage-events",
           "view-realm",
+          "manage-identity-providers",
           "manage-realm",
           "query-clients",
           "query-realms",
           "create-client",
+          "view-events",
           "manage-clients",
+          "view-identity-providers",
+          "impersonation",
           "realm-admin",
           "query-groups",
           "manage-authorization",
           "manage-users",
-          "view-clients"
+          "view-clients",
+          "view-authorization"
+        ],
+        "account": [
+          "manage-account"
         ]
       },
       "notBefore": 0,
@@ -1464,6 +1473,41 @@
   "components": {
     "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
       {
+        "id": "bd274a31-b1e5-451b-8492-5296ca583d01",
+        "name": "Allowed Client Scopes",
+        "providerId": "allowed-client-templates",
+        "subType": "authenticated",
+        "subComponents": {},
+        "config": {
+          "allow-default-scopes": [
+            "true"
+          ]
+        }
+      },
+      {
+        "id": "a21a8ea1-b0e1-41d2-a154-f7105e57dc09",
+        "name": "Trusted Hosts",
+        "providerId": "trusted-hosts",
+        "subType": "anonymous",
+        "subComponents": {},
+        "config": {
+          "host-sending-registration-request-must-match": [
+            "true"
+          ],
+          "client-uris-must-match": [
+            "true"
+          ]
+        }
+      },
+      {
+        "id": "da55b134-715a-48ff-a82f-6e3bd9badba6",
+        "name": "Full Scope Disabled",
+        "providerId": "scope",
+        "subType": "anonymous",
+        "subComponents": {},
+        "config": {}
+      },
+      {
         "id": "b2259398-0d4b-4a64-9fc7-27f7c31e631f",
         "name": "Allowed Protocol Mapper Types",
         "providerId": "allowed-protocol-mappers",
@@ -1532,49 +1576,6 @@
             "200"
           ]
         }
-      },
-      {
-        "id": "bd274a31-b1e5-451b-8492-5296ca583d01",
-        "name": "Allowed Client Scopes",
-        "providerId": "allowed-client-templates",
-        "subType": "authenticated",
-        "subComponents": {},
-        "config": {
-          "allow-default-scopes": [
-            "true"
-          ]
-        }
-      },
-      {
-        "id": "a21a8ea1-b0e1-41d2-a154-f7105e57dc09",
-        "name": "Trusted Hosts",
-        "providerId": "trusted-hosts",
-        "subType": "anonymous",
-        "subComponents": {},
-        "config": {
-          "host-sending-registration-request-must-match": [
-            "true"
-          ],
-          "client-uris-must-match": [
-            "true"
-          ]
-        }
-      },
-      {
-        "id": "da55b134-715a-48ff-a82f-6e3bd9badba6",
-        "name": "Full Scope Disabled",
-        "providerId": "scope",
-        "subType": "anonymous",
-        "subComponents": {},
-        "config": {}
-      }
-    ],
-    "org.keycloak.userprofile.UserProfileProvider": [
-      {
-        "id": "614eefb7-ac8d-4787-93fb-25f29f098420",
-        "providerId": "declarative-user-profile",
-        "subComponents": {},
-        "config": {}
       }
     ],
     "org.keycloak.keys.KeyProvider": [
@@ -1722,6 +1723,32 @@
       "providerId": "basic-flow",
       "topLevel": false,
       "builtIn": true,
+      "authenticationExecutions": [
+        {
+          "authenticator": "conditional-user-configured",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "auth-otp-form",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    },
+    {
+      "id": "6b5f898f-ec3b-4681-b804-6514f247ea35",
+      "alias": "Custom2FA Browser - Conditional OTP",
+      "description": "Flow to determine if the OTP is required for the authentication",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
       "authenticationExecutions": [
         {
           "authenticator": "conditional-user-configured",

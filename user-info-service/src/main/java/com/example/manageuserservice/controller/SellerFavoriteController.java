@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/seller-favorite")
 @Tag(name = "Seller Favorite")
 public class SellerFavoriteController {
 
@@ -29,7 +29,7 @@ public class SellerFavoriteController {
         this.sellerFavoriteService = sellerFavoriteService;
     }
 
-    @PostMapping(value = "/seller/favorite")
+    @PostMapping("")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "added posted from user to favorite list")
     public ResponseEntity<ApiResponse<SellerFavoriteResponse>> addedShopToFavoriteList(@Valid @RequestBody SellerFavoriteRequest request){
@@ -40,7 +40,7 @@ public class SellerFavoriteController {
         ), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = "/seller/favorite/{id}")
+    @DeleteMapping(value = "/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "remove posted by id from favorite list")
     public ResponseEntity<ApiResponse<SellerFavoriteResponse>> removePostedFromFavoriteList(@PathVariable UUID id){
@@ -51,7 +51,7 @@ public class SellerFavoriteController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/seller/favorite/current")
+    @GetMapping("/current")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetched all posted from favorite's list from current user")
     public ResponseEntity<ApiResponse<List<SellerFavoriteResponse>>> getAllPostedFromSellerFavoriteListByOwnerId(){
@@ -62,7 +62,7 @@ public class SellerFavoriteController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/seller/favorite/{id}")
+    @GetMapping("/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetched posted from favorite's list by post id and current id")
     public ResponseEntity<ApiResponse<SellerFavoriteResponse>> getPostedFromFavoriteListByPostedIdAndOwnerId(@PathVariable UUID id){

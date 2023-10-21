@@ -50,7 +50,11 @@ public class ChatService {
     }
 
     public List<MessageModel> getHistoryMessage(UUID senderId, UUID receiverId) {
-        return chatMessageRepository.findHistory(senderId,receiverId);
+        List<MessageModel> model = chatMessageRepository.findHistory(senderId,receiverId);
+        if(!model.isEmpty()){
+            return model;
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_MESSAGE);
     }
 
     public MessageModel isContainDestination(UUID firstUser, UUID secondUser) {

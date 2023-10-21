@@ -19,10 +19,8 @@ public class KeyCloakSecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
                     authorize.requestMatchers("user-info-service/v3/api-docs/**", "user-info-service/swagger-ui/**", "user-info-service/swagger-ui.html").permitAll();
-                    //For Swagger-ui
-//                    authorize.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/user-info/{id}").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/image").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"api/v1/user-info/image").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();

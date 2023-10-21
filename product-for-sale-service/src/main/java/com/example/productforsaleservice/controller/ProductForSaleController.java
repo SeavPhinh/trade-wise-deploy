@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/product-for-sales")
 @Tag(name = "Product For Sales")
 @SecurityRequirement(name = "oAuth2")
 public class ProductForSaleController {
@@ -31,7 +31,7 @@ public class ProductForSaleController {
         this.productForSaleService = productForSaleService;
     }
 
-    @PostMapping(value = "/product-for-sales")
+    @PostMapping("")
     @Operation(summary = "shop adding a product to buyer")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> addProductToPost(@Valid @RequestBody ProductForSaleRequest postRequest){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -41,7 +41,7 @@ public class ProductForSaleController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("/product-for-sales")
+    @GetMapping("")
     @Operation(summary = "fetch all products")
     public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getAllProductForSale(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -51,7 +51,7 @@ public class ProductForSaleController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/product-for-sales/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "fetch product by id")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -61,7 +61,7 @@ public class ProductForSaleController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/product-for-sales/post/{id}")
+    @GetMapping("/post/{id}")
     @Operation(summary = "fetch product by posted id")
     public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -71,7 +71,7 @@ public class ProductForSaleController {
         ), HttpStatus.OK);
     }
 
-    @DeleteMapping("/product-for-sales/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "delete product by id")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> deleteProductForSaleById(@PathVariable UUID id){
 
@@ -82,7 +82,7 @@ public class ProductForSaleController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/product-for-sales/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "update post by id")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> updateProductForSaleById(@PathVariable UUID id,
                                                                        @Valid @RequestBody ProductForSaleRequest request){

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/posts")
 @Tag(name = "Post")
 @SecurityRequirement(name = "oAuth2")
 public class PostController {
@@ -35,7 +35,7 @@ public class PostController {
         this.postService = postService;
     }
 
-    @PostMapping(value = "/posts")
+    @PostMapping("")
     @Operation(summary = "user created post")
     public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody PostRequest postRequest) {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -45,7 +45,7 @@ public class PostController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("/posts")
+    @GetMapping("")
     @Operation(summary = "fetch all posts")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPost() {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -55,7 +55,7 @@ public class PostController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/posts/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "fetch post by id")
     public ResponseEntity<ApiResponse<PostResponse>> getPostById(@PathVariable UUID id) {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -65,7 +65,7 @@ public class PostController {
         ), HttpStatus.OK);
     }
 
-    @DeleteMapping("/posts/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "delete post by id")
     public ResponseEntity<ApiResponse<PostResponse>> deletePostById(@PathVariable UUID id) {
 
@@ -76,7 +76,7 @@ public class PostController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/posts/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "update post and drafted post by id")
     public ResponseEntity<ApiResponse<PostResponse>> updatePostById(@PathVariable UUID id,
                                                                     @Valid @RequestBody PostRequest request) {
@@ -100,7 +100,7 @@ public class PostController {
     }
 
 
-    @GetMapping("/posts/drafted")
+    @GetMapping("/drafted")
     @Operation(summary = "fetch all drafted posts ")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllDraftPosts() {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -128,7 +128,7 @@ public class PostController {
                 .body(postService.getImageByName(name));
     }
 
-    @GetMapping("/posts/budget")
+    @GetMapping("/budget")
     @Operation(summary = "get all posts by budget (get all posts as long as the buyer can buy)")
     public ResponseEntity<ApiResponse<List<PostResponse>>> filterPostByBudget(@RequestParam Float budgetFrom,@RequestParam Float budgetTo) {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -139,7 +139,7 @@ public class PostController {
     }
 
 
-    @GetMapping("/posts/newest")
+    @GetMapping("/newest")
     @Operation(summary = "get all post sorted buy newest")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedByNewest(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -149,7 +149,7 @@ public class PostController {
                 ),HttpStatus.OK);
     }
 
-    @GetMapping("/posts/oldest")
+    @GetMapping("/oldest")
     @Operation(summary = "get all post sorted buy oldest")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedByOldest(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -159,7 +159,7 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
-    @GetMapping("/posts/a-z")
+    @GetMapping("/a-z")
     @Operation(summary = "get all post sorted buy a-z")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedByAZ(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -168,7 +168,7 @@ public class PostController {
                 HttpStatus.OK
         ),HttpStatus.OK);
     }
-    @GetMapping("/posts/z-a")
+    @GetMapping("/z-a")
     @Operation(summary = "get all post sorted buy z-a")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedByZA(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -178,7 +178,7 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
-    @GetMapping("/posts/sub-category")
+    @GetMapping("/sub-category")
     @Operation(summary = "get all post sorted sub-category")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedBySubCategory(@RequestParam String subCategory){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -188,7 +188,7 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
-    @GetMapping("/posts/sub-category/search")
+    @GetMapping("/sub-category/search")
     @Operation(summary = "search all post by sub-category")
     public ResponseEntity<ApiResponse<List<PostResponse>>> searchPostBySubCategory(@RequestParam String subCategory){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -198,7 +198,7 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
-    @GetMapping("/posts/currentUser")
+    @GetMapping("/currentUser")
     @Operation(summary = "get all post for current user")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getPostsForCurrentUser(){
         return new ResponseEntity<>(new ApiResponse<>(

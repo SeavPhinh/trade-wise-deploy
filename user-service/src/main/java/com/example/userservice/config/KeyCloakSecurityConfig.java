@@ -19,14 +19,14 @@ public class KeyCloakSecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
                     authorize.requestMatchers("user-service/v3/api-docs/**", "user-service/swagger-ui/**", "user-service/swagger-ui.html").permitAll();
-                    authorize.requestMatchers("api/v1/users").permitAll();
-                    authorize.requestMatchers("api/v1/modify").permitAll();
-                    authorize.requestMatchers("api/v1/login").permitAll();
-                    authorize.requestMatchers("api/v1/username").permitAll();
-                    authorize.requestMatchers("api/v1/verify").permitAll();
-                    authorize.requestMatchers("api/v1/reset-password").permitAll();
-                    authorize.requestMatchers("api/v1/users/email").permitAll();
-                    authorize.requestMatchers("api/v1/otp-reset-password").permitAll();
+                    authorize.requestMatchers("/api/v1/users").permitAll();
+                    authorize.requestMatchers("/api/v1/third-party/modify").permitAll();
+                    authorize.requestMatchers("/api/v1/users/login").permitAll();
+                    authorize.requestMatchers("/api/v1/users/username").permitAll();
+                    authorize.requestMatchers("/api/v1/users/verify").permitAll();
+                    authorize.requestMatchers("/api/v1/users/reset-password").permitAll();
+                    authorize.requestMatchers("/api/v1/users/users/email").permitAll();
+                    authorize.requestMatchers("/api/v1/users/otp-reset-password").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"/api/v1/users/{id}").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));

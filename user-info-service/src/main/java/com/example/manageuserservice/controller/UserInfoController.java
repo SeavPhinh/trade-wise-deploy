@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/user-info")
 @Tag(name = "User Info")
 public class UserInfoController {
 
@@ -30,7 +30,7 @@ public class UserInfoController {
         this.userInfoService = userInfoService;
     }
 
-    @PostMapping(value = "/user-info")
+    @PostMapping(value = "")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "user adding user information")
     public ResponseEntity<ApiResponse<UserInfoResponse>> addUserDetail(@Valid @RequestBody UserInfoRequest request) throws Exception {
@@ -41,7 +41,7 @@ public class UserInfoController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("/user-info/{userId}")
+    @GetMapping("/{userId}")
     @Operation(summary = "fetched user information by user id")
     public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfoByUserId(@PathVariable UUID userId){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -51,7 +51,7 @@ public class UserInfoController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/user-info/current")
+    @GetMapping("/current")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetched current user information")
     public ResponseEntity<ApiResponse<UserInfoResponse>> getCurrentUserInfo(){
@@ -62,7 +62,7 @@ public class UserInfoController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/user-info/current")
+    @PutMapping("/current")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "update current user's information")
     public ResponseEntity<ApiResponse<UserInfoResponse>> updateCurrentUserInfo( @Valid @RequestBody UserInfoRequest request){

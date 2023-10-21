@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/users")
 @Tag(name = "AppUser")
 public class AppUserController {
 
@@ -31,7 +31,7 @@ public class AppUserController {
         this.userService = userService;
     }
 
-    @GetMapping("/users")
+    @GetMapping("")
     @Operation(summary = "fetch all user from keycloak")
     public ResponseEntity<ApiResponse<List<User>>> getAllUser(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -41,7 +41,7 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "fetch user by id from keycloak")
     public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -51,7 +51,7 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/users/current")
+    @GetMapping("/current")
     @Operation(summary = "fetch current from keycloak")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<User>> getCurrentUser(){
@@ -62,7 +62,7 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/users/username")
+    @GetMapping("/username")
     @Operation(summary = "fetch user by username from keycloak")
     public ResponseEntity<ApiResponse<List<User>>> getAllUserByUsername(@RequestParam String username){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -72,7 +72,7 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/users/email")
+    @GetMapping("/email")
     @Operation(summary = "fetch user by email from keycloak")
     public ResponseEntity<ApiResponse<List<User>>> getAllUserByEmail(@RequestParam String email){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -82,7 +82,7 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @PostMapping("/users")
+    @PostMapping("")
     @Operation(summary = "register user to keycloak")
     public ResponseEntity<ApiResponse<User>> addingUser(@Valid @RequestBody UserRequest request) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -92,7 +92,7 @@ public class AppUserController {
         ), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "delete user by id from keycloak")
     public ResponseEntity<ApiResponse<User>> deleteUserById(@PathVariable UUID id){
@@ -104,7 +104,7 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/users/current")
+    @PutMapping("/current")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "update current user from keycloak")
     public ResponseEntity<ApiResponse<User>> updateCurrentUser(@Valid @RequestBody UserUpdate request){

@@ -164,6 +164,7 @@ project("chat-service"){
         testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket
         implementation libraries.resourceServer
+        implementation libraries.webMvc
     }
 
 }

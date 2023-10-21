@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/products")
 @Tag(name = "Product")
 @SecurityRequirement(name = "oAuth2")
 public class ProductController {
@@ -32,7 +32,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PostMapping(value = "/products")
+    @PostMapping("")
     @Operation(summary = "shop adding a product")
     public ResponseEntity<ApiResponse<ProductResponse>> addProduct(@Valid @RequestBody ProductRequest postRequest){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -42,7 +42,7 @@ public class ProductController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("/products")
+    @GetMapping("")
     @Operation(summary = "fetch all products")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -52,7 +52,7 @@ public class ProductController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "fetch product by id")
     public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -62,7 +62,7 @@ public class ProductController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/products/shop/{id}")
+    @GetMapping("/shop/{id}")
     @Operation(summary = "fetch product by shop id")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProductByShopId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -72,7 +72,7 @@ public class ProductController {
         ), HttpStatus.OK);
     }
 
-    @DeleteMapping("/products/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "delete product by id")
     public ResponseEntity<ApiResponse<ProductResponse>> deleteProductById(@PathVariable UUID id){
 
@@ -83,7 +83,7 @@ public class ProductController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/products/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "update products by id")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProductById(@PathVariable UUID id,
                                                                     @Valid @RequestBody ProductRequest request){

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/ratings")
 @Tag(name = "Rating")
 @SecurityRequirement(name = "oAuth2")
 public class RatingController {
@@ -28,7 +28,7 @@ public class RatingController {
         this.ratingService = ratingService;
     }
 
-    @PostMapping("/ratings")
+    @PostMapping("")
     @Operation(summary = "ratings shop by user")
     public ResponseEntity<ApiResponse<RatingResponse>> ratingShop(@Valid @RequestBody RatingRequest request) {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -38,7 +38,7 @@ public class RatingController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("/ratings/shops/current")
+    @GetMapping("/shops/current")
     @Operation(summary = "fetch rated shop by owner id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ShopResponse>>> getRatedShopByCurrentId(){

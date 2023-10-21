@@ -94,6 +94,7 @@ public class ValidationConfig {
     public static final String NULL_MESSAGE = "Field cannot be null ";
     public static final String NUMBER_ONLY_REGEX = "\\d{0,3}(,\\d{3})*(\\.\\d+)?";
     public static final int POST_DESCRIPTION_MAX = 200;
+    public static final String NOT_FOUND_MESSAGE = "This message is not found";
 
 
 }

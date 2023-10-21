@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/categories")
 @Tag(name = "Category")
 public class CategoryController {
 
@@ -26,7 +26,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("/categories")
+    @GetMapping("/")
     @Operation(summary = "fetch all categories")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -36,7 +36,7 @@ public class CategoryController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/categories/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "fetch categories by id")
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -46,7 +46,7 @@ public class CategoryController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/category/subcategories/{id}")
+    @GetMapping("/subcategories/{id}")
     @Operation(summary = "fetch category with sub categories by id")
     public ResponseEntity<ApiResponse<CategorySubCategory>> getCategoryAndSubCategoryById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -56,7 +56,7 @@ public class CategoryController {
         ), HttpStatus.OK);
     }
 
-    @PostMapping("/categories")
+    @PostMapping("/")
     @Operation(summary = "adding category")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategoryResponse>> addCategory(@Valid @RequestBody CategoryRequest request){
@@ -67,7 +67,7 @@ public class CategoryController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/categories/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "delete categories by id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategoryById(@PathVariable UUID id){
@@ -78,7 +78,7 @@ public class CategoryController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/categories/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "update categories by id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategoryResponse>> updateCategoryById(@PathVariable UUID id,

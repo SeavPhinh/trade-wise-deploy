@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/buyer-favorite")
 @Tag(name = "Buyer Favorite")
 public class BuyerFavoriteController {
 
@@ -26,7 +26,7 @@ public class BuyerFavoriteController {
         this.buyerFavoriteService = buyerFavoriteService;
     }
 
-    @PostMapping(value = "/buyer/favorite")
+    @PostMapping("")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "added shop by user to favorite list")
     public ResponseEntity<ApiResponse<BuyerFavoriteResponse>> addedShopToFavoriteList(@Valid @RequestBody BuyerFavoriteRequest request){
@@ -37,7 +37,7 @@ public class BuyerFavoriteController {
         ), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = "/buyer/favorite/{id}")
+    @DeleteMapping(value = "/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "remove shop by id from favorite list")
     public ResponseEntity<ApiResponse<BuyerFavoriteResponse>> removeShopFromFavoriteList(@PathVariable UUID id){
@@ -48,7 +48,7 @@ public class BuyerFavoriteController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/buyer/favorite/current")
+    @GetMapping("/current")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetched all from favorite's list from current user")
     public ResponseEntity<ApiResponse<List<BuyerFavoriteResponse>>> getAllFromBuyerFavoriteListByOwnerId(){
@@ -59,7 +59,7 @@ public class BuyerFavoriteController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/buyer/favorite/{id}")
+    @GetMapping("/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetched shop from favorite's list by shop id and current id")
     public ResponseEntity<ApiResponse<BuyerFavoriteResponse>> getShopFromFavoriteListByShopIdAndOwnerId(@PathVariable UUID id){

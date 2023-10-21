@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/shops")
 @Tag(name = "Shop")
 public class ShopController {
 
@@ -38,7 +38,7 @@ public class ShopController {
     }
 
 
-    @PostMapping("/shops")
+    @PostMapping("")
     @Operation(summary = "set up shop")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ShopResponse>> setUpShop(@Valid @RequestBody ShopRequest request) throws Exception {
@@ -49,7 +49,7 @@ public class ShopController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("/shops")
+    @GetMapping("")
     @Operation(summary = "fetch all shops")
     public ResponseEntity<ApiResponse<List<ShopResponse>>> getAllShop(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -59,7 +59,7 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/shops/{id}")
+    @GetMapping("/{id}")
     @Operation(summary = "fetch shop by id")
     public ResponseEntity<ApiResponse<ShopResponse>> getShopById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -69,7 +69,7 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/shops/current")
+    @GetMapping("/current")
     @Operation(summary = "fetch shop by owner id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ShopResponse>> getShopByOwnerId(){
@@ -80,7 +80,7 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/shops/current")
+    @PutMapping("/current")
     @Operation(summary = "update shop by id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ShopResponse>> updateShopById(@Valid @RequestBody ShopRequest request){
@@ -91,7 +91,7 @@ public class ShopController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/shops/current/action")
+    @PutMapping("/current/action")
     @Operation(summary = "change to shop's shopAction")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ShopResponse>> shopAction(@RequestParam(defaultValue = "false") Boolean isActive){
