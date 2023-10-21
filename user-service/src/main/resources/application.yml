@@ -6,31 +6,9 @@ spring:
   cloud:
     config:
       uri: http://localhost:8585
-      name: mann-user
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://localhost:8761/eureka
+      name: user-service
 server:
   port: 8081
-
 logging:
   level:
     org.springframework.web.servlet.handler.SimpleUrlHandlerMapping: OFF
-
-#management:
-#  tracing:
-#    sampling:
-#      probability: 1.0
-
-#openapi:
-#  service:
-#    title: keycloak-service
-#    version: 1.0.0
-#    url: http://localhost:9000
-#
-#springdoc:
-#  api-docs:
-#    path: /keycloak-service/v3/api-docs
-#  swagger-ui:
-#    path: /keycloak-service/swagger-ui.html

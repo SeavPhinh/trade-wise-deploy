@@ -1,3 +1,11 @@
 spring:
   application:
     name: common-service
+  config:
+    import: "optional:configserver:"
+  cloud:
+    config:
+      uri: http://localhost:8585
+      name: common-service
+server:
+  port: 6666

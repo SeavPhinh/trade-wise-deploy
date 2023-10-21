@@ -53,6 +53,7 @@ project("post-service"){
         implementation libraries.keycloak
         implementation libraries.keycloakAdmin
         implementation libraries.cloudClient
+        implementation libraries.eurekaClient
         implementation libraries.resourceServer
 
     }
@@ -108,6 +109,7 @@ project("category-service"){
         implementation libraries.keycloak
         implementation libraries.keycloakAdmin
         implementation libraries.cloudClient
+        implementation libraries.eurekaClient
         implementation libraries.resourceServer
     }
 
@@ -157,9 +159,11 @@ project("chat-service"){
         implementation libraries.jpa
         implementation libraries.postgresql
         implementation libraries.cloudClient
+        implementation libraries.eurekaClient
         implementation libraries.amqpStarter
         testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket
+        implementation libraries.resourceServer
     }
 
 }
@@ -248,6 +252,7 @@ project("user-info-service"){
         implementation libraries.keycloak
         implementation libraries.keycloakAdmin
         implementation libraries.cloudClient
+        implementation libraries.eurekaClient
         implementation libraries.resourceServer
     }
 
@@ -354,6 +359,7 @@ project("product-service"){
         implementation libraries.keycloak
         implementation libraries.keycloakAdmin
         implementation libraries.cloudClient
+        implementation libraries.eurekaClient
         implementation libraries.resourceServer
     }
 
@@ -407,6 +413,7 @@ project("product-for-sale-service"){
         implementation libraries.actuator
         implementation libraries.keycloak
         implementation libraries.keycloakAdmin
+        implementation libraries.eurekaClient
         implementation libraries.cloudClient
         implementation libraries.resourceServer
     }
@@ -462,6 +469,7 @@ project("shop-service"){
         implementation libraries.keycloak
         implementation libraries.keycloakAdmin
         implementation libraries.cloudClient
+        implementation libraries.eurekaClient
         implementation libraries.resourceServer
     }
 
@@ -521,6 +529,16 @@ project("eureka-service"){
         sourceCompatibility = '17'
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
@@ -532,7 +550,11 @@ project("eureka-service"){
     }
 
     dependencies {
-
+        implementation libraries.webFlux
+        implementation libraries.eurekaServer
+        testImplementation  libraries.reactorTest
+        implementation libraries.cloudClient
+        testImplementation  libraries.startTest
     }
 
 }
@@ -561,12 +583,24 @@ project("gateway-service"){
         }
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     repositories {
         mavenCentral()
     }
 
     dependencies {
-
+        implementation libraries.starterWebFlux
+        implementation libraries.gateway
+        implementation libraries.eurekaClient
+        implementation libraries.cloudClient
     }
 
 }
@@ -623,6 +657,7 @@ project("user-service"){
         implementation libraries.thymleaf
         implementation libraries.starterMail
         implementation libraries.validation
+        implementation libraries.eurekaClient
 //        implementation libraries.zipkinTracking
 //        implementation libraries.zipkinReporter
     }
@@ -672,6 +707,8 @@ project("common-service"){
         implementation libraries.circuitBreaker
         implementation libraries.webMvc
         implementation libraries.validation
+        implementation libraries.eurekaClient
+        implementation libraries.cloudClient
 
     }
 
@@ -708,6 +745,12 @@ allprojects {
 
     dependencies {
 
+        if(!projectDir.name.startsWith("gateway-service")){
+            implementation libraries.keycloak
+            implementation libraries.springWeb
+        }
+
+
         compileOnly libraries.lombok
         developmentOnly libraries.devtools
         annotationProcessor libraries.annoDevtools
@@ -716,6 +759,6 @@ allprojects {
     }
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
+//tasks.named('test') {
+//    useJUnitPlatform()
+//}

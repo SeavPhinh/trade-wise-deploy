@@ -18,9 +18,7 @@ public class KeyCloakSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
-                    //authorize.requestMatchers("keycloak-service/v3/api-docs/**", "keycloak-service/swagger-ui/**", "keycloak-service/swagger-ui.html").permitAll();
-                    //For Swagger-ui
-                    authorize.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
+                    authorize.requestMatchers("user-service/v3/api-docs/**", "user-service/swagger-ui/**", "user-service/swagger-ui.html").permitAll();
                     authorize.requestMatchers("api/v1/users").permitAll();
                     authorize.requestMatchers("api/v1/modify").permitAll();
                     authorize.requestMatchers("api/v1/login").permitAll();
@@ -29,7 +27,7 @@ public class KeyCloakSecurityConfig {
                     authorize.requestMatchers("api/v1/reset-password").permitAll();
                     authorize.requestMatchers("api/v1/users/email").permitAll();
                     authorize.requestMatchers("api/v1/otp-reset-password").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/users/{id}").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"/api/v1/users/{id}").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();

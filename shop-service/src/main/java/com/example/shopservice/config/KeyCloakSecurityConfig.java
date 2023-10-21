@@ -18,9 +18,9 @@ public class KeyCloakSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
-                    //authorize.requestMatchers("keycloak-service/v3/api-docs/**", "keycloak-service/swagger-ui/**", "keycloak-service/swagger-ui.html").permitAll();
+                    authorize.requestMatchers("shop-service/v3/api-docs/**", "shop-service/swagger-ui/**", "shop-service/swagger-ui.html").permitAll();
                     //For Swagger-ui
-                    authorize.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
+//                    authorize.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/shops").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/{id}").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/image").permitAll();
