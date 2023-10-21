@@ -13,4 +13,5 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, UUID> {
     @Transactional
     @Query(value = "SELECT * FROM user_info WHERE user_id = :#{#id}", nativeQuery = true)
     UserInfo findByOwnerId(UUID id);
+
 }

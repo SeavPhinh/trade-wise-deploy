@@ -6,7 +6,7 @@ spring:
   cloud:
     config:
       uri: http://localhost:8585
-      name: user-service
+      name: mann-user
 #eureka:
 #  client:
 #    serviceUrl:
