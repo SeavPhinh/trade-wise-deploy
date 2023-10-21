@@ -87,5 +87,13 @@ public class ValidationConfig {
     public static final String NOT_FOUND_SUB_CATEGORIES = "This subcategories are empty";
     public static final String EXISTING_SUB_CATEGORIES = "This subcategories is already exist";
 
+    public static final String POST_TITLE_MESSAGE = "Title must be between 3 and 25 characters";
+    public static final String POST_TITLE_REQUIRE = "Title is required";
+    public static final String POST_SUBCATEGORY_REQUIRE = "Sub-category is required";
+    public static final String POST_DESCRIPTION_MESSAGE = "Description mustn't be more than 200 characters ";
+    public static final String NULL_MESSAGE = "Field cannot be null ";
+    public static final String NUMBER_ONLY_REGEX = "\\d{0,3}(,\\d{3})*(\\.\\d+)?";
+    public static final int POST_DESCRIPTION_MAX = 200;
+
 
 }
