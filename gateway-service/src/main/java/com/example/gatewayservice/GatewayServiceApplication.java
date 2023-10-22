@@ -38,9 +38,6 @@ public class GatewayServiceApplication {
                 .route(r -> r.path("/post-service/v3/api-docs").uri("lb://post-service"))
                 .route(r -> r.path("/api/v1/posts/**").uri("lb://post-service"))
 
-                .route(r -> r.path("/product-for-sale-service/v3/api-docs").uri("lb://product-for-sale-service"))
-                .route(r -> r.path("/api/v1/product-for-sales/**").uri("lb://product-for-sale-service"))
-
                 .route(r -> r.path("/product-service/v3/api-docs").uri("lb://product-service"))
                 .route(r -> r.path("/api/v1/products/**").uri("lb://product-service"))
 
@@ -50,8 +47,8 @@ public class GatewayServiceApplication {
 
                 .route(r -> r.path("/user-info-service/v3/api-docs").uri("lb://user-info-service"))
                 .route(r -> r.path("/api/v1/user-info/**").uri("lb://user-info-service"))
-                .route(r -> r.path("/api/v1/seller/favorite/**").uri("lb://user-info-service"))
-                .route(r -> r.path("/api/v1/buyer/favorite/**").uri("lb://user-info-service"))
+                .route(r -> r.path("/api/v1/seller-favorite/**").uri("lb://user-info-service"))
+                .route(r -> r.path("/api/v1/buyer-favorite/**").uri("lb://user-info-service"))
 
                 .build();
     }

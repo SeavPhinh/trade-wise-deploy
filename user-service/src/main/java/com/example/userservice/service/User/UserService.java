@@ -3,6 +3,7 @@ package com.example.userservice.service.User;
 
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
+import com.example.userservice.model.UserCreated;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
@@ -24,7 +25,7 @@ public interface UserService {
 
     List<User> findByEmail(String email);
 
-    User postUser(UserRequest request) throws MessagingException;
+    UserCreated postUser(UserRequest request) throws MessagingException;
 
     User deleteUser(UUID id);
 

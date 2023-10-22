@@ -23,12 +23,4 @@ public class UserUpdate {
     @Size(min = ValidationConfig.ROLE_VALIDATION_MIN, message = ValidationConfig.ROLE_RESPONSE_MESSAGE)
     private List<Role> roles;
 
-    @NotEmpty(message = ValidationConfig.FIRSTNAME_REQUIRED_MESSAGE)
-    @Size(max = ValidationConfig.FIRSTNAME_VALIDATION_MAX, message = ValidationConfig.FIRSTNAME_RESPONSE_MESSAGE)
-    private String firstname;
-
-    @NotEmpty(message = ValidationConfig.LASTNAME_REQUIRED_MESSAGE)
-    @Size(max = ValidationConfig.LASTNAME_VALIDATION_MAX, message = ValidationConfig.LASTNAME_RESPONSE_MESSAGE)
-    private String lastname;
-
 }

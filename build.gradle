@@ -258,58 +258,6 @@ project("user-info-service"){
     }
 
 }
-project("newsfeed-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.auth0
-        implementation libraries.webFlux
-        implementation libraries.webMvc
-        implementation libraries.validation
-        implementation libraries.jpa
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.keycloakAdmin
-        implementation libraries.resourceServer
-        implementation libraries.cloudClient
-    }
-
-}
 project("product-service"){
 
     // Apply external plugin
@@ -361,61 +309,6 @@ project("product-service"){
         implementation libraries.keycloakAdmin
         implementation libraries.cloudClient
         implementation libraries.eurekaClient
-        implementation libraries.resourceServer
-    }
-
-}
-project("product-for-sale-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.auth0
-        implementation libraries.webFlux
-        implementation libraries.webMvc
-        implementation libraries.validation
-        implementation libraries.jpa
-        implementation libraries.postgresql
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.keycloakAdmin
-        implementation libraries.eurekaClient
-        implementation libraries.cloudClient
         implementation libraries.resourceServer
     }
 

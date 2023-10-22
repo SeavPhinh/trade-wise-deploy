@@ -2,9 +2,9 @@ package com.example.productservice.controller;
 
 import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.response.ApiResponse;
-import com.example.productservice.request.ProductRequest;
-import com.example.productservice.response.ProductResponse;
-import com.example.productservice.service.product.ProductService;
+import com.example.productservice.request.ProductForSaleRequest;
+import com.example.productservice.response.ProductForSaleResponse;
+import com.example.productservice.service.comment.ProductForSaleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,89 +21,85 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/products")
-@Tag(name = "Product")
-public class ProductController {
+@RequestMapping("api/v1/product-for-sales")
+@Tag(name = "Product For Sales")
+@SecurityRequirement(name = "oAuth2")
+public class ProductForSaleController {
 
-    private final ProductService productService;
+    private final ProductForSaleService productForSaleService;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductForSaleController(ProductForSaleService productForSaleService) {
+        this.productForSaleService = productForSaleService;
     }
 
     @PostMapping("")
-    @Operation(summary = "shop adding a product by current user")
-    @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<ProductResponse>> addProduct(@Valid @RequestBody ProductRequest postRequest){
+    @Operation(summary = "shop adding a product to buyer")
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> addProductToPost(@Valid @RequestBody ProductForSaleRequest postRequest){
         return new ResponseEntity<>(new ApiResponse<>(
-                "Shop has added new product successfully",
-                productService.addProduct(postRequest),
+                "Shop has added a product to buyer's post successfully",
+                productForSaleService.addProductToPost(postRequest),
                 HttpStatus.CREATED
         ), HttpStatus.CREATED);
     }
 
     @GetMapping("")
     @Operation(summary = "fetch all products")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts(){
+    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getAllProductForSale(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "products fetched successfully",
-                productService.getAllProduct(),
+                productForSaleService.getAllProduct(),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "fetch product by id")
-    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by id successfully",
-                productService.getProductById(id),
+                productForSaleService.getProductById(id),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/shop/{id}")
-    @Operation(summary = "fetch product by shop id")
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProductByShopId(@PathVariable UUID id){
+    @GetMapping("/post/{id}")
+    @Operation(summary = "fetch product by posted id")
+    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
-                "product fetched by shop id successfully",
-                productService.getAllProductByShopId(id),
+                "product fetched by posted id successfully",
+                productForSaleService.getProductByPostId(id),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "delete product by id")
-    @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<ProductResponse>> deleteProductById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> deleteProductForSaleById(@PathVariable UUID id){
 
         return new ResponseEntity<>(new ApiResponse<>(
                 "product delete by id successfully",
-                productService.deleteProductById(id),
+                productForSaleService.deleteProductById(id),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "update products by id")
-    @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<ProductResponse>> updateProductById(@PathVariable UUID id,
-                                                                    @Valid @RequestBody ProductRequest request){
+    @Operation(summary = "update post by id")
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> updateProductForSaleById(@PathVariable UUID id,
+                                                                       @Valid @RequestBody ProductForSaleRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
-                " Updated products by id successfully",
-                productService.updateProductById(id, request),
+                " updated product by id successfully",
+                productForSaleService.updateProductById(id, request),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }
 
-
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "upload multiple file")
-    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) List<MultipartFile> files,
                                            HttpServletRequest request) throws IOException {
         if(files != null){
-            return ResponseEntity.status(200).body(productService.saveListFile(files,request));
+            return ResponseEntity.status(200).body(productForSaleService.saveListFile(files,request));
         }
         throw new NotFoundExceptionClass("No filename to upload");
     }

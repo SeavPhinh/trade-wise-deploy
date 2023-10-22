@@ -3,6 +3,7 @@ package com.example.userservice.controller;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.userservice.model.UserCreated;
 import com.example.userservice.model.UserLogin;
 import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
@@ -84,7 +85,7 @@ public class AppUserController {
 
     @PostMapping("")
     @Operation(summary = "register user to keycloak")
-    public ResponseEntity<ApiResponse<User>> addingUser(@Valid @RequestBody UserRequest request) throws MessagingException {
+    public ResponseEntity<ApiResponse<UserCreated>> addingUser(@Valid @RequestBody UserRequest request) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(
                 "User posted successfully",
                 userService.postUser(request),
@@ -104,16 +105,16 @@ public class AppUserController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/current")
-    @SecurityRequirement(name = "oAuth2")
-    @Operation(summary = "update current user from keycloak")
-    public ResponseEntity<ApiResponse<User>> updateCurrentUser(@Valid @RequestBody UserUpdate request){
-        return new ResponseEntity<>(new ApiResponse<>(
-                "Current user updated by id successfully",
-                userService.updateUser(request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
-    }
+//    @PutMapping("/current")
+//    @SecurityRequirement(name = "oAuth2")
+//    @Operation(summary = "update current user from keycloak")
+//    public ResponseEntity<ApiResponse<User>> updateCurrentUser(@Valid @RequestBody UserUpdate request){
+//        return new ResponseEntity<>(new ApiResponse<>(
+//                "Current user updated by id successfully",
+//                userService.updateUser(request),
+//                HttpStatus.ACCEPTED
+//        ), HttpStatus.ACCEPTED);
+//    }
 
     @PostMapping("/verify")
     @Operation(summary = "verified account first login")

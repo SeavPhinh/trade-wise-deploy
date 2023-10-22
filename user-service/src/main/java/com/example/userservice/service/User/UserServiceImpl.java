@@ -6,10 +6,7 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.userservice.exception.NotFoundExceptionClass;
-import com.example.userservice.model.UserDto;
-import com.example.userservice.model.UserLogin;
-import com.example.userservice.model.UserResponse;
-import com.example.userservice.model.VerifyLogin;
+import com.example.userservice.model.*;
 import com.example.userservice.request.*;
 import com.example.userservice.service.Mail.EmailService;
 import jakarta.mail.MessagingException;
@@ -76,10 +73,13 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    public User postUser(UserRequest request) throws MessagingException {
+    public UserCreated postUser(UserRequest request) throws MessagingException {
+
+        List<String> roles = new ArrayList<>();
+        roles.add(String.valueOf(Role.SELLER));
+        roles.add(String.valueOf(Role.BUYER));
 
         UsersResource usersResource = keycloak.realm(realm).users();
-
         if(whiteSpace(request.getPassword())){
             throw new IllegalArgumentException(ValidationConfig.WHITE_SPACE);
         }
@@ -95,10 +95,8 @@ public class UserServiceImpl implements UserService {
         userPre.setFirstName(request.getFirstname());
         userPre.setLastName(request.getLastname());
         userPre.setEmail(request.getEmail().toLowerCase());
-        if (!request.getRoles().contains(Role.BUYER) && !request.getRoles().contains(Role.SELLER)) {
-            throw new NotFoundExceptionClass(ValidationConfig.WARNING_ROLE);
-        }
-        userPre.singleAttribute("role", String.valueOf(roles(String.valueOf(request.getRoles()))));
+
+        userPre.singleAttribute("role", String.valueOf(roles(String.valueOf(roles))));
         userPre.singleAttribute("created_date", String.valueOf(LocalDateTime.now()));
         userPre.singleAttribute("last_modified", String.valueOf(LocalDateTime.now()));
         userPre.singleAttribute("otp_code",String.valueOf(emailService.verifyCode(request.getEmail())));
@@ -109,7 +107,7 @@ public class UserServiceImpl implements UserService {
         UserRepresentation createdUserRepresentation =
                 keycloak.realm(realm).users().search(request.getUsername().replaceAll("\\s+","").toLowerCase()).get(0);
 
-        return new User(
+        return new UserCreated(
                 UUID.fromString(createdUserRepresentation.getId()),
                 createdUserRepresentation.getUsername().toLowerCase().replaceAll("\\s+",""),
                 createdUserRepresentation.getEmail().toLowerCase(),
@@ -117,7 +115,6 @@ public class UserServiceImpl implements UserService {
                 createdUserRepresentation.getLastName(),
                 Boolean.valueOf(userPre.getAttributes().get("is_verify").get(0)),
                 roles(userPre.getAttributes().get("role").get(0)),
-                userPre.getAttributes().get("logged_as").get(0),
                 LocalDateTime.parse(userPre.getAttributes().get("created_date").get(0)),
                 LocalDateTime.parse(userPre.getAttributes().get("last_modified").get(0))
         );
@@ -139,8 +136,6 @@ public class UserServiceImpl implements UserService {
     public User updateUser(UserUpdate request) {
         UserRepresentation updatedUser = new UserRepresentation();
         resource(UUID.fromString(currentUser()));
-        updatedUser.setFirstName(request.getFirstname().replaceAll("\\s+",""));
-        updatedUser.setLastName(request.getLastname().replaceAll("\\s+",""));
         updatedUser.setEmail(request.getEmail());
         updatedUser.singleAttribute("role", String.valueOf(request.getRoles()));
         updatedUser.singleAttribute("created_date", String.valueOf(resource(UUID.fromString(currentUser())).toRepresentation().getAttributes().get("createdDate").get(0)));

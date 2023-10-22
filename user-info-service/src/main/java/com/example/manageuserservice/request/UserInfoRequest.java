@@ -24,6 +24,12 @@ public class UserInfoRequest {
     private String phoneNumber;
     @NotEmpty(message = ValidationConfig.PROFILE_IMAGE_RESPONSE)
     private String profileImage;
+    @NotEmpty(message = ValidationConfig.FIRSTNAME_REQUIRED_MESSAGE)
+    @Size(max = ValidationConfig.FIRSTNAME_VALIDATION_MAX, message = ValidationConfig.FIRSTNAME_RESPONSE_MESSAGE)
+    private String firstname;
+    @NotEmpty(message = ValidationConfig.LASTNAME_REQUIRED_MESSAGE)
+    @Size(max = ValidationConfig.LASTNAME_VALIDATION_MAX, message = ValidationConfig.LASTNAME_RESPONSE_MESSAGE)
+    private String lastname;
 
     public UserInfo toEntity(String phoneNumber,UUID createdBy){
         return new UserInfo(null, this.gender,this.dob,phoneNumber,this.profileImage.trim(),createdBy);
