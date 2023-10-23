@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -18,6 +19,7 @@ public class ShopResponse {
     private String profileImage;
     private UUID userId;
     private Boolean status;
+    private List<String> subCategoryList;
     private Address address;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;

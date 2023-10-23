@@ -6,6 +6,7 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.SubCategoryResponse;
 import com.example.shopservice.exception.NotFoundExceptionClass;
 import com.example.shopservice.exception.NullExceptionClass;
 import com.example.shopservice.model.Rating;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RatingServiceImpl implements RatingService {
@@ -31,11 +33,13 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
     private final ShopRepository service;
     private final WebClient webClient;
+    private final WebClient subCategoryWeb;
 
-    public RatingServiceImpl(RatingRepository ratingRepository, ShopRepository service, WebClient.Builder webClient) {
+    public RatingServiceImpl(RatingRepository ratingRepository, ShopRepository service, WebClient.Builder webClient, WebClient.Builder subCategoryWeb) {
         this.ratingRepository = ratingRepository;
         this.service = service;
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
+        this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:1688/").build();
     }
 
     @Override
@@ -67,7 +71,7 @@ public class RatingServiceImpl implements RatingService {
             for (Rating rate : ratings) {
                 Shop shop = service.getActiveShopById(rate.getShop().getId());
                 if(shop != null){
-                    shops.add(shop.toDto());
+                    shops.add(shop.toDto(categoriesList(shop.getSubCategoryList())));
                 }
             }
             if(!shops.isEmpty()){
@@ -113,6 +117,43 @@ public class RatingServiceImpl implements RatingService {
         if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.BUYER))){
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
         }
+    }
+
+    // Converting Category from Attribute as String to ArrayList
+    public List<UUID> category(String categories){
+        List<String> categoriesList = Arrays.asList(categories.replaceAll("\\[|\\]", "").split(", "));
+        return categoriesList.stream()
+                .map(UUID::fromString)
+                .collect(Collectors.toList());
+    }
+
+    // Converting Category list as UUID to List<String>
+    public List<String> categoriesList(String categories){
+
+        List<UUID> uuidList = category(categories);
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        List<String> responses = new ArrayList<>();
+
+        System.out.println("UUID list: " + uuidList);
+
+        if(!uuidList.isEmpty()){
+            for (UUID subId : uuidList) {
+                try{
+                    SubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(subCategoryWeb
+                            .get()
+                            .uri("api/v1/subcategories/{id}", subId)
+                            .retrieve()
+                            .bodyToMono(ApiResponse.class)
+                            .block()).getPayload(), SubCategoryResponse.class);
+                    responses.add(subName.getName());
+                }catch (Exception e){
+                    throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+                }
+            }
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+
     }
 
 }

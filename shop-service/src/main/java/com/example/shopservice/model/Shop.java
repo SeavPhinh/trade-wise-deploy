@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -24,7 +25,8 @@ public class Shop {
     private String profileImage;
     private UUID userId;
     private Boolean status;
-
+    @JoinColumn(name = "sub_category_list")
+    private String subCategoryList;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address address;
@@ -32,7 +34,7 @@ public class Shop {
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
 
-    public ShopResponse toDto(){
-        return new ShopResponse(this.id,this.name,this.profileImage,this.userId,this.status,this.address,this.createdDate,this.lastModified);
+    public ShopResponse toDto(List<String> subCategoryList){
+        return new ShopResponse(this.id,this.name,this.profileImage,this.userId,this.status,subCategoryList,this.address,this.createdDate,this.lastModified);
     }
 }

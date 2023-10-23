@@ -404,7 +404,7 @@ project("config-service"){
     }
 
 }
-project("eureka-service"){
+project("eureka-server"){
 
     // Apply external plugin
     apply from: "$rootProject.projectDir/plugin.gradle"

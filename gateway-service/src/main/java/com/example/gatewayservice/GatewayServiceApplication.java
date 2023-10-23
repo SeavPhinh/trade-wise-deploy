@@ -27,6 +27,7 @@ public class GatewayServiceApplication {
 
                 .route(r -> r.path("/category-service/v3/api-docs").uri("lb://category-service"))
                 .route(r -> r.path("/api/v1/categories/**").uri("lb://category-service"))
+                .route(r -> r.path("/api/v1/subcategories/**").uri("lb://category-service"))
 
                 .route(r -> r.path("/user-service/v3/api-docs").uri("lb://user-service"))
                 .route(r -> r.path("/api/v1/users/**").uri("lb://user-service"))

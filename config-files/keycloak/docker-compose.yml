@@ -1,0 +1,54 @@
+version: '3'
+
+networks:
+  keycloak-network:
+
+services:
+  # Keycloak Database
+  keycloak-db:
+    image: postgres:14.4-alpine
+    networks:
+      - keycloak-network
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+  # Keycloak
+  keycloak:
+    image: jboss/keycloak
+    networks:
+      - keycloak-network
+    ports:
+      - "1234:8080"
+    depends_on:
+      - keycloak-db
+    environment:
+      - DB_VENDOR=postgres
+      - DB_ADDR=keycloak-db
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=keycloak
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+  # Zipkin Tracking
+  zipkin:
+    image: openzipkin/zipkin:2.23
+    networks:
+      - keycloak-network
+    ports:
+      - 9411:9411
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: my-rabbit
+    volumes:
+      - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/defu.json
+      - ./rabbitmq/etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
+      - ./rabbitmq/logs:/var/log/rabbitmq/log
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+volumes:
+  keycloak-db-data:

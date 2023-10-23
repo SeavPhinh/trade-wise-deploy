@@ -6,6 +6,8 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.CategorySubCategoryResponse;
+import com.example.commonservice.response.SubCategoryResponse;
 import com.example.shopservice.config.FileStorageProperties;
 import com.example.shopservice.exception.NotFoundExceptionClass;
 import com.example.shopservice.model.Address;
@@ -17,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -40,11 +41,13 @@ public class ShopServiceImpl implements ShopService {
     private final ShopRepository shopRepository;
     private final FileStorageProperties fileStorageProperties;
     private final WebClient webClient;
+    private final WebClient subCategoryWeb;
 
-    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient) {
+    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, WebClient.Builder subCategoryWeb) {
         this.shopRepository = shopRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
+        this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:1688/").build();
     }
 
 
@@ -72,7 +75,7 @@ public class ShopServiceImpl implements ShopService {
         if(preUserInfo != null){
             preUserInfo.setProfileImage(fileName);
             shopRepository.save(preUserInfo);
-            return preUserInfo.toDto();
+            return preUserInfo.toDto(categoriesList(preUserInfo.getSubCategoryList()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
 
@@ -84,12 +87,13 @@ public class ShopServiceImpl implements ShopService {
         isExistingShop(createdBy(UUID.fromString(currentUser())).getId());
         isContainWhitespace(request.getAddress().getUrl());
         validateFile(request.getProfileImage());
-        return shopRepository.save(request.toEntity(request.getAddress().toEntity(), createdBy(UUID.fromString(currentUser())).getId())).toDto();
+        List<String> nameSubCategory = categoriesList(request.getSubCategoryList().toString());
+        return shopRepository.save(request.toEntity(request.getAddress().toEntity(), createdBy(UUID.fromString(currentUser())).getId())).toDto(nameSubCategory);
     }
 
     @Override
     public List<ShopResponse> getAllShop(){
-        List<ShopResponse> shops = shopRepository.getAllActiveShop().stream().map(Shop::toDto).collect(Collectors.toList());
+        List<ShopResponse> shops = shopRepository.getAllActiveShop().stream().map(sub -> sub.toDto(categoriesList(sub.getSubCategoryList()))).collect(Collectors.toList());
         if(!shops.isEmpty()){
             return shops;
         }
@@ -100,7 +104,7 @@ public class ShopServiceImpl implements ShopService {
     public ShopResponse getShopById(UUID id){
         Shop shop = shopRepository.getActiveShopById(id);
         if(shop != null){
-            return shop.toDto();
+            return shop.toDto(categoriesList(shop.getSubCategoryList()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
     }
@@ -121,7 +125,7 @@ public class ShopServiceImpl implements ShopService {
             preShop.setAddress(address);
             preShop.setProfileImage(request.getProfileImage());
             preShop.setLastModified(LocalDateTime.now());
-            return shopRepository.save(preShop).toDto();
+            return shopRepository.save(preShop).toDto(categoriesList(request.getSubCategoryList().toString()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
@@ -131,7 +135,7 @@ public class ShopServiceImpl implements ShopService {
         isLegal(UUID.fromString(currentUser()));
         Shop shop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(shop != null){
-            return shop.toDto();
+            return shop.toDto(categoriesList(shop.getSubCategoryList()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
@@ -146,7 +150,7 @@ public class ShopServiceImpl implements ShopService {
             }
             // Update Previous Data;
             preShop.setStatus(isActive);
-            return shopRepository.save(preShop).toDto();
+            return shopRepository.save(preShop).toDto(categoriesList(preShop.getSubCategoryList()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
@@ -208,9 +212,41 @@ public class ShopServiceImpl implements ShopService {
         }
     }
 
+    // Converting Category from Attribute as String to ArrayList
+    public List<UUID> category(String categories){
+        List<String> categoriesList = Arrays.asList(categories.replaceAll("\\[|\\]", "").split(", "));
+        return categoriesList.stream()
+                .map(UUID::fromString)
+                .collect(Collectors.toList());
+    }
+
+    // Converting Category list as UUID to List<String>
+    public List<String> categoriesList(String categories) {
+
+        List<UUID> uuidList = category(categories);
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        List<String> responses = new ArrayList<>();
+        try {
+            for (UUID subId : uuidList) {
+                CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(subCategoryWeb
+                        .get()
+                        .uri("api/v1/subcategories/{id}", subId)
+                        .retrieve()
+                        .bodyToMono(ApiResponse.class)
+                        .block()).getPayload(), CategorySubCategoryResponse.class);
+                responses.add(subName.getSubCategory().getName());
+            }
+            return responses;
+
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+        }
+
+    }
+
     // Validation Whitespace
     public void isContainWhitespace(String text){
-
         if(text.contains(" ")){
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_WHITESPACE);
         }
@@ -241,4 +277,5 @@ public class ShopServiceImpl implements ShopService {
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
         }
     }
+
 }

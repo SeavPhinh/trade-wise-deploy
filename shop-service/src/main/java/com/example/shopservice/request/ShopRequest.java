@@ -6,11 +6,13 @@ import com.example.shopservice.model.Shop;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -24,11 +26,16 @@ public class ShopRequest {
     @NotEmpty(message = ValidationConfig.EMPTY_IMAGE)
     @NotNull(message = ValidationConfig.NULL_IMAGE)
     private String profileImage;
+
+    @NotEmpty(message = ValidationConfig.EMPTY_FIELD)
+    @Size(min = ValidationConfig.MIN_SUB_CATEGORY, message = ValidationConfig.SUB_CATEGORY_RESPONSE)
+    private List<UUID> subCategoryList;
+
     @Valid
     private AddressRequest address;
 
     public Shop toEntity(Address address, UUID createdBy){
-        return new Shop(null,this.name.trim(),this.profileImage.trim(),createdBy, true, address, LocalDateTime.now(),LocalDateTime.now());
+        return new Shop(null,this.name.trim(),this.profileImage.trim(),createdBy, true, subCategoryList.toString() ,address, LocalDateTime.now(),LocalDateTime.now());
     }
 
 }

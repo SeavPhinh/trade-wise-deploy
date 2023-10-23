@@ -57,7 +57,6 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponse createPost(PostRequest postRequest) {
 
-
         User tempUser= createdBy(UUID.fromString(currentUser()));
         //cut white spaces left and right
         String trimmedTitle= postRequest.getTitle().trim();
