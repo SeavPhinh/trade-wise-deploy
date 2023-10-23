@@ -59,6 +59,16 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
+    @GetMapping("/best")
+    @Operation(summary = "fetch three shop based on ratings")
+    public ResponseEntity<ApiResponse<List<ShopResponse>>> bestThreeShop(){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Best Shops fetched successfully",
+                shopService.getShopBasedOnRating(),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "fetch shop by id")
     public ResponseEntity<ApiResponse<ShopResponse>> getShopById(@PathVariable UUID id){

@@ -7,11 +7,13 @@ import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.CategorySubCategoryResponse;
-import com.example.commonservice.response.SubCategoryResponse;
 import com.example.shopservice.config.FileStorageProperties;
+import com.example.shopservice.enumeration.Level;
 import com.example.shopservice.exception.NotFoundExceptionClass;
 import com.example.shopservice.model.Address;
+import com.example.shopservice.model.Rating;
 import com.example.shopservice.model.Shop;
+import com.example.shopservice.repository.RatingRepository;
 import com.example.shopservice.repository.ShopRepository;
 import com.example.shopservice.request.ShopRequest;
 import com.example.shopservice.response.ShopResponse;
@@ -40,12 +42,14 @@ public class ShopServiceImpl implements ShopService {
 
     private final ShopRepository shopRepository;
     private final FileStorageProperties fileStorageProperties;
+    private final RatingRepository ratingRepository;
     private final WebClient webClient;
     private final WebClient subCategoryWeb;
 
-    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, WebClient.Builder subCategoryWeb) {
+    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, RatingRepository ratingRepository, WebClient.Builder webClient, WebClient.Builder subCategoryWeb) {
         this.shopRepository = shopRepository;
         this.fileStorageProperties = fileStorageProperties;
+        this.ratingRepository = ratingRepository;
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
         this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:1688/").build();
     }
@@ -166,6 +170,76 @@ public class ShopServiceImpl implements ShopService {
         String uploadPath = fileStorageProperties.getUploadPath();
         Path paths = Paths.get(uploadPath + fileName);
         return new ByteArrayResource(Files.readAllBytes(paths));
+    }
+
+    @Override
+    public List<ShopResponse> getShopBasedOnRating() {
+
+        Map<UUID,Float> percentageOfShop = new HashMap<>();
+
+        for (Level star : Level.values()) {
+            System.out.println(star.name() + ": " + rated(star));
+        }
+
+        return null;
+    }
+
+    // Return Rated All shop
+    public Map<UUID,Float> rated(Level star){
+
+        Float oneStar = 0.2F;
+        Float twoStars = 0.4F;
+        Float threeStars = 0.6F;
+        Float fourStars = 0.8F;
+        Float fiveStars = 1F;
+
+        Map<UUID,Float> starOfShop = new HashMap<>();
+        Map<String, List<Rating>> rated = new HashMap<>();
+
+        //
+        for (Level level : Level.values()) {
+            rated.put(level.name(),ratingRepository.getAllShopRatedByStars(level.name()));
+        }
+
+        Integer countStarOfProjectId;
+
+        for (Rating name : rated.get(star.name())) {
+            Float sum = 0F;
+            switch (star.name()) {
+                case "ONE_STAR": {
+                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
+                    sum += oneStar * countStarOfProjectId;
+                    starOfShop.put(name.getShop().getId(), sum);
+                    break;
+                }
+                case "TWO_STARS": {
+                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
+                    sum += twoStars * countStarOfProjectId;
+                    starOfShop.put(name.getShop().getId(), sum);
+                    break;
+                }
+                case "THREE_STARS": {
+                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
+                    sum += threeStars * countStarOfProjectId;
+                    starOfShop.put(name.getShop().getId(), sum);
+                    break;
+                }
+                case "FOUR_STARS": {
+                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
+                    sum += fourStars * countStarOfProjectId;
+                    starOfShop.put(name.getShop().getId(), sum);
+                    break;
+                }
+                case "FIVE_STARS": {
+                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
+                    sum += fiveStars * countStarOfProjectId;
+                    starOfShop.put(name.getShop().getId(), sum);
+                    break;
+                }
+            }
+        }
+
+        return starOfShop;
     }
 
     // Returning Token
