@@ -17,6 +17,7 @@ spring:
             - shop-service
             - user-info-service
             - user-service
+            - eureka-server
           default-label: master
 server:
   port: 8888
