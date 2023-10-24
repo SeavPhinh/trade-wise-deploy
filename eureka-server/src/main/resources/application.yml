@@ -1,9 +1,7 @@
 spring:
   application:
-    name: eureka-service
+    name: eureka-server
+  profiles:
+    active: dev
   config:
-    import: "optional:configserver:"
-  cloud:
-    config:
-      uri: http://localhost:8585
-      name: eureka-service
+    import: optional:configserver:http://localhost:8888
