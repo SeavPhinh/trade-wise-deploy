@@ -143,9 +143,7 @@ public class ProductServiceImpl implements ProductService{
     public String currentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            // Decode to Get User Id
-//            DecodedJWT decodedJWT = JWT.decode(jwt.getTokenValue());
-            DecodedJWT decodedJWT = JWT.decode("eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXckJaS3JoVDBIRXhhMU9FWUNJcUhOWjlSQkpyUVNRejZMVlQ1dEFEU1BnIn0.eyJleHAiOjE2OTc5OTEwNjgsImlhdCI6MTY5Nzk5MDc2OCwianRpIjoiZWNlMTYyODYtNzJkMC00ZDVhLWIxYjYtNmMxZDFhMWVjNTY4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoxMjM0L2F1dGgvcmVhbG1zL2dvLXNlbGxpbmctYXBpIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjcwMzUzYTEzLWI0ZDQtNDFkNi05ZDJhLWFmNDIxOGQ4NzdlNSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImdvLXNlbGxpbmciLCJzZXNzaW9uX3N0YXRlIjoiYWRiNzA3ZWItMzVlZi00OTI3LWEwODgtNmVjNTg4YWZiOWJiIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImRlZmF1bHQtcm9sZXMtZ28tc2VsbGluZy1hcGkiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInNpZCI6ImFkYjcwN2ViLTM1ZWYtNDkyNy1hMDg4LTZlYzU4OGFmYjliYiIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6ImZpcnN0bmFtZSBsYXN0bmFtZSIsInByZWZlcnJlZF91c2VybmFtZSI6ImJ1eWVyIiwiZ2l2ZW5fbmFtZSI6ImZpcnN0bmFtZSIsImZhbWlseV9uYW1lIjoibGFzdG5hbWUiLCJlbWFpbCI6ImJ1eWVyQGdtYWlsLmNvbSJ9.UGRtb1hXOEavVy46XwPAszeo-333QovTSI6_b1M8JNp764iBwtiWfSg1qRz--Z9HH-BoISaW1SwyHq9cdHSWnTaKy8xFNftEk8zcuhfsnH-aA6VpWDUjv1zh2h27Ud19eY2bHCK4hNTeXuCqDozcQcNvN4UA5sDJc2VqaToYW1ek8_E6Q02RlDBK8sL59rOoh5rcU9bdfwSEuaauQN95iPfFrQK6O5i5eeXilHdbVpWxZppPxkrVXEBhH2A2mt-Ne8Vo9WhxGeRQz227OqvESrGlPxk1fL_OuZ7hGaz7-T08cNzSIfn1QmdXl3hiYMbG0wLpY0cKbP9SMx_m6K2xBg");
+            DecodedJWT decodedJWT = JWT.decode(jwt.getTokenValue());
             return decodedJWT.getSubject();
         } else {
             return null;
@@ -176,8 +174,7 @@ public class ProductServiceImpl implements ProductService{
                 return covertSpecificClass.convertValue(Objects.requireNonNull(shopClient
                         .get()
                         .uri("api/v1/shops/current")
-//                    .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
-                        .headers(h -> h.setBearerAuth("eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXckJaS3JoVDBIRXhhMU9FWUNJcUhOWjlSQkpyUVNRejZMVlQ1dEFEU1BnIn0.eyJleHAiOjE2OTc5OTE4NzIsImlhdCI6MTY5Nzk5MTU3MiwianRpIjoiZDU1Mjg4YzItYzBlOS00YWJiLWE0MzYtNmE1MDBmNGQ0YzAzIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoxMjM0L2F1dGgvcmVhbG1zL2dvLXNlbGxpbmctYXBpIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjcwMzUzYTEzLWI0ZDQtNDFkNi05ZDJhLWFmNDIxOGQ4NzdlNSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImdvLXNlbGxpbmciLCJzZXNzaW9uX3N0YXRlIjoiODE3ZmM0NTMtY2Y1Ny00MmIzLWJlMDItMzkzMmIxNGJhOTBhIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImRlZmF1bHQtcm9sZXMtZ28tc2VsbGluZy1hcGkiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInNpZCI6IjgxN2ZjNDUzLWNmNTctNDJiMy1iZTAyLTM5MzJiMTRiYTkwYSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6ImZpcnN0bmFtZSBsYXN0bmFtZSIsInByZWZlcnJlZF91c2VybmFtZSI6ImJ1eWVyIiwiZ2l2ZW5fbmFtZSI6ImZpcnN0bmFtZSIsImZhbWlseV9uYW1lIjoibGFzdG5hbWUiLCJlbWFpbCI6ImJ1eWVyQGdtYWlsLmNvbSJ9.k29JFWVPyR1WFmONhnYzeG5xt6sfJBOCtyIYpBrcyu344M24Scby4gv87Ua71dOJ7VnvFNCLB7kPR7x_QiCjKW6SD-SAMZ3kjewv2UjDKEGv9pzuhluM0q5HngIWI3_WjyCYpwyQ0_NHf0vp5iGgXoq-IhitWPM22SfvsH0yNq1XVYziRj7jYnyAp8Mwg5co4No7Q6gwGgQaIfZHnd4teUs3rPhFBgrIWHZVp51mGKqvzErtG1gdLSO5V7omHqtJwC7xK9c98ZUcwfHBJ7o-FBNiptURy_LZFi2K2HjBFrwdbjEB8vu6giQ3lcyN6p0IgyJ6sPmhzcyxXm48t7Up9A"))
+                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(), Shop.class);
