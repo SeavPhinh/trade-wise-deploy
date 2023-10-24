@@ -78,7 +78,7 @@ public class ShopServiceImpl implements ShopService {
         if(preUserInfo != null){
             preUserInfo.setProfileImage(fileName);
             shopRepository.save(preUserInfo);
-            return preUserInfo.toDto(categoriesList(preUserInfo.getSubCategoryList()));
+            return preUserInfo.toDto(categoriesList(preUserInfo.getSubCategoryList()),ratedCount(preUserInfo.getId()), ratedPercentage(preUserInfo.getId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
 
@@ -91,12 +91,12 @@ public class ShopServiceImpl implements ShopService {
         isContainWhitespace(request.getAddress().getUrl());
         validateFile(request.getProfileImage());
         List<String> nameSubCategory = categoriesList(request.getSubCategoryList().toString());
-        return shopRepository.save(request.toEntity(request.getAddress().toEntity(), createdBy(UUID.fromString(currentUser())).getId())).toDto(nameSubCategory);
+        return shopRepository.save(request.toEntity(request.getAddress().toEntity(), createdBy(UUID.fromString(currentUser())).getId())).toDto(nameSubCategory,0, 0F);
     }
 
     @Override
     public List<ShopResponse> getAllShop(){
-        List<ShopResponse> shops = shopRepository.getAllActiveShop().stream().map(sub -> sub.toDto(categoriesList(sub.getSubCategoryList()))).collect(Collectors.toList());
+        List<ShopResponse> shops = shopRepository.getAllActiveShop().stream().map(sub -> sub.toDto(categoriesList(sub.getSubCategoryList()),ratedCount(sub.getId()), ratedPercentage(sub.getId()))).collect(Collectors.toList());
         if(!shops.isEmpty()){
             return shops;
         }
@@ -107,7 +107,7 @@ public class ShopServiceImpl implements ShopService {
     public ShopResponse getShopById(UUID id){
         Shop shop = shopRepository.getActiveShopById(id);
         if(shop != null){
-            return shop.toDto(categoriesList(shop.getSubCategoryList()));
+            return shop.toDto(categoriesList(shop.getSubCategoryList()),ratedCount(shop.getId()), ratedPercentage(shop.getId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
     }
@@ -128,7 +128,7 @@ public class ShopServiceImpl implements ShopService {
             preShop.setAddress(address);
             preShop.setProfileImage(request.getProfileImage());
             preShop.setLastModified(LocalDateTime.now());
-            return shopRepository.save(preShop).toDto(categoriesList(request.getSubCategoryList().toString()));
+            return shopRepository.save(preShop).toDto(categoriesList(request.getSubCategoryList().toString()),ratedCount(preShop.getId()), ratedPercentage(preShop.getId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
@@ -138,7 +138,7 @@ public class ShopServiceImpl implements ShopService {
         isLegal(UUID.fromString(currentUser()));
         Shop shop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(shop != null){
-            return shop.toDto(categoriesList(shop.getSubCategoryList()));
+            return shop.toDto(categoriesList(shop.getSubCategoryList()),ratedCount(shop.getId()), ratedPercentage(shop.getId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
@@ -153,7 +153,7 @@ public class ShopServiceImpl implements ShopService {
             }
             // Update Previous Data;
             preShop.setStatus(isActive);
-            return shopRepository.save(preShop).toDto(categoriesList(preShop.getSubCategoryList()));
+            return shopRepository.save(preShop).toDto(categoriesList(preShop.getSubCategoryList()), ratedCount(preShop.getId()), ratedPercentage(preShop.getId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
     }
@@ -191,7 +191,8 @@ public class ShopServiceImpl implements ShopService {
         // Active Shop from Shop table and check with Rating
         Set<UUID> uniqueIds = new HashSet<>(activeShopInRating);
 
-        Map<UUID, Integer> shopIdAndRatedValue = new HashMap<>();
+        Map<UUID, Float> shopIdAndRatedValue = new HashMap<>();
+
         List<UUID> sortedKeys = new ArrayList<>();
         for (UUID id : uniqueIds) {
             int sum = 0;
@@ -210,7 +211,7 @@ public class ShopServiceImpl implements ShopService {
                 }
             }
 
-            shopIdAndRatedValue.put(id,sum/level.size());
+            shopIdAndRatedValue.put(id, Float.valueOf(sum/level.size()));
 
             sortedKeys = sortKeysByValueDescending(shopIdAndRatedValue);
         }
@@ -219,18 +220,18 @@ public class ShopServiceImpl implements ShopService {
             if(sortedKeys.size() > 3){
                 break;
             }else{
-                topThreeShop.add(shopRepository.getActiveShopById(sortedKeys.get(i)).toDto(categoriesList(shopRepository.getActiveShopById(sortedKeys.get(i)).getSubCategoryList())));
+                topThreeShop.add(shopRepository.getActiveShopById(sortedKeys.get(i)).toDto(categoriesList(shopRepository.getActiveShopById(sortedKeys.get(i)).getSubCategoryList()), ratedCount(sortedKeys.get(i)), ratedPercentage(sortedKeys.get(i))));
             }
         }
 
         return topThreeShop;
     }
 
-    private static List<UUID> sortKeysByValueDescending(Map<UUID, Integer> map) {
-        List<Map.Entry<UUID, Integer>> entryList = new ArrayList<>(map.entrySet());
+    private static List<UUID> sortKeysByValueDescending(Map<UUID, Float> map) {
+        List<Map.Entry<UUID, Float>> entryList = new ArrayList<>(map.entrySet());
         entryList.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
         List<UUID> sortedKeys = new ArrayList<>();
-        for (Map.Entry<UUID, Integer> entry : entryList) {
+        for (Map.Entry<UUID, Float> entry : entryList) {
             sortedKeys.add(entry.getKey());
         }
         return sortedKeys;
@@ -344,6 +345,32 @@ public class ShopServiceImpl implements ShopService {
         if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.SELLER))){
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
         }
+    }
+
+    // Rated Count by Shop Id
+    public Integer ratedCount(UUID shopId){
+        List<String> level = ratingRepository.getRatedStarByShopId(shopId);
+        return level.size();
+    }
+
+    // Percentage Rating shop
+    public Float ratedPercentage(UUID shopId){
+        int sum = 0;
+        List<String> level = ratingRepository.getRatedStarByShopId(shopId);
+        for (String star : level) {
+            if(star.equalsIgnoreCase(Level.ONE_STAR.name())){
+                sum += 1;
+            }else if(star.equalsIgnoreCase(Level.TWO_STARS.name())){
+                sum += 2;
+            }else if(star.equalsIgnoreCase(Level.THREE_STARS.name())){
+                sum += 3;
+            }else if(star.equalsIgnoreCase(Level.FOUR_STARS.name())){
+                sum += 4;
+            }else if(star.equalsIgnoreCase(Level.FIVE_STARS.name())){
+                sum += 5;
+            }
+        }
+        return (float) (sum/level.size());
     }
 
 }

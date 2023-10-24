@@ -34,7 +34,7 @@ public class Shop {
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
 
-    public ShopResponse toDto(List<String> subCategoryList){
-        return new ShopResponse(this.id,this.name,this.profileImage,this.userId,this.status,subCategoryList,this.address,this.createdDate,this.lastModified);
+    public ShopResponse toDto(List<String> subCategoryList,Integer ratedCount, Float rated){
+        return new ShopResponse(this.id,this.name,this.profileImage,this.userId,this.status, ratedCount,rated,subCategoryList,this.address,this.createdDate,this.lastModified);
     }
 }

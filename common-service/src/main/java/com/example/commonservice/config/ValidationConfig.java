@@ -89,6 +89,7 @@ public class ValidationConfig {
     public static final String NOT_FOUND_PRODUCTS_IN_UR_SHOP = "Product in your shop is empty";
     public static final String SHOP_INACTIVE = "This shop is inactive now";
     public static final String SUB_CATEGORY_RESPONSE = "SubCategory contain at least 1";
+    public static final String INVALID_STRING = "This field is invalid";
     public static final int MIN_SUB_CATEGORY = 1;
 
 }

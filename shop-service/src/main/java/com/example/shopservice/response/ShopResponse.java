@@ -19,6 +19,8 @@ public class ShopResponse {
     private String profileImage;
     private UUID userId;
     private Boolean status;
+    private Integer ratedCount;
+    private Float rated;
     private List<String> subCategoryList;
     private Address address;
     private LocalDateTime createdDate;

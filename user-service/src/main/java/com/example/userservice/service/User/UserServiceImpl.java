@@ -84,6 +84,9 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException(ValidationConfig.WHITE_SPACE);
         }
 
+        isValidString(request.getFirstname());
+        isValidString(request.getLastname());
+
         CredentialRepresentation credentialRepresentation = createPasswordCredentials(request.getPassword());
 
         // Validation Existing Account
@@ -438,6 +441,17 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+    }
+
+    // firstname and lastname Validating
+    public void isValidString(String data){
+        try {
+            if(data.matches(".*\\d+.*")){
+                throw new IllegalArgumentException(ValidationConfig.INVALID_STRING);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(ValidationConfig.INVALID_STRING);
+        }
     }
 
 }

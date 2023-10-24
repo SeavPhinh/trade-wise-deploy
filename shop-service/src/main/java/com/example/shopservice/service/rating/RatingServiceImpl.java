@@ -7,6 +7,7 @@ import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.SubCategoryResponse;
+import com.example.shopservice.enumeration.Level;
 import com.example.shopservice.exception.NotFoundExceptionClass;
 import com.example.shopservice.exception.NullExceptionClass;
 import com.example.shopservice.model.Rating;
@@ -71,7 +72,7 @@ public class RatingServiceImpl implements RatingService {
             for (Rating rate : ratings) {
                 Shop shop = service.getActiveShopById(rate.getShop().getId());
                 if(shop != null){
-                    shops.add(shop.toDto(categoriesList(shop.getSubCategoryList())));
+                    shops.add(shop.toDto(categoriesList(shop.getSubCategoryList()), ratedCount(shop.getId()), ratedPercentage(shop.getId())));
                 }
             }
             if(!shops.isEmpty()){
@@ -112,6 +113,33 @@ public class RatingServiceImpl implements RatingService {
                 .block()).getPayload(), User.class);
     }
 
+
+    // Rated Count by Shop Id
+    public Integer ratedCount(UUID shopId){
+        List<String> level = ratingRepository.getRatedStarByShopId(shopId);
+        return level.size();
+    }
+
+    // Percentage Rating shop
+    public Float ratedPercentage(UUID shopId){
+        int sum = 0;
+        List<String> level = ratingRepository.getRatedStarByShopId(shopId);
+        for (String star : level) {
+            if(star.equalsIgnoreCase(Level.ONE_STAR.name())){
+                sum += 1;
+            }else if(star.equalsIgnoreCase(Level.TWO_STARS.name())){
+                sum += 2;
+            }else if(star.equalsIgnoreCase(Level.THREE_STARS.name())){
+                sum += 3;
+            }else if(star.equalsIgnoreCase(Level.FOUR_STARS.name())){
+                sum += 4;
+            }else if(star.equalsIgnoreCase(Level.FIVE_STARS.name())){
+                sum += 5;
+            }
+        }
+        return (float) (sum/level.size());
+    }
+
     // Validation legal Role
     public void isLegal(UUID id){
         if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.BUYER))){
@@ -134,9 +162,6 @@ public class RatingServiceImpl implements RatingService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         List<String> responses = new ArrayList<>();
-
-        System.out.println("UUID list: " + uuidList);
-
         if(!uuidList.isEmpty()){
             for (UUID subId : uuidList) {
                 try{
@@ -153,7 +178,6 @@ public class RatingServiceImpl implements RatingService {
             }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
-
     }
 
 }
