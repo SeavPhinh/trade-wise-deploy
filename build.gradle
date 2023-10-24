@@ -368,7 +368,7 @@ project("shop-service"){
     }
 
 }
-project("config-service"){
+project("config-server"){
 
     // Apply external plugin
     apply from: "$rootProject.projectDir/plugin.gradle"

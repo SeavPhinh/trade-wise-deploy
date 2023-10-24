@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/goselling/trade-wise-config
+          clone-on-start: true
+          search-paths:
+            - category-service
+            - notification-service
+            - chat-service
+            - post-service
+            - product-service
+            - shop-service
+            - user-info-service
+            - user-service
+          default-label: master
+server:
+  port: 8888

@@ -1,0 +1,38 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:1234/auth/realms/go-selling-api
+          jwk-set-uri: http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/certs
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+server:
+  port: 1688
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /v3/api-docs
+        name: Gateway Service
+      - url: /user-service/v3/api-docs
+        name: User Service
+      - url: /category-service/v3/api-docs
+        name: Category Service
+      - url: /chat-service/v3/api-docs
+        name: Chat Service
+      - url: /post-service/v3/api-docs
+        name: Post Service
+      - url: /product-service/v3/api-docs
+        name: Product Service
+      - url: /shop-service/v3/api-docs
+        name: Shop Service
+      - url: /user-info-service/v3/api-docs
+        name: User Info Service

@@ -1,11 +1,9 @@
 spring:
   application:
     name: user-info-service
+  profiles:
+    active: native
   config:
-    import: "optional:configserver:"
-  cloud:
-    config:
-      uri: http://localhost:8585
-      name: user-info-service
+    import: optional:configserver:http://localhost:8888
 server:
   port: 8084

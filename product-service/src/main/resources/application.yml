@@ -1,12 +1,10 @@
 spring:
   application:
     name: product-service
+  profiles:
+    active: native
   config:
-    import: "optional:configserver:"
-  cloud:
-    config:
-      uri: http://localhost:8585
-      name: product-service
+    import: optional:configserver:http://localhost:8888
 server:
   port: 8089
 

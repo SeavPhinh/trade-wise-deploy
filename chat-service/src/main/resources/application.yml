@@ -1,13 +1,10 @@
-
 spring:
-  config:
-    import: "optional:configserver:"
-  cloud:
-    config:
-      uri: http://localhost:8585
-      name: chat-service
   application:
     name: chat-service
+  profiles:
+    active: native
+  config:
+    import: optional:configserver:http://localhost:8888
   rabbitmq:
     host: localhost
     port: 5672

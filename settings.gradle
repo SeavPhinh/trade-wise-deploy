@@ -8,7 +8,7 @@ include 'common-service'
 include 'gateway-service'
 include 'eureka-server'
 include 'user-service'
-include 'config-service'
+include 'config-server'
 include 'user-info-service'
 include 'notification-service'
 
