@@ -11,7 +11,6 @@ import com.example.shopservice.config.FileStorageProperties;
 import com.example.shopservice.enumeration.Level;
 import com.example.shopservice.exception.NotFoundExceptionClass;
 import com.example.shopservice.model.Address;
-import com.example.shopservice.model.Rating;
 import com.example.shopservice.model.Shop;
 import com.example.shopservice.repository.RatingRepository;
 import com.example.shopservice.repository.ShopRepository;
@@ -173,78 +172,73 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public List<ShopResponse> getShopBasedOnRating() {
+    public List<ShopResponse> getShopBasedOnRating(){
 
-        Map<UUID,Float> percentageOfShop = new HashMap<>();
+        List<Shop> getAllActiveShop = shopRepository.getAllActiveShop();
+        if(getAllActiveShop.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+        }
+        List<UUID> getAllShopIdFromRating = ratingRepository.getAllShopIdFromRating();
 
-        for (Level star : Level.values()) {
-            System.out.println(star.name() + ": " + rated(star));
+        if(getAllShopIdFromRating.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+        }
+        List<UUID> activeShopInRating = new ArrayList<>(getAllShopIdFromRating);
+
+        List<ShopResponse> topThreeShop = new ArrayList<>();
+        activeShopInRating.retainAll(getAllActiveShop.stream().map(Shop::getId).collect(Collectors.toList()));
+
+        // Active Shop from Shop table and check with Rating
+        Set<UUID> uniqueIds = new HashSet<>(activeShopInRating);
+
+        Map<UUID, Integer> shopIdAndRatedValue = new HashMap<>();
+        List<UUID> sortedKeys = new ArrayList<>();
+        for (UUID id : uniqueIds) {
+            int sum = 0;
+            List<String> level = ratingRepository.getRatedStarByShopId(id);
+            for (String star : level) {
+                if(star.equalsIgnoreCase(Level.ONE_STAR.name())){
+                    sum += 1;
+                }else if(star.equalsIgnoreCase(Level.TWO_STARS.name())){
+                    sum += 2;
+                }else if(star.equalsIgnoreCase(Level.THREE_STARS.name())){
+                    sum += 3;
+                }else if(star.equalsIgnoreCase(Level.FOUR_STARS.name())){
+                    sum += 4;
+                }else if(star.equalsIgnoreCase(Level.FIVE_STARS.name())){
+                    sum += 5;
+                }
+            }
+
+            shopIdAndRatedValue.put(id,sum/level.size());
+
+            sortedKeys = sortKeysByValueDescending(shopIdAndRatedValue);
         }
 
-        return null;
-    }
-
-    // Return Rated All shop
-    public Map<UUID,Float> rated(Level star){
-
-        Float oneStar = 0.2F;
-        Float twoStars = 0.4F;
-        Float threeStars = 0.6F;
-        Float fourStars = 0.8F;
-        Float fiveStars = 1F;
-
-        Map<UUID,Float> starOfShop = new HashMap<>();
-        Map<String, List<Rating>> rated = new HashMap<>();
-
-        //
-        for (Level level : Level.values()) {
-            rated.put(level.name(),ratingRepository.getAllShopRatedByStars(level.name()));
-        }
-
-        Integer countStarOfProjectId;
-
-        for (Rating name : rated.get(star.name())) {
-            Float sum = 0F;
-            switch (star.name()) {
-                case "ONE_STAR": {
-                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
-                    sum += oneStar * countStarOfProjectId;
-                    starOfShop.put(name.getShop().getId(), sum);
-                    break;
-                }
-                case "TWO_STARS": {
-                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
-                    sum += twoStars * countStarOfProjectId;
-                    starOfShop.put(name.getShop().getId(), sum);
-                    break;
-                }
-                case "THREE_STARS": {
-                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
-                    sum += threeStars * countStarOfProjectId;
-                    starOfShop.put(name.getShop().getId(), sum);
-                    break;
-                }
-                case "FOUR_STARS": {
-                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
-                    sum += fourStars * countStarOfProjectId;
-                    starOfShop.put(name.getShop().getId(), sum);
-                    break;
-                }
-                case "FIVE_STARS": {
-                    countStarOfProjectId = ratingRepository.countStarByProjectId(name.getShop().getId());
-                    sum += fiveStars * countStarOfProjectId;
-                    starOfShop.put(name.getShop().getId(), sum);
-                    break;
-                }
+        for (int i = 0; i < sortedKeys.size(); i++) {
+            if(sortedKeys.size() > 3){
+                break;
+            }else{
+                topThreeShop.add(shopRepository.getActiveShopById(sortedKeys.get(i)).toDto(categoriesList(shopRepository.getActiveShopById(sortedKeys.get(i)).getSubCategoryList())));
             }
         }
 
-        return starOfShop;
+        return topThreeShop;
+    }
+
+    private static List<UUID> sortKeysByValueDescending(Map<UUID, Integer> map) {
+        List<Map.Entry<UUID, Integer>> entryList = new ArrayList<>(map.entrySet());
+        entryList.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+        List<UUID> sortedKeys = new ArrayList<>();
+        for (Map.Entry<UUID, Integer> entry : entryList) {
+            sortedKeys.add(entry.getKey());
+        }
+        return sortedKeys;
     }
 
     // Returning Token
     public String currentUser() {
-        try {
+        try{
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
                 // Decode to Get User Id

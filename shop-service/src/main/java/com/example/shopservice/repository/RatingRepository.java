@@ -1,6 +1,7 @@
 package com.example.shopservice.repository;
 
 import com.example.shopservice.model.Rating;
+import com.example.shopservice.model.Shop;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -54,6 +55,23 @@ public interface RatingRepository extends JpaRepository<Rating, UUID> {
     }
 
     @Transactional
-    @Query(value = "SELECT COUNT(*) FROM ratings WHERE shop_id = :#{#id}", nativeQuery = true)
-    Integer countStarByProjectId(UUID id);
+    @Query(value = "SELECT * FROM ratings WHERE shop_id = :#{#id} AND level = :#{#level}", nativeQuery = true)
+    List<Rating> countRatedRecordByProjectId(UUID id, String level);
+
+    @Transactional
+    @Query(value = "SELECT * FROM ratings WHERE shop_id = :#{#id}", nativeQuery = true)
+    List<Rating> countRatedRecordByShopId(UUID id);
+
+
+    @Transactional
+    @Query(value = "SELECT shop_id FROM ratings", nativeQuery = true)
+    List<UUID> getAllShopIdFromRating();
+
+    @Transactional
+    @Query(value = "SELECT * FROM ratings WHERE shop_id = :#{#shopId} AND level = :#{#name}", nativeQuery = true)
+    List<Rating> getAllShopRatedByStarsAndActiveShop(String name, UUID shopId);
+
+    @Transactional
+    @Query(value = "SELECT level FROM ratings WHERE shop_id = :#{#id}", nativeQuery = true)
+    List<String> getRatedStarByShopId(UUID id);
 }
