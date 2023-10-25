@@ -15,11 +15,11 @@ public interface CategoryService {
 
     CategoryResponse addCategory(CategoryRequest request);
 
-    CategoryResponse getCategoryById(UUID id);
+    CategoryResponse getCategoryById(String name);
 
-    CategoryResponse deleteCategoryById(UUID id);
+    CategoryResponse deleteCategoryByName(String name);
 
-    CategoryResponse updateCategoryById(UUID id,CategoryRequest request);
+    CategoryResponse updateCategoryByName(String name, CategoryRequest request);
 
-    CategorySubCategory getCategoryAndSubCategoryById(UUID id);
+    CategorySubCategory getCategoryAndSubCategoryByName(String name);
 }

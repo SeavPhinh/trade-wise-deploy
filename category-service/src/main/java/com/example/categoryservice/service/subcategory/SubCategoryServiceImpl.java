@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class SubCategoryServiceImpl implements SubCategoryService{
@@ -26,8 +25,8 @@ public class SubCategoryServiceImpl implements SubCategoryService{
     }
 
     @Override
-    public CategorySubCategoryResponse getSubCategoryById(UUID id) {
-        SubCategory subCategory = subCategoryRepository.getAllById(id);
+    public CategorySubCategoryResponse getSubCategoryByName(String name) {
+        SubCategory subCategory = subCategoryRepository.getAllByName(name);
         if(subCategory != null){
             Optional<Category> category = categoryRepository.findById(subCategory.getCategory().getId());
             if(category.isPresent()){
@@ -39,46 +38,46 @@ public class SubCategoryServiceImpl implements SubCategoryService{
     }
 
     @Override
-    public CategorySubCategoryResponse addSubCategory(UUID categoryId, SubCategoryRequest request) {
+    public CategorySubCategoryResponse addSubCategory(String name, SubCategoryRequest request) {
         List<SubCategory> subCat = subCategoryRepository.findAll();
         for (SubCategory sub: subCat) {
             if(sub.getName().equalsIgnoreCase(request.getName())){
                 throw new IllegalArgumentException(ValidationConfig.EXISTING_SUB_CATEGORIES);
             }
         }
-        Optional<Category> category = categoryRepository.findById(categoryId);
-        if(category.isEmpty()){
+        Category category = categoryRepository.getCategoryByName(name);
+        if(category == null){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_CATEGORIES);
         }
 
-        return new CategorySubCategoryResponse(category.get().toDto(),subCategoryRepository.save(request.toEntity(category.get())).toDto());
+        return new CategorySubCategoryResponse(category.toDto(),subCategoryRepository.save(request.toEntity(category)).toDto());
     }
 
     @Override
-    public CategorySubCategoryResponse deleteSubCategoryById(UUID id) {
-        Optional<SubCategory> subCategory = subCategoryRepository.findById(id);
-        if(subCategory.isEmpty()){
+    public CategorySubCategoryResponse deleteSubCategoryByName(String name) {
+        SubCategory subCategory = subCategoryRepository.getAllByName(name);
+        if(subCategory == null){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
         }
-        subCategoryRepository.deleteById(id);
-        return new CategorySubCategoryResponse(categoryRepository.findById(subCategory.get().getCategory().getId()).orElseThrow().toDto(),subCategory.get().toDto());
+        subCategoryRepository.removeSubCategoryByName(name);
+        return new CategorySubCategoryResponse(categoryRepository.findById(subCategory.getCategory().getId()).orElseThrow().toDto(),subCategory.toDto());
     }
 
     @Override
-    public CategorySubCategoryResponse updateSubCategoryById(UUID id, SubCategoryRequest request) {
+    public CategorySubCategoryResponse updateSubCategoryByName(String name, SubCategoryRequest request) {
         List<SubCategory> subCat = subCategoryRepository.findAll();
         for (SubCategory sub: subCat) {
             if(sub.getName().equalsIgnoreCase(request.getName())){
                 throw new IllegalArgumentException(ValidationConfig.EXISTING_SUB_CATEGORIES);
             }
         }
-        Optional<SubCategory> subCategory = subCategoryRepository.findById(id);
-        if(subCategory.isEmpty()){
+        SubCategory subCategory = subCategoryRepository.getAllByName(name);
+        if(subCategory == null){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
         }
-        subCategory.get().setName(request.getName());
-        subCategoryRepository.save(subCategory.get());
-        return new CategorySubCategoryResponse(categoryRepository.findById(subCategory.get().getCategory().getId()).orElseThrow().toDto(),subCategory.get().toDto());
+        subCategory.setName(request.getName());
+        subCategoryRepository.save(subCategory);
+        return new CategorySubCategoryResponse(categoryRepository.findById(subCategory.getCategory().getId()).orElseThrow().toDto(),subCategory.toDto());
     }
 
 }

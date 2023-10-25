@@ -4,15 +4,13 @@ import com.example.categoryservice.request.SubCategoryRequest;
 import com.example.categoryservice.response.CategorySubCategoryResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public interface SubCategoryService {
-    CategorySubCategoryResponse getSubCategoryById(UUID name);
+    CategorySubCategoryResponse getSubCategoryByName(String name);
 
-    CategorySubCategoryResponse addSubCategory(UUID categoryId, SubCategoryRequest request);
+    CategorySubCategoryResponse addSubCategory(String categoryName, SubCategoryRequest request);
 
-    CategorySubCategoryResponse deleteSubCategoryById(UUID id);
+    CategorySubCategoryResponse deleteSubCategoryByName(String name);
 
-    CategorySubCategoryResponse updateSubCategoryById(UUID id, SubCategoryRequest request);
+    CategorySubCategoryResponse updateSubCategoryByName(String name, SubCategoryRequest request);
 }

@@ -7,6 +7,7 @@ import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.ShopResponse;
 import com.example.productservice.config.FileStorageProperties;
 import com.example.productservice.exception.NotFoundExceptionClass;
 import com.example.productservice.model.FileStorage;
@@ -80,13 +81,12 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ProductResponse addProduct(ProductRequest postRequest) {
         isLegal(UUID.fromString(currentUser()));
-        return productRepository.save(postRequest.toEntity(shop().getId())).toDto(postRequest.getFiles());
+        return productRepository.save(postRequest.toEntity(shop(UUID.fromString(currentUser())).getId())).toDto(postRequest.getFiles());
     }
 
     // This method need to update for related products
     @Override
     public List<ProductResponse> getAllProduct() {
-
         List<ProductResponse> responseList = productRepository.findAll().stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
         if(!responseList.isEmpty()){
             return responseList;
@@ -165,19 +165,21 @@ public class ProductServiceImpl implements ProductService{
     }
 
     // Return Shop
-    public Shop shop(){
+    public ShopResponse shop(UUID userId){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
+
+                System.out.println("Token: " + jwt.getTokenValue());
+
                 return covertSpecificClass.convertValue(Objects.requireNonNull(shopClient
                         .get()
-                        .uri("api/v1/shops/current")
-                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
+                        .uri("api/v1/shops/user/{userId}", userId)
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
-                        .block()).getPayload(), Shop.class);
+                        .block()).getPayload(), ShopResponse.class);
             }
         }catch (Exception e){
             throw new IllegalArgumentException(ValidationConfig.SHOP_NOT_CREATED);

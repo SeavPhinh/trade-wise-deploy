@@ -22,6 +22,7 @@ public class KeyCloakSecurityConfig {
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/shops").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/best").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/{id}").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/user/{userId}").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/image").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));

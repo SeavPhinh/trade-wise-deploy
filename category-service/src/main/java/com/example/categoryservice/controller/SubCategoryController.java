@@ -12,10 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/sub-categories")
 @Tag(name = "SubCategory")
 public class SubCategoryController {
 
@@ -25,48 +23,48 @@ public class SubCategoryController {
         this.subCategoryService = subCategoryService;
     }
 
-    @GetMapping("/subcategories/{id}")
-    @Operation(summary = "fetch sub category by sub category id")
-    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> getSubCategoryById(@PathVariable UUID id){
+    @GetMapping("")
+    @Operation(summary = "fetch sub category by sub category name")
+    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> getSubCategoryById(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
                 "SubCategories fetched by id successfully",
-                subCategoryService.getSubCategoryById(id),
+                subCategoryService.getSubCategoryByName(name),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
-    @PostMapping("/subcategories/{categoryId}")
-    @Operation(summary = "adding subcategory by category id")
+    @PostMapping("")
+    @Operation(summary = "adding subcategory by category name")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> addSubCategory(@PathVariable UUID categoryId,
+    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> addSubCategory(@RequestParam String categoryName,
                                                                                    @Valid @RequestBody SubCategoryRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
                 "SubCategories added successfully",
-                subCategoryService.addSubCategory(categoryId,request),
+                subCategoryService.addSubCategory(categoryName,request),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/subcategories/{id}")
-    @Operation(summary = "delete sub categories by id")
+    @DeleteMapping("")
+    @Operation(summary = "delete sub categories by name")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> deleteSubCategoryById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> deleteSubCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
-                "SubCategories delete by id successfully",
-                subCategoryService.deleteSubCategoryById(id),
+                "SubCategories delete by name successfully",
+                subCategoryService.deleteSubCategoryByName(name),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
 
-    @PutMapping("/subcategories/{id}")
-    @Operation(summary = "update subcategories by id")
+    @PutMapping("")
+    @Operation(summary = "update subcategories by name")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> updateSubCategoryById(@PathVariable UUID id,
+    public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> updateSubCategoryByName(@RequestParam String name,
                                                                             @Valid @RequestBody SubCategoryRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
-                "SubCategories updated by id successfully",
-                subCategoryService.updateSubCategoryById(id,request),
+                "SubCategories updated by name successfully",
+                subCategoryService.updateSubCategoryByName(name,request),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }

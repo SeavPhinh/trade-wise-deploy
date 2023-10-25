@@ -17,6 +17,10 @@ public interface SubCategoryRepository extends JpaRepository<SubCategory, UUID> 
     List<SubCategory> getAllSubCategoryByCategoryId(UUID id);
 
     @Transactional
-    @Query(value = "SELECT * FROM sub_categories WHERE id = :#{#id}", nativeQuery = true)
-    SubCategory getAllById(UUID id);
+    @Query(value = "SELECT * FROM sub_categories WHERE name = :#{#name}", nativeQuery = true)
+    SubCategory getAllByName(String name);
+
+    @Transactional
+    @Query(value = "DELETE * FROM sub_categories WHERE name = :#{#name}", nativeQuery = true)
+    void removeSubCategoryByName(String name);
 }

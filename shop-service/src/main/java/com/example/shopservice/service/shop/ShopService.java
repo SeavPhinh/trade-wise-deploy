@@ -31,4 +31,6 @@ public interface ShopService {
     ShopResponse shopAction(Boolean isActive);
     ByteArrayResource getImage(String fileName) throws IOException;
     List<ShopResponse> getShopBasedOnRating();
+
+    ShopResponse getShopByUserId(UUID userId);
 }

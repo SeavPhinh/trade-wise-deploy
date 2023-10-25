@@ -13,8 +13,6 @@ import com.example.commonservice.config.ValidationConfig;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,29 +46,29 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryResponse getCategoryById(UUID id) {
-        Optional<Category> category = categoryRepository.findById(id);
-        if(category.isPresent()){
-            return category.get().toDto();
+    public CategoryResponse getCategoryById(String name) {
+        Category category = categoryRepository.getCategoryByName(name);
+        if(category != null){
+            return category.toDto();
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_CATEGORIES);
     }
 
     @Override
-    public CategoryResponse deleteCategoryById(UUID id) {
-        Optional<Category> category = categoryRepository.findById(id);
-        if(category.isPresent()){
-            categoryRepository.deleteById(id);
-            return category.get().toDto();
+    public CategoryResponse deleteCategoryByName(String name) {
+        Category category = categoryRepository.getCategoryByName(name);
+        if(category != null){
+            categoryRepository.removeCategoryName(name);
+            return category.toDto();
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_CATEGORIES);
 
     }
 
     @Override
-    public CategoryResponse updateCategoryById(UUID id,CategoryRequest request) {
-        Optional<Category> category = categoryRepository.findById(id);
-        if(category.isPresent()){
+    public CategoryResponse updateCategoryByName(String name, CategoryRequest request) {
+        Category category = categoryRepository.getCategoryByName(name);
+        if(category != null){
 
             List<Category> lists = categoryRepository.findAll();
             for (Category categories: lists) {
@@ -78,22 +76,23 @@ public class CategoryServiceImpl implements CategoryService {
                     throw new IllegalArgumentException(ValidationConfig.EXISTING_CATEGORIES);
                 }
             }
-            category.get().setName(request.getName());
-            return categoryRepository.save(category.get()).toDto();
+            category.setName(request.getName());
+            return categoryRepository.save(category).toDto();
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_CATEGORIES);
     }
 
     @Override
-    public CategorySubCategory getCategoryAndSubCategoryById(UUID id) {
-        Optional<Category> category = categoryRepository.findById(id);
-        if(category.isPresent()){
-            List<SubCategory> subCategory = subCategoryRepository.getAllSubCategoryByCategoryId(id);
+    public CategorySubCategory getCategoryAndSubCategoryByName(String name) {
+        System.out.println("Name: "+ name);
+        Category category = categoryRepository.getCategoryByName(name);
+        if(category != null){
+            List<SubCategory> subCategory = subCategoryRepository.getAllSubCategoryByCategoryId(category.getId());
             if(subCategory.isEmpty()){
                 throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
             }
             List<SubCategoryResponse> listSubCategories = subCategory.stream().map(SubCategory::toDto).collect(Collectors.toList());
-            return new CategorySubCategory(category.get().getId(),category.get().getName(),listSubCategories);
+            return new CategorySubCategory(category.getId(),category.getName(),listSubCategories);
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_CATEGORIES);
     }

@@ -227,6 +227,16 @@ public class ShopServiceImpl implements ShopService {
         return topThreeShop;
     }
 
+    @Override
+    public ShopResponse getShopByUserId(UUID userId) {
+        isLegal(userId);
+        Shop shop = shopRepository.getShopByOwnerId(userId);
+        if(shop != null){
+            return shop.toDto(categoriesList(shop.getSubCategoryList()),ratedCount(shop.getId()), ratedPercentage(shop.getId()));
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
+    }
+
     private static List<UUID> sortKeysByValueDescending(Map<UUID, Float> map) {
         List<Map.Entry<UUID, Float>> entryList = new ArrayList<>(map.entrySet());
         entryList.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
@@ -256,7 +266,6 @@ public class ShopServiceImpl implements ShopService {
     public User createdBy(UUID id){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
-
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                 .get()
                 .uri("api/v1/users/{id}", id)
@@ -281,25 +290,28 @@ public class ShopServiceImpl implements ShopService {
     }
 
     // Converting Category from Attribute as String to ArrayList
-    public List<UUID> category(String categories){
+    public List<String> category(String categories){
         List<String> categoriesList = Arrays.asList(categories.replaceAll("\\[|\\]", "").split(", "));
         return categoriesList.stream()
-                .map(UUID::fromString)
+                .map(String::toUpperCase)
                 .collect(Collectors.toList());
     }
 
     // Converting Category list as UUID to List<String>
     public List<String> categoriesList(String categories) {
 
-        List<UUID> uuidList = category(categories);
+        List<String> uuidList = category(categories);
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         List<String> responses = new ArrayList<>();
         try {
-            for (UUID subId : uuidList) {
+            for (String name : uuidList) {
                 CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(subCategoryWeb
                         .get()
-                        .uri("api/v1/subcategories/{id}", subId)
+                        .uri(uriBuilder -> uriBuilder
+                                .path("api/v1/sub-categories")
+                                .queryParam("name", name)
+                                .build())
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(), CategorySubCategoryResponse.class);

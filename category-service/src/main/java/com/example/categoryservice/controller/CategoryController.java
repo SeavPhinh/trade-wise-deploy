@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/categories")
@@ -26,7 +25,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     @Operation(summary = "fetch all categories")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -36,27 +35,27 @@ public class CategoryController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "fetch categories by id")
-    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable UUID id){
+    @GetMapping("/name")
+    @Operation(summary = "fetch categories by name")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
-                "Categories fetched by id successfully",
-                categoryService.getCategoryById(id),
+                "Categories fetched by name successfully",
+                categoryService.getCategoryById(name),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/subcategories/{id}")
-    @Operation(summary = "fetch category with sub categories by id")
-    public ResponseEntity<ApiResponse<CategorySubCategory>> getCategoryAndSubCategoryById(@PathVariable UUID id){
+    @GetMapping("/sub-categories")
+    @Operation(summary = "fetch category with sub categories by name")
+    public ResponseEntity<ApiResponse<CategorySubCategory>> getCategoryAndSubCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
-                "Category and SubCategory fetched by id successfully",
-                categoryService.getCategoryAndSubCategoryById(id),
+                "Category and SubCategory fetched by name successfully",
+                categoryService.getCategoryAndSubCategoryByName(name),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     @Operation(summary = "adding category")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategoryResponse>> addCategory(@Valid @RequestBody CategoryRequest request){
@@ -67,25 +66,25 @@ public class CategoryController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "delete categories by id")
+    @DeleteMapping("")
+    @Operation(summary = "delete categories by name")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategoryById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
-                "Categories delete by id successfully",
-                categoryService.deleteCategoryById(id),
+                "Categories delete by name successfully",
+                categoryService.deleteCategoryByName(name),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "update categories by id")
+    @PutMapping("")
+    @Operation(summary = "update categories by name")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategoryById(@PathVariable UUID id,
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategoryById(@RequestParam String name,
                                                                             @Valid @RequestBody CategoryRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
-                "Categories updated by id successfully",
-                categoryService.updateCategoryById(id,request),
+                "Categories updated by name successfully",
+                categoryService.updateCategoryByName(name,request),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }

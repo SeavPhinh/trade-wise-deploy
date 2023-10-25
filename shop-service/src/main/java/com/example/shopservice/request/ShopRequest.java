@@ -29,7 +29,7 @@ public class ShopRequest {
 
     @NotEmpty(message = ValidationConfig.EMPTY_FIELD)
     @Size(min = ValidationConfig.MIN_SUB_CATEGORY, message = ValidationConfig.SUB_CATEGORY_RESPONSE)
-    private List<UUID> subCategoryList;
+    private List<String> subCategoryList;
 
     @Valid
     private AddressRequest address;
