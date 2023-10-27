@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,4 +16,8 @@ public interface ProductForSaleRepository extends JpaRepository<ProductForSale, 
     @Transactional
     @Query(value = "SELECT * FROM product_for_sales WHERE post_id = :#{#id}", nativeQuery = true)
     List<ProductForSale> getProductByPostId(UUID id);
+
+    @Transactional
+    @Query(value = "SELECT * FROM product_for_sales WHERE post_id = :#{#id} AND shop_id = :#{#shopId}", nativeQuery = true)
+    List<ProductForSale> getProductByPostIdAndUserId(UUID id, UUID shopId);
 }

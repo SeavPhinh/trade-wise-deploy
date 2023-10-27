@@ -91,6 +91,14 @@ public class ValidationConfig {
     public static final String SUB_CATEGORY_RESPONSE = "SubCategory contain at least 1";
     public static final String INVALID_STRING = "This field is invalid";
     public static final String REGEX_ROLES = "\\[|\\]";
+    public static final String CANNOT_UPDATE = "You cannot update this product";
+    public static final String CANNOT_DELETE = "You cannot delete this product";
+    public static final String CANNOT_UPLOAD = "You cannot upload a photo to this product";
+    public static final String NOTFOUND_POST = "This post is not found";
+    public static final String NOT_EXIST_IN_POST = "This post is not containing comment from seller";
+    public static final String NOT_OWNER_PRODUCT = "You are not owner of this product";
+    public static final String NOT_YET_ADD_TO_POST = "You haven't add a product to this post";
+    public static final String UR_PRODUCT_NOT_FOUND = "Your products is not found in this post";
     public static final int MIN_SUB_CATEGORY = 1;
 
 }

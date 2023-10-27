@@ -97,7 +97,6 @@ public class AppUserController {
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "delete user by id from keycloak")
     public ResponseEntity<ApiResponse<String>> deleteUserById(@PathVariable UUID id){
-
         return new ResponseEntity<>(new ApiResponse<>(
                 "User delete by id successfully",
                 userService.deleteUser(id),

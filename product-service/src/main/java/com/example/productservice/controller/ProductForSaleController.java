@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/product-for-sales")
 @Tag(name = "Product For Sales")
-@SecurityRequirement(name = "oAuth2")
 public class ProductForSaleController {
 
     private final ProductForSaleService productForSaleService;
@@ -34,6 +34,7 @@ public class ProductForSaleController {
 
     @PostMapping("")
     @Operation(summary = "shop adding a product to buyer")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> addProductToPost(@Valid @RequestBody ProductForSaleRequest postRequest){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop has added a product to buyer's post successfully",
@@ -42,28 +43,28 @@ public class ProductForSaleController {
         ), HttpStatus.CREATED);
     }
 
-    @GetMapping("")
-    @Operation(summary = "fetch all products")
-    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getAllProductForSale(){
-        return new ResponseEntity<>(new ApiResponse<>(
-                "products fetched successfully",
-                productForSaleService.getAllProduct(),
-                HttpStatus.OK
-        ), HttpStatus.OK);
-    }
+//    @GetMapping("")
+//    @Operation(summary = "fetch all products")
+//    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getAllProductForSale(){
+//        return new ResponseEntity<>(new ApiResponse<>(
+//                "products fetched successfully",
+//                productForSaleService.getAllProduct(),
+//                HttpStatus.OK
+//        ), HttpStatus.OK);
+//    }
 
     @GetMapping("/{id}")
-    @Operation(summary = "fetch product by id")
+    @Operation(summary = "fetch product for sale by id")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
-                "product fetched by id successfully",
+                "product for sale fetched by id successfully",
                 productForSaleService.getProductById(id),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
     @GetMapping("/post/{id}")
-    @Operation(summary = "fetch product by posted id")
+    @Operation(summary = "fetch all product for sale by posted id")
     public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by posted id successfully",
@@ -73,9 +74,9 @@ public class ProductForSaleController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "delete product by id")
-    public ResponseEntity<ApiResponse<ProductForSaleResponse>> deleteProductForSaleById(@PathVariable UUID id){
-
+    @Operation(summary = "delete product for sale by id")
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<String>> deleteProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product delete by id successfully",
                 productForSaleService.deleteProductById(id),
@@ -85,8 +86,9 @@ public class ProductForSaleController {
 
     @PutMapping("/{id}")
     @Operation(summary = "update post by id")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> updateProductForSaleById(@PathVariable UUID id,
-                                                                       @Valid @RequestBody ProductForSaleRequest request){
+                                                               @Valid @RequestBody ProductForSaleRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
                 " updated product by id successfully",
                 productForSaleService.updateProductById(id, request),
@@ -94,14 +96,22 @@ public class ProductForSaleController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "upload multiple file")
-    public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) List<MultipartFile> files,
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<?> saveMultiFile(@PathVariable UUID id,
+                                           @RequestParam(required = false) List<MultipartFile> files,
                                            HttpServletRequest request) throws IOException {
         if(files != null){
-            return ResponseEntity.status(200).body(productForSaleService.saveListFile(files,request));
+            return ResponseEntity.status(200).body(productForSaleService.saveListFile(id,files,request));
         }
         throw new NotFoundExceptionClass("No filename to upload");
+    }
+
+    @GetMapping("/image")
+    @Operation(summary = "fetched image")
+    public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(productForSaleService.getImage(fileName));
     }
 
 }

@@ -49,8 +49,8 @@ public class ShopServiceImpl implements ShopService {
         this.shopRepository = shopRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.ratingRepository = ratingRepository;
-        this.webClient = webClient.baseUrl("http://localhost:8081/").build();
-        this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:1688/").build();
+        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:8080/").build();
     }
 
 
@@ -318,7 +318,6 @@ public class ShopServiceImpl implements ShopService {
                 responses.add(subName.getSubCategory().getName());
             }
             return responses;
-
         }catch (Exception e){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
         }

@@ -19,6 +19,7 @@ import com.example.productservice.response.ProductResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -28,6 +29,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -40,42 +42,42 @@ public class ProductServiceImpl implements ProductService{
     private final ProductRepository productRepository;
     private final FileStorageProperties fileStorageProperties;
     private final WebClient webClient;
-    private final WebClient shopClient;
 
-    public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, WebClient.Builder shopClient) {
+    public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient) {
         this.productRepository = productRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:1688/").build();
-        this.shopClient = shopClient.baseUrl("http://192.168.154.1:1688/").build();
+        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
     }
 
-
     @Override
-    public List<FileRequest> saveListFile(List<MultipartFile> files, HttpServletRequest request) throws IOException {
+    public ProductResponse saveListFile(UUID productId, List<MultipartFile> files, HttpServletRequest request) throws IOException {
+
+        UUID shopId = shop(UUID.fromString(currentUser())).getId();
+        Product preData = productRepository.findById(productId).orElseThrow();
+
+        if(!shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
+            throw new IllegalArgumentException(ValidationConfig.CANNOT_UPLOAD);
+        }
 
         isLegal(UUID.fromString(currentUser()));
-
-        List<FileRequest> filesResponses = new ArrayList<>();
+        List<String> listFiles = new ArrayList<>();
         for (MultipartFile file : files) {
 
             String uploadPath = fileStorageProperties.getUploadPath();
             Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
             java.io.File directory = directoryPath.toFile();
+
             if (!directory.exists()) {
                 directory.mkdirs();
             }
-            String fileName = file.getOriginalFilename();
+
+            String fileName = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+","");
             File dest = new File(directoryPath.toFile(), fileName);
             file.transferTo(dest);
-
-            FileStorage obj = new FileStorage();
-            obj.setFileName(file.getOriginalFilename());
-            obj.setFileType(file.getContentType());
-            obj.setSize(file.getSize());
-            obj.setFileUrl(String.valueOf(request.getRequestURL()).substring(0,22)+"images/"+obj.getFileName());
-            filesResponses.add(new FileRequest(obj.getFileName(), obj.getFileUrl(),obj.getFileType(),obj.getSize()));
+            listFiles.add(fileName);
         }
-        return filesResponses;
+        preData.setFile(listFiles.toString());
+        return productRepository.save(preData).toDto(listFiles);
     }
 
     @Override
@@ -107,26 +109,35 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public ProductResponse deleteProductById(UUID id) {
-        isLegal(UUID.fromString(currentUser()));
-        // Create new object to store before delete
-        ProductResponse response = getProductById(id);
-        productRepository.deleteById(id);
-        return response;
+        UUID shopId = shop(UUID.fromString(currentUser())).getId();
+        Product preData = productRepository.findById(id).orElseThrow();
+        if(shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
+            isLegal(UUID.fromString(currentUser()));
+            // Create new object to store before delete
+            ProductResponse response = getProductById(id);
+            productRepository.deleteById(id);
+            return response;
+        }
+       throw new IllegalArgumentException(ValidationConfig.CANNOT_DELETE);
     }
 
     @Override
     public ProductResponse updateProductById(UUID id, ProductRequest request) {
 
-        isLegal(UUID.fromString(currentUser()));
         Product preData = productRepository.findById(id).orElseThrow();
-        // Update Previous Data
-        preData.setTitle(request.getTitle());
-        preData.setFile(request.getFiles().toString());
-        preData.setDescription(request.getDescription());
-        preData.setStatus(request.getStatus());
-        preData.setLastModified(LocalDateTime.now());
+        UUID shopId = shop(UUID.fromString(currentUser())).getId();
+        if(shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
+            isLegal(UUID.fromString(currentUser()));
+            // Update Previous Data
+            preData.setTitle(request.getTitle());
+            preData.setFile(request.getFiles().toString());
+            preData.setDescription(request.getDescription());
+            preData.setStatus(request.getStatus());
+            preData.setLastModified(LocalDateTime.now());
+            return productRepository.save(preData).toDto(getFiles(preData));
+        }
+        throw new IllegalArgumentException(ValidationConfig.CANNOT_UPDATE);
 
-        return productRepository.save(preData).toDto(getFiles(preData));
     }
 
     @Override
@@ -137,6 +148,19 @@ public class ProductServiceImpl implements ProductService{
             return responseList;
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_PRODUCTS_IN_UR_SHOP);
+    }
+
+    @Override
+    public ByteArrayResource getImage(String fileName) throws IOException {
+        String filePath = "product-service/src/main/resources/storage/" + fileName;
+        Path path = Paths.get(filePath);
+
+        if(!Files.exists(path)){
+            throw new NotFoundExceptionClass(ValidationConfig.FILE_NOTFOUND);
+        }
+        String uploadPath = fileStorageProperties.getUploadPath();
+        Path paths = Paths.get(uploadPath + fileName);
+        return new ByteArrayResource(Files.readAllBytes(paths));
     }
 
     // Returning Token
@@ -171,10 +195,7 @@ public class ProductServiceImpl implements ProductService{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
-
-                System.out.println("Token: " + jwt.getTokenValue());
-
-                return covertSpecificClass.convertValue(Objects.requireNonNull(shopClient
+                return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                         .get()
                         .uri("api/v1/shops/user/{userId}", userId)
                         .retrieve()
@@ -194,7 +215,7 @@ public class ProductServiceImpl implements ProductService{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
-                return covertSpecificClass.convertValue(Objects.requireNonNull(shopClient
+                return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                         .get()
                         .uri("api/v1/shops/{id}", id).retrieve()
                         .bodyToMono(ApiResponse.class)
@@ -208,7 +229,7 @@ public class ProductServiceImpl implements ProductService{
 
     // Separate file -> List
     private List<String> getFiles(Product product) {
-        return Arrays.asList(product.getFile().replaceAll("\\[|\\]", "").split(", "));
+        return Arrays.asList(product.getFile().replaceAll(ValidationConfig.REGEX_ROLES, "").split(", "));
     }
 
     // Validation legal Role

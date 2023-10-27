@@ -3,20 +3,23 @@ package com.example.productservice.service.comment;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
-import com.example.commonservice.exception.NotFoundExceptionClass;
+import com.example.commonservice.enumeration.Role;
+import com.example.commonservice.model.Post;
 import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.productservice.config.FileStorageProperties;
-import com.example.productservice.model.FileStorage;
+import com.example.productservice.exception.NotFoundExceptionClass;
+import com.example.productservice.model.Product;
 import com.example.productservice.model.ProductForSale;
 import com.example.productservice.repository.ProductForSaleRepository;
-import com.example.productservice.request.FileRequest;
+import com.example.productservice.repository.ProductRepository;
 import com.example.productservice.request.ProductForSaleRequest;
 import com.example.productservice.response.ProductForSaleResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,6 +29,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -37,46 +41,50 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
 
     private final ProductForSaleRepository productForSaleRepository;
     private final FileStorageProperties fileStorageProperties;
+    private final ProductRepository productRepository;
     private final WebClient webClient;
-    private final WebClient shopClient;
 
-    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, WebClient.Builder shopClient) {
+    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, ProductRepository productRepository, WebClient.Builder webClient) {
         this.productForSaleRepository = productForSaleRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.webClient = webClient.baseUrl("http://localhost:8081/").build();
-        this.shopClient = shopClient.baseUrl("http://localhost:8088/").build();
+        this.productRepository = productRepository;
+        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
     }
 
     @Override
-    public List<FileRequest> saveListFile(List<MultipartFile> files, HttpServletRequest request) throws IOException {
-        List<FileRequest> filesResponses = new ArrayList<>();
+    public ProductForSaleResponse saveListFile(UUID id, List<MultipartFile> files, HttpServletRequest request) throws IOException {
 
+        UUID shopId = shop().getId();
+        ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
+
+        validationShop(shopId,preData);
+        isLegal(UUID.fromString(currentUser()));
+        List<String> listFiles = new ArrayList<>();
         for (MultipartFile file : files) {
 
             String uploadPath = fileStorageProperties.getUploadPath();
             Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
-            File directory = directoryPath.toFile();
+            java.io.File directory = directoryPath.toFile();
+
             if (!directory.exists()) {
                 directory.mkdirs();
             }
-            String fileName = file.getOriginalFilename();
+
+            String fileName = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+","");
             File dest = new File(directoryPath.toFile(), fileName);
             file.transferTo(dest);
-
-            FileStorage obj = new FileStorage();
-            obj.setFileName(file.getOriginalFilename());
-            obj.setFileType(file.getContentType());
-            obj.setSize(file.getSize());
-            obj.setFileUrl(String.valueOf(request.getRequestURL()).substring(0,22)+"images/"+obj.getFileName());
-            filesResponses.add(new FileRequest(obj.getFileName(), obj.getFileUrl(),obj.getFileType(),obj.getSize()));
+            listFiles.add(fileName);
         }
-
-        return filesResponses;
+        return productForSaleRepository.save(preData).toDto(listFiles);
     }
 
     @Override
     public ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest) {
-        return productForSaleRepository.save(postRequest.toEntity()).toDto(postRequest.getFiles());
+        Optional<Product> product = productRepository.findById(postRequest.getPostId());
+        if(product.isPresent()){
+            return productForSaleRepository.save(postRequest.toEntity(shop().getId())).toDto(postRequest.getFiles());
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_POST);
     }
 
     @Override
@@ -86,33 +94,74 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
 
     @Override
     public ProductForSaleResponse getProductById(UUID id) {
-        return productForSaleRepository.findById(id).orElseThrow().toDto(getFiles(productForSaleRepository.findById(id).orElseThrow()));
+        Optional<ProductForSale> product = productForSaleRepository.findById(id);
+        if(product.isPresent()){
+            if(product.get().getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
+               product.get().getPostId().toString().equalsIgnoreCase(post(product.get().getPostId()).getId().toString())){
+                return product.get().toDto(getFiles(productForSaleRepository.findById(id).orElseThrow()));
+            }
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_YET_ADD_TO_POST);
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_PRODUCT);
     }
 
     @Override
-    public ProductForSaleResponse deleteProductById(UUID id) {
+    public String deleteProductById(UUID id) {
         // Create new object to store before delete
         ProductForSaleResponse response = getProductById(id);
-        productForSaleRepository.deleteById(id);
-        return response;
+        if(response.getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
+           currentUser().equalsIgnoreCase(post(id).getUserId().toString())){
+            productForSaleRepository.deleteById(id);
+            return "You have delete this product successfully";
+        }
+        throw new IllegalArgumentException(ValidationConfig.NOT_OWNER_PRODUCT);
     }
 
     @Override
     public ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequest request) {
         ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
-        // Update Previous Data
-        preData.setTitle(request.getTitle());
-        preData.setFile(request.getFiles().toString());
-        preData.setDescription(request.getDescription());
-        preData.setStatus(request.getStatus());
-        preData.setLastModified(LocalDateTime.now());
+        if(preData.getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
+        preData.getPostId().toString().equalsIgnoreCase(post(id).getId().toString())){
+            // Update Previous Data
+            preData.setTitle(request.getTitle());
+            preData.setFile(request.getFiles().toString());
+            preData.setDescription(request.getDescription());
+            preData.setStatus(request.getStatus());
+            preData.setLastModified(LocalDateTime.now());
+            return productForSaleRepository.save(preData).toDto(getFiles(preData));
+        }
+        throw new IllegalArgumentException(ValidationConfig.NOT_OWNER_PRODUCT);
 
-        return productForSaleRepository.save(preData).toDto(getFiles(preData));
     }
 
     @Override
     public List<ProductForSaleResponse> getProductByPostId(UUID id) {
-        return productForSaleRepository.getProductByPostId(id).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
+        List<ProductForSale> listFiles = productForSaleRepository.getProductByPostId(id);
+        if(!listFiles.isEmpty()){
+            // Not Owner Post (seller)
+            if(!currentUser().equalsIgnoreCase(post(id).getUserId().toString())){
+                if(productForSaleRepository.getProductByPostIdAndUserId(id, shop().getId()).isEmpty()){
+                    throw new NotFoundExceptionClass(ValidationConfig.UR_PRODUCT_NOT_FOUND);
+                }
+                return productForSaleRepository.getProductByPostIdAndUserId(id, shop().getId()).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
+            }
+            // Owner Post (buyer) can see all product comment
+            return productForSaleRepository.getProductByPostId(id).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOT_EXIST_IN_POST);
+    }
+
+    @Override
+    public ByteArrayResource getImage(String fileName) throws IOException {
+        String filePath = "product-service/src/main/resources/storage/" + fileName;
+        Path path = Paths.get(filePath);
+
+        if(!Files.exists(path)){
+            throw new com.example.productservice.exception.NotFoundExceptionClass(ValidationConfig.FILE_NOTFOUND);
+        }
+        String uploadPath = fileStorageProperties.getUploadPath();
+        Path paths = Paths.get(uploadPath + fileName);
+        return new ByteArrayResource(Files.readAllBytes(paths));
     }
 
     // Returning Token
@@ -120,8 +169,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             // Decode to Get User Id
-//            DecodedJWT decodedJWT = JWT.decode(jwt.getTokenValue());
-            DecodedJWT decodedJWT = JWT.decode("eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXckJaS3JoVDBIRXhhMU9FWUNJcUhOWjlSQkpyUVNRejZMVlQ1dEFEU1BnIn0.eyJleHAiOjE2OTczNTg4OTYsImlhdCI6MTY5NzM1ODU5NiwianRpIjoiN2ZiYzE4ZmUtMWRlYy00NGU0LWFkN2QtODZkZDI2MWNmYTNhIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoxMjM0L2F1dGgvcmVhbG1zL2dvLXNlbGxpbmctYXBpIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjJhMTAxYjk5LTYxYmQtNDBhMS05MmMzLThlZDgwMzJhMmE0OCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImdvLXNlbGxpbmciLCJzZXNzaW9uX3N0YXRlIjoiYmRjMzdjM2YtY2E3Zi00YjE5LWEyNGQtNzE2NGNkOWEyY2I4IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImRlZmF1bHQtcm9sZXMtZ28tc2VsbGluZy1hcGkiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInNpZCI6ImJkYzM3YzNmLWNhN2YtNGIxOS1hMjRkLTcxNjRjZDlhMmNiOCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6Im15IHJlY2VpdmVyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoicmVjZWl2ZXIiLCJnaXZlbl9uYW1lIjoibXkiLCJmYW1pbHlfbmFtZSI6InJlY2VpdmVyIiwiZW1haWwiOiJyZWNlaXZlckBnbWFpbC5jb20ifQ.ETFk0WjaQL5NwYoES3_-wnCxtI-VPrCDY3UxSjW4zJYEa-3QDpGY8j46j4bR1kXXHd75snW8n44wiCbWlDbLMOB5hVkAK-4eZgRNrzCIbLnN1p15KeKzIKaSK8EuoG2gPKd3hsuRPhZ9QGst1K1-xTjVtdhrumEqL1MUMzI8KM45wC9iJfuYHJLECqCk72TnbNhPludJzLA38naO6nlUFZ_n1uDKZcxq8SpKYUES0BQeWuHLI0agsRhHxqhAi6YVtjsBhLhG2r6tNxdQcTe8TELJJGeF6YqYwTcpr6RRaO7UQFmmRbRA9WrwoZIddXMxfeGpXwhhcaKY0T4EBqg4mg");
+            DecodedJWT decodedJWT = JWT.decode(jwt.getTokenValue());
             return decodedJWT.getSubject();
         } else {
             return null;
@@ -143,16 +191,14 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     }
 
     // Return Shop
-    public Shop shop(UUID id){
-
+    public Shop shop(){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if(authentication.getPrincipal() instanceof Jwt jwt){
-            return covertSpecificClass.convertValue(Objects.requireNonNull(shopClient
+            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                     .get()
-                    .uri("api/v1/shops/owner/{id}", id)
+                    .uri("api/v1/shops/current")
                     .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                     .retrieve()
                     .bodyToMono(ApiResponse.class)
@@ -161,9 +207,40 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
+    // Return Post
+    public Post post(UUID id){
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication.getPrincipal() instanceof Jwt jwt){
+            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .get()
+                    .uri("api/v1/posts/{id}", id)
+                    .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
+                    .retrieve()
+                    .bodyToMono(ApiResponse.class)
+                    .block()).getPayload(), Post.class);
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+    }
+
     // Separate file -> List
     private List<String> getFiles(ProductForSale product) {
-        return Arrays.asList(product.getFile().replaceAll("\\[|\\]", "").split(", "));
+        return Arrays.asList(product.getFile().replaceAll(ValidationConfig.REGEX_ROLES, "").split(", "));
+    }
+
+    // Validation legal Role
+    public void isLegal(UUID id){
+        if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.SELLER))){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
+        }
+    }
+
+    // Validation Shop
+    public void validationShop (UUID shopId, ProductForSale preShop){
+        if(!shopId.toString().equalsIgnoreCase(preShop.getShopId().toString())){
+            throw new IllegalArgumentException(ValidationConfig.CANNOT_UPLOAD);
+        }
     }
 
 }

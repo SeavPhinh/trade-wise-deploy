@@ -22,7 +22,10 @@ import io.swagger.v3.oas.annotations.servers.Server;
         type = SecuritySchemeType.OAUTH2,
         in = SecuritySchemeIn.HEADER,
         flows = @OAuthFlows(
-                clientCredentials = @OAuthFlow(
+//                clientCredentials = @OAuthFlow(
+//                        tokenUrl = "http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/token"
+//                ),
+                password = @OAuthFlow(
                         tokenUrl = "http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/token"
                 )
         )

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -88,7 +89,7 @@ public class ProductController {
     @Operation(summary = "update products by id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProductById(@PathVariable UUID id,
-                                                                    @Valid @RequestBody ProductRequest request){
+                                                                            @Valid @RequestBody ProductRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
                 " Updated products by id successfully",
                 productService.updateProductById(id, request),
@@ -97,15 +98,22 @@ public class ProductController {
     }
 
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "upload multiple file")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) List<MultipartFile> files,
+    public ResponseEntity<?> saveMultiFile(@PathVariable UUID productId,
+            @RequestParam(required = false) List<MultipartFile> files,
                                            HttpServletRequest request) throws IOException {
         if(files != null){
-            return ResponseEntity.status(200).body(productService.saveListFile(files,request));
+            return ResponseEntity.status(200).body(productService.saveListFile(productId,files,request));
         }
         throw new NotFoundExceptionClass("No filename to upload");
+    }
+
+    @GetMapping("/image")
+    @Operation(summary = "fetched image")
+    public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(productService.getImage(fileName));
     }
 
 }

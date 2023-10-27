@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,7 +49,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         this.userInfoRepository = userInfoRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.keycloak = keycloak;
-        this.userWeb = userWeb.baseUrl("http://localhost:8081/").build();
+        this.userWeb = userWeb.baseUrl("http://192.168.154.1:8080/").build();
     }
 
     @Override
@@ -161,8 +160,7 @@ public class UserInfoServiceImpl implements UserInfoService {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
                 // Decode to Get User Id
-//            DecodedJWT decodedJWT = JWT.decode(jwt.getTokenValue());
-                DecodedJWT decodedJWT = JWT.decode("eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXckJaS3JoVDBIRXhhMU9FWUNJcUhOWjlSQkpyUVNRejZMVlQ1dEFEU1BnIn0.eyJleHAiOjE2OTc5ODYxODcsImlhdCI6MTY5Nzk4NTg4NywianRpIjoiOTc0MmYzNWYtYWE1My00MWQ3LTk4MjAtZDgzNjU1YjVhM2RmIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoxMjM0L2F1dGgvcmVhbG1zL2dvLXNlbGxpbmctYXBpIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6ImFkZDc4MmM2LTFkYzktNGJjYi1hNjRkLWU2OTFiOTM4ODczNCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImdvLXNlbGxpbmciLCJzZXNzaW9uX3N0YXRlIjoiMDhjOGI5YTMtMzk2Yi00M2FmLTkxZGItNDI2YzA0MzYyNzQ5IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIqIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsImRlZmF1bHQtcm9sZXMtZ28tc2VsbGluZy1hcGkiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInNpZCI6IjA4YzhiOWEzLTM5NmItNDNhZi05MWRiLTQyNmMwNDM2Mjc0OSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6IlJpdGh5c2FrIFJlbiIsInByZWZlcnJlZF91c2VybmFtZSI6InJpdGh5c2FrIiwiZ2l2ZW5fbmFtZSI6IlJpdGh5c2FrIiwiZmFtaWx5X25hbWUiOiJSZW4iLCJlbWFpbCI6InJpdGh5c2FrcmVuQGdtYWlsLmNvbSJ9.egQpht_xDyLb-Qh08rsC-DqkiHiYvF_IRu_HeLLehOHYNtWQH9RdTCiHeh3iNgeJc_BhkrxK_X2C14-QVWrWjBPxqJ9Dl4B2oMcEVEXsJBr3uwU4mscnJScpDFACA9ubvLE6rvI-qp1-vZ1sOMYyucDpv5nNnFYyFuwWhR8312TfzTamld7tMmfKqkLgmW8XbkZp1FbOCowLBkrqApqlX29BqNG8045FImzNHp-BPe8AgcHS8Wqxf_R37BvKlO3fSUAKPOOBPnQ6G_yELayBmDs1pDvMg9jRX1vGkN-Aw65MaaCKdUPgTzQg43QMAZK5evr-_NHKafL5Pgs0nWoweQ");
+                DecodedJWT decodedJWT = JWT.decode(jwt.getTokenValue());
                 return decodedJWT.getSubject();
             }
         }catch (Exception e){

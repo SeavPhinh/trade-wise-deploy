@@ -4,6 +4,7 @@ import com.example.productservice.request.FileRequest;
 import com.example.productservice.request.ProductRequest;
 import com.example.productservice.response.ProductResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Service
 public interface ProductService {
 
-    List<FileRequest> saveListFile(List<MultipartFile> files, HttpServletRequest request) throws IOException;
+    ProductResponse saveListFile(UUID productId, List<MultipartFile> files, HttpServletRequest request) throws IOException;
 
     ProductResponse addProduct(ProductRequest postRequest);
 
@@ -27,4 +28,5 @@ public interface ProductService {
     ProductResponse updateProductById(UUID id, ProductRequest request);
 
     List<ProductResponse> getAllProductByShopId(UUID id);
+    ByteArrayResource getImage(String fileName) throws IOException;
 }

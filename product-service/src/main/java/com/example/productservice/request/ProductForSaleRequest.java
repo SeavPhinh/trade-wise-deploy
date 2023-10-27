@@ -17,11 +17,10 @@ public class ProductForSaleRequest {
     private List<String> files;
     private String description;
     private Boolean status;
-    private UUID shopId;
     private UUID postId;
 
-    public ProductForSale toEntity(){
-        return new ProductForSale(null, this.title,this.files.toString(),this.description,this.status,this.shopId,this.postId, LocalDateTime.now(), LocalDateTime.now());
+    public ProductForSale toEntity(UUID shopId){
+        return new ProductForSale(null, this.title,this.files.toString(),this.description,this.status,shopId,this.postId, LocalDateTime.now(), LocalDateTime.now());
     }
 
 }
