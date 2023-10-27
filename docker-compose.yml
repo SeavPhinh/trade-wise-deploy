@@ -1,14 +1,14 @@
 version: '3'
 
 networks:
-  keycloak-network:
+  trade-wise:
 
 services:
   # Keycloak Database
   keycloak-db:
     image: postgres:14.4-alpine
     networks:
-      - keycloak-network
+      - trade-wise
     volumes:
       - keycloak-db-data:/var/lib/postgresql/data
     environment:
@@ -18,7 +18,7 @@ services:
   keycloak:
     image: jboss/keycloak
     networks:
-      - keycloak-network
+      - trade-wise
     ports:
       - "1234:8080"
     depends_on:
@@ -31,18 +31,25 @@ services:
       - DB_PASSWORD=keycloak
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
-      - KEYCLOAK_IMPORT= /keycloak/realm-export.json
-      - KEYCLOAK_PROFILE_FEATURE_UPLOAD_SCRIPTS=enabled
+#      - KEYCLOAK_IMPORT=keycloak/realm-export.json
+#      - KEYCLOAK_PROFILE_FEATURE_UPLOAD_SCRIPTS=enabled
   # Config Server
   config-server:
     build:
       context: .
       dockerfile: deployment/config-server.Dockerfile
+    healthcheck:
+      test: "curl --fail --silent http://localhost:8080/actuator/health | grep UP || exit 1"
+      interval: 5s
+      timeout: 5s
+      retries: 5
     container_name: config-server
     environment:
-      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_PROFILES_ACTIVE: default
     ports:
       - "8888:8080"
+    networks:
+      - trade-wise
   # Eureka Server
   eureka-server:
     build:
@@ -52,9 +59,11 @@ services:
     environment:
       SPRING_APPLICATION_NAME: eureka-server
       SPRING_PROFILES_ACTIVE: native,dev
-      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+      SPRING_CONFIG_IMPORT: "configserver:http://localhost:8888"
     ports:
       - "8761:8761"
+    networks:
+      - trade-wise
   # Gateway
   gateway-service:
     build:
@@ -67,6 +76,8 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8080:8080"
+    networks:
+      - trade-wise
   # User info Service
   user-service:
     build:
@@ -79,6 +90,8 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8081:8080"
+    networks:
+      - trade-wise
   # Post Service
   post-service:
     build:
@@ -91,6 +104,8 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8083:8080"
+    networks:
+      - trade-wise
   # Product Service
   product-service:
     build:
@@ -103,6 +118,8 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8089:8080"
+    networks:
+      - trade-wise
   # Product Service
   shop-service:
     build:
@@ -115,6 +132,8 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8088:8080"
+    networks:
+      - trade-wise
   # User info Service
   user-info-service:
     build:
@@ -127,6 +146,8 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8084:8080"
+    networks:
+      - trade-wise
   # Category Service
   category-service:
     build:
@@ -139,6 +160,8 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8087:8080"
+    networks:
+      - trade-wise
 
 volumes:
   keycloak-db-data:

@@ -1,5 +1,6 @@
 package com.example.postservice.service;
 
+import com.example.commonservice.response.FileResponse;
 import com.example.postservice.exception.CustomErrorResponse;
 import com.example.postservice.model.Post;
 import com.example.postservice.request.FileRequest;
@@ -19,9 +20,9 @@ import java.util.UUID;
 @Service
 public interface PostService {
 
-    PostResponse createPost(PostRequest postRequest) ;
+    PostResponse createPost(PostRequest postRequest) throws Exception;
 
-    PostResponse saveListFile(List<MultipartFile> files, HttpServletRequest request, UUID postId) throws IOException;
+    FileResponse saveListFile(MultipartFile file, HttpServletRequest request) throws Exception;
 
     List<PostResponse> getAllPost();
 
@@ -37,7 +38,7 @@ public interface PostService {
 
     ByteArrayResource getImage(String fileName) throws IOException;
 
-    List<PostResponse> findByBudgetFromAndBudgetTo(RangeBudget budget);
+    List<PostResponse> findByBudgetFromAndBudgetTo(Float budgetFrom, Float budgetTo);
 
     List<PostResponse> getAllPostSortedByNewest();
 

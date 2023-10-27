@@ -33,7 +33,7 @@ public class CrudPostController {
     @PostMapping("")
     @Operation(summary = "BUYER created post")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody PostRequest postRequest) {
+    public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody PostRequest postRequest) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 "BUYER created new post successfully",
                 postService.createPost(postRequest),
@@ -64,14 +64,13 @@ public class CrudPostController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @PutMapping(value = "/upload/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "upload multiple file")
+    @PutMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "upload file to post")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) List<MultipartFile> files,
-                                           HttpServletRequest request,
-                                           @PathVariable UUID postId) throws IOException {
-        if (files != null) {
-            return ResponseEntity.status(200).body(postService.saveListFile(files, request, postId));
+    public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) MultipartFile file,
+                                           HttpServletRequest request) throws Exception {
+        if (file != null) {
+            return ResponseEntity.status(200).body(postService.saveListFile(file, request));
         }
         throw new NotFoundExceptionClass("No filename to upload");
     }

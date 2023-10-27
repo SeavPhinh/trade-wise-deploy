@@ -25,6 +25,10 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 clientCredentials = @OAuthFlow(
                         tokenUrl = "http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/token"
                 )
+                ,
+                password = @OAuthFlow(
+                tokenUrl = "http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/token"
+                )
         )
 )
 public class OpenApiConfig { }

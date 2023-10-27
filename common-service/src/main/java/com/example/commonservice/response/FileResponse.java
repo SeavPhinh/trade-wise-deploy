@@ -10,9 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FileResponse {
-    private UUID id;
     private String fileName;
-    private String fileUrl;
     private String fileType;
     private Long size;
 }

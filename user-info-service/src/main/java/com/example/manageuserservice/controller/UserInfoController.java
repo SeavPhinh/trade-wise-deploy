@@ -1,6 +1,7 @@
 package com.example.manageuserservice.controller;
 
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.FileResponse;
 import com.example.manageuserservice.request.UserInfoRequest;
 import com.example.manageuserservice.response.UserInfoResponse;
 import com.example.manageuserservice.service.userinfo.UserInfoService;
@@ -75,9 +76,9 @@ public class UserInfoController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "oAuth2")
-    @Operation(summary = "upload file")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> saveFile(@RequestParam(required = false) MultipartFile file,
-                                                              HttpServletRequest request) throws IOException {
+    @Operation(summary = "upload profile image")
+    public ResponseEntity<ApiResponse<FileResponse>> saveFile(@RequestParam(required = false) MultipartFile file,
+                                                              HttpServletRequest request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 "image upload to user information successfully",
                 userInfoService.saveFile(file,request),

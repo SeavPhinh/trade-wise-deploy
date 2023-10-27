@@ -79,10 +79,11 @@ public class PostController {
 
     @GetMapping("/budget")
     @Operation(summary = "get all posts by budget (get all posts as long as the buyer can buy)")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> filterPostByBudget(@Valid @RequestBody RangeBudget budget) {
+    public ResponseEntity<ApiResponse<List<PostResponse>>> filterPostByBudget(@RequestParam(defaultValue = "0.0") Float budgetFrom,
+                                                                              @RequestParam(defaultValue = "1.0") Float budgetTo) {
         return new ResponseEntity<>(new ApiResponse<>(
                 "posts filtered by budget fetched successfully",
-                postService.findByBudgetFromAndBudgetTo(budget),
+                postService.findByBudgetFromAndBudgetTo(budgetFrom,budgetTo),
                 HttpStatus.OK
         ),HttpStatus.OK);
     }

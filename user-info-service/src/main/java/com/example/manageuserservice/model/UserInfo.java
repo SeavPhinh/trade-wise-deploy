@@ -2,6 +2,7 @@ package com.example.manageuserservice.model;
 
 import com.example.commonservice.model.User;
 import com.example.manageuserservice.response.UserInfoResponse;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class UserInfo {
     private UUID id;
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDateTime dob;
     private String phoneNumber;
     @Column(nullable = false)

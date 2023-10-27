@@ -1,3 +1,3 @@
-FROM eclipse-temurin:20-jdk-jammy
-ADD ../shop-service/build/libs/shop-service-0.0.1-SNAPSHOT.jar .
-ENTRYPOINT ["java", "-jar", "root.jar"]
+FROM openjdk:17
+COPY ../shop-service/build/libs/shop-service-0.0.1-SNAPSHOT.jar shop.jar
+ENTRYPOINT ["java", "-jar", "shop.jar"]

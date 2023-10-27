@@ -1,5 +1,6 @@
 package com.example.manageuserservice.service.userinfo;
 
+import com.example.commonservice.response.FileResponse;
 import com.example.manageuserservice.request.UserInfoRequest;
 import com.example.manageuserservice.response.UserInfoResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 @Service
 public interface UserInfoService {
-    UserInfoResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException;
+    FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws Exception;
 
     UserInfoResponse addUserDetail(UserInfoRequest request) throws Exception;
 

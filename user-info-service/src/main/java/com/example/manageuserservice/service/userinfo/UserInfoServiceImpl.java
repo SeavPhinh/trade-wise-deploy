@@ -5,6 +5,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.FileResponse;
 import com.example.manageuserservice.config.FileStorageProperties;
 import com.example.manageuserservice.exception.NotFoundExceptionClass;
 import com.example.manageuserservice.model.UserInfo;
@@ -53,25 +54,18 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public UserInfoResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException {
-        if (file != null && !isImageFile(file)) {
-            throw new IllegalArgumentException(ValidationConfig.INVALID_FILE);
-        }
+    public FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws Exception {
         String uploadPath = fileStorageProperties.getUploadPath();
         Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
-
         java.io.File directory = directoryPath.toFile();
         if (!directory.exists()) {
             directory.mkdirs();
         }
-
         String fileName = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+","");
+        validateFile(fileName);
         File dest = new File(directoryPath.toFile(), fileName);
         file.transferTo(dest);
-        UserInfo preUserInfo = userInfoRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
-        preUserInfo.setProfileImage(fileName);
-        userInfoRepository.save(preUserInfo);
-        return preUserInfo.toDto(createdBy(preUserInfo.getUserId()));
+        return new FileResponse(fileName,file.getContentType(),file.getSize());
     }
 
     @Override
@@ -112,7 +106,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         preUserInfo.setGender(request.getGender());
         preUserInfo.setDob(request.getDob());
         preUserInfo.setPhoneNumber(request.getPhoneNumber());
-        preUserInfo.setProfileImage(request.getProfileImage());
+//        preUserInfo.setProfileImage(request.getProfileImage());
         return userInfoRepository.save(preUserInfo).toDto(createdBy(preUserInfo.getUserId()));
     }
 

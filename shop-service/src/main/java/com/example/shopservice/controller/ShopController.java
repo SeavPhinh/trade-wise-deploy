@@ -90,15 +90,15 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/user/{userId}")
-    @Operation(summary = "fetch shop by owner id")
-    public ResponseEntity<ApiResponse<ShopResponse>> getShopByUserId(@PathVariable UUID userId){
-        return new ResponseEntity<>(new ApiResponse<>(
-                "Shop fetched by user id successfully",
-                shopService.getShopByUserId(userId),
-                HttpStatus.OK
-        ), HttpStatus.OK);
-    }
+//    @GetMapping("/user/{userId}")
+//    @Operation(summary = "fetch shop by owner id")
+//    public ResponseEntity<ApiResponse<ShopResponse>> getShopByUserId(@PathVariable UUID userId){
+//        return new ResponseEntity<>(new ApiResponse<>(
+//                "Shop fetched by user id successfully",
+//                shopService.getShopByUserId(userId),
+//                HttpStatus.OK
+//        ), HttpStatus.OK);
+//    }
 
     @PutMapping("/current")
     @Operation(summary = "update shop by id")

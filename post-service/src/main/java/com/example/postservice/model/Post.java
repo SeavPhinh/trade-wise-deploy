@@ -36,8 +36,8 @@ public class Post {
     private LocalDateTime lastModified;
     private UUID userId;
 
-    public PostResponse toDto(List<String> files, User createdBy){
-        return new PostResponse(this.id,this.title, files, this.description, this.budgetFrom,this.budgetTo, this.subCategory, this.status,this.createdDate,this.lastModified,createdBy);
+    public PostResponse toDto(User createdBy){
+        return new PostResponse(this.id,this.title, this.file, this.description, this.budgetFrom,this.budgetTo, this.subCategory, this.status,this.createdDate,this.lastModified,createdBy);
     }
 
 
