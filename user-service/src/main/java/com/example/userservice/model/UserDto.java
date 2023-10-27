@@ -1,5 +1,6 @@
 package com.example.userservice.model;
 
+import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -16,7 +17,7 @@ public class UserDto {
 
         // Converting String to List<Role>
         String listRole = userRepresentation.getAttributes().get("role").get(0);
-        List<String> rolesList = Arrays.asList(listRole.replaceAll("\\[|\\]", "").split(", "));
+        List<String> rolesList = Arrays.asList(listRole.replaceAll(ValidationConfig.REGEX_ROLES, "").split(", "));
         List<Role> roles = rolesList.stream()
                 .map(Role::valueOf)
                 .collect(Collectors.toList());
@@ -28,6 +29,7 @@ public class UserDto {
         user.setLastName(userRepresentation.getLastName());
         user.setIsVerify(Boolean.valueOf(userRepresentation.getAttributes().get("is_verify").get(0)));
         user.setRoles(roles);
+        user.setLoggedAs(userRepresentation.getAttributes().get("logged_as").get(0));
         user.setCreatedDate(LocalDateTime.parse(userRepresentation.getAttributes().get("created_date").get(0)));
         user.setLastModified(LocalDateTime.parse(userRepresentation.getAttributes().get("last_modified").get(0)));
         return user;

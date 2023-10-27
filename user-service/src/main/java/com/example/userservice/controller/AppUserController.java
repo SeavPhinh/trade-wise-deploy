@@ -96,7 +96,7 @@ public class AppUserController {
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "delete user by id from keycloak")
-    public ResponseEntity<ApiResponse<User>> deleteUserById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<String>> deleteUserById(@PathVariable UUID id){
 
         return new ResponseEntity<>(new ApiResponse<>(
                 "User delete by id successfully",
@@ -104,17 +104,6 @@ public class AppUserController {
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
-
-//    @PutMapping("/current")
-//    @SecurityRequirement(name = "oAuth2")
-//    @Operation(summary = "update current user from keycloak")
-//    public ResponseEntity<ApiResponse<User>> updateCurrentUser(@Valid @RequestBody UserUpdate request){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "Current user updated by id successfully",
-//                userService.updateUser(request),
-//                HttpStatus.ACCEPTED
-//        ), HttpStatus.ACCEPTED);
-//    }
 
     @PostMapping("/verify")
     @Operation(summary = "verified account first login")
@@ -146,7 +135,7 @@ public class AppUserController {
         ), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/otp-reset-password")
+    @PostMapping("/otp/reset-password")
     @Operation(summary = "Sending otpCode to user")
     public ResponseEntity<ApiResponse<RequestResetPassword>> otpResetPassword(@Valid @RequestBody RequestResetPassword reset) throws MessagingException {
         return new ResponseEntity<>(new ApiResponse<>(

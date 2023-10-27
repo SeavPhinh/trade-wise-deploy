@@ -55,7 +55,6 @@ public class UserServiceImpl implements UserService {
         if(userRepresentations.stream().toList().isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.EMPTY_USER);
         }
-
         return userRepresentations.stream()
                 .map(UserDto::toDto)
                 .collect(Collectors.toList());
@@ -102,6 +101,7 @@ public class UserServiceImpl implements UserService {
         userPre.singleAttribute("role", String.valueOf(roles(String.valueOf(roles))));
         userPre.singleAttribute("created_date", String.valueOf(LocalDateTime.now()));
         userPre.singleAttribute("last_modified", String.valueOf(LocalDateTime.now()));
+        userPre.singleAttribute("logged_as", String.valueOf(Role.BUYER));
         userPre.singleAttribute("otp_code",String.valueOf(emailService.verifyCode(request.getEmail())));
         userPre.singleAttribute("is_verify",String.valueOf(false));
         userPre.setEnabled(true);
@@ -123,35 +123,21 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    public User deleteUser(UUID userId) {
+    public String deleteUser(UUID userId) {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            User responseUser;
             if (user.getId().equalsIgnoreCase(String.valueOf(getUserById(userId).getId()))) {
-                responseUser = getUserById(userId);
                 keycloak.realm(realm).users().delete(String.valueOf(userId));
-                return responseUser;
+                return "User has deleted successfully";
             }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
-
-    }
-
-    public User updateUser(UserUpdate request) {
-        UserRepresentation updatedUser = new UserRepresentation();
-        resource(UUID.fromString(currentUser()));
-        updatedUser.setEmail(request.getEmail());
-        updatedUser.singleAttribute("role", String.valueOf(request.getRoles()));
-        updatedUser.singleAttribute("created_date", String.valueOf(resource(UUID.fromString(currentUser())).toRepresentation().getAttributes().get("createdDate").get(0)));
-        updatedUser.singleAttribute("last_modified", String.valueOf(LocalDateTime.now()));
-        resource(UUID.fromString(currentUser())).update(updatedUser);
-        return getUserById(UUID.fromString(currentUser()));
     }
 
     @Override
     public UserResponse verifiedAccount(Role role, VerifyLogin login){
 
         roleCheck(role);
-        String token = "";
+        String token;
 
         if(accessTokenResponse(login.getAccount(),login.getPassword()) == null){
             throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
@@ -213,11 +199,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public RequestResetPassword sendOptCode(RequestResetPassword reset) throws MessagingException {
-        User account = findEmail(reset.getAccount());
-        if (account.getEmail().equalsIgnoreCase(reset.getAccount()) || account.getUsername().equalsIgnoreCase(reset.getAccount())) {
-            setAttribute(findUser(reset.getAccount()),reset.getAccount().replaceAll("\\s+",""));
-            emailService.resetPassword(reset.getAccount().replaceAll("\\s+",""));
-            return reset;
+        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
+            if(user.getEmail().equalsIgnoreCase(reset.getEmail())){
+                setAttribute(findUser(reset.getEmail()),reset.getEmail().replaceAll("\\s+",""));
+                emailService.resetPassword(reset.getEmail().replaceAll("\\s+",""));
+                return reset;
+            }
+            throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
@@ -226,12 +214,11 @@ public class UserServiceImpl implements UserService {
     public UserResponse loginAccount(Role role, UserLogin login) {
 
         roleCheck(role);
-        String token = "";
+        String token;
 
         if(accessTokenResponse(login.getAccount(),login.getPassword()) == null){
             throw new IllegalArgumentException(ValidationConfig.USER_INVALID);
         }
-
         token = accessTokenResponse(login.getAccount(),login.getPassword());
 
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
@@ -311,7 +298,7 @@ public class UserServiceImpl implements UserService {
 
     // Converting Role from Attribute as String to ArrayList
     public List<Role> roles(String role){
-        List<String> rolesList = Arrays.asList(role.replaceAll("\\[|\\]", "").split(", "));
+        List<String> rolesList = Arrays.asList(role.replaceAll(ValidationConfig.REGEX_ROLES, "").split(", "));
         return rolesList.stream()
                 .map(roleName -> Role.valueOf(roleName.toUpperCase()))
                 .collect(Collectors.toList());
@@ -394,16 +381,6 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException(ValidationConfig.EXISTING_USERNAME);
             }
         }
-    }
-
-    // Find Email
-    public User findEmail(String account){
-        for (UserRepresentation user : keycloak.realm(realm).users().list()) {
-            if(user.getEmail().equalsIgnoreCase(account) || user.getUsername().equalsIgnoreCase(account)){
-                return returnUser(user);
-            }
-        }
-        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     // Return UserRepresentation

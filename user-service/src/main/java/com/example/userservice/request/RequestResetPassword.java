@@ -13,6 +13,6 @@ public class RequestResetPassword {
 
     @NotBlank
     @NotEmpty
-    private String account;
+    private String email;
 
 }
