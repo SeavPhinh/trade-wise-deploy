@@ -2,8 +2,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://34.143.202.207:5432/shop_db
-    username: postgres
-    password: tradewise321
+    username: '{cipher}cb149f3fb4e5611382132c16617c52d7f0b604d6b8c3fed1e4433b9c5a2ffdce'
+    password: '{cipher}9ea912480434f64cb60f47fb6cfc696a2a4c73ee0969a426479240c203aeb984'
   jpa:
     hibernate:
       ddl-auto: update
@@ -29,8 +29,8 @@ keycloak:
   credentials:
     username: 'admin'
     password: 'admin'
-    client-id: 'go-selling'
-    secret: '5C0KwGLLlVYFrap5mni59YnZOwoONS3t'
+    client-id: '{cipher}68cb01c2cb6cc09d52d307bb77df71dd6ea99df0449c664e7031b6cbb6529055'
+    secret: '{cipher}17a058ed6a1cfb9e45c48c567154bf0c424936c2a4a78330270b8e651be4ff65fd8cabdf6534b386018fd079b1cc86dc7415a6c77b5f1897fa7181971de2fbc1'
     provider: secret
 file:
   uploadPath: shop-service/src/main/resources/storage/

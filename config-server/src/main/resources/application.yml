@@ -19,5 +19,7 @@ spring:
             - user-service
             - eureka-server
           default-label: master
+encrypt:
+  key: sdafghfdeweqads#sazdf1212
 server:
   port: 8888
