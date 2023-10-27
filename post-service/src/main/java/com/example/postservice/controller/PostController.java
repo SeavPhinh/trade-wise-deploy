@@ -1,24 +1,16 @@
 package com.example.postservice.controller;
-
-import com.example.postservice.model.Post;
-import com.example.postservice.request.PostRequest;
+import com.example.postservice.request.RangeBudget;
 import com.example.postservice.response.PostResponse;
 import com.example.postservice.service.PostService;
-import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +18,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/posts")
 @Tag(name = "Post")
-@SecurityRequirement(name = "oAuth2")
 public class PostController {
 
     private final PostService postService;
@@ -35,86 +26,44 @@ public class PostController {
         this.postService = postService;
     }
 
-    @PostMapping("")
-    @Operation(summary = "user created post")
-    public ResponseEntity<ApiResponse<PostResponse>> createPost(@Valid @RequestBody PostRequest postRequest) {
-        return new ResponseEntity<>(new ApiResponse<>(
-                "User created post successfully",
-                postService.createPost(postRequest),
-                HttpStatus.CREATED
-        ), HttpStatus.CREATED);
-    }
-
     @GetMapping("")
-    @Operation(summary = "fetch all posts")
+    @Operation(summary = "fetched all BUYER's posts")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPost() {
         return new ResponseEntity<>(new ApiResponse<>(
-                "Posts fetched successfully",
+                "fetched all BUYER's post successfully",
                 postService.getAllPost(),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "fetch post by id")
+    @Operation(summary = "fetched BUYER's post by id (not draft post)")
     public ResponseEntity<ApiResponse<PostResponse>> getPostById(@PathVariable UUID id) {
         return new ResponseEntity<>(new ApiResponse<>(
-                "User fetched by id successfully",
+                "fetched BUYER's post by id successfully",
                 postService.getPostById(id),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "delete post by id")
-    public ResponseEntity<ApiResponse<PostResponse>> deletePostById(@PathVariable UUID id) {
-
-        return new ResponseEntity<>(new ApiResponse<>(
-                "post delete by id successfully",
-                postService.deletePostById(id),
-                HttpStatus.OK
-        ), HttpStatus.OK);
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "update post and drafted post by id")
-    public ResponseEntity<ApiResponse<PostResponse>> updatePostById(@PathVariable UUID id,
-                                                                    @Valid @RequestBody PostRequest request) {
-        return new ResponseEntity<>(new ApiResponse<>(
-                " Updated post by id successfully",
-                postService.updatePostById(id, request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
-    }
-
-
-    @PutMapping(value = "/upload/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "upload multiple file")
-    public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) List<MultipartFile> files,
-                                           HttpServletRequest request,
-                                           @PathVariable UUID postId) throws IOException {
-        if (files != null) {
-            return ResponseEntity.status(200).body(postService.saveListFile(files, request, postId));
-        }
-        throw new NotFoundExceptionClass("No filename to upload");
-    }
-
 
     @GetMapping("/drafted")
-    @Operation(summary = "fetch all drafted posts ")
+    @Operation(summary = "fetch all Buyer's drafted posts")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAllDraftPosts() {
         return new ResponseEntity<>(new ApiResponse<>(
-                "Drafted posts fetched successfully",
+                "fetched all BUYER's drafted posts successfully",
                 postService.getAllDraftPosts(),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
 
     @GetMapping("/drafted/{id}")
-    @Operation(summary = "fetch drafted post by id")
+    @Operation(summary = "fetch buyer's drafted post by id")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<PostResponse>> getDraftedPostById(@PathVariable UUID id) {
         return new ResponseEntity<>(new ApiResponse<>(
-                "Drafted post fetched by id successfully",
+                "fetched BUYER's drafted posts by id successfully",
                 postService.getDraftedPostById(id),
                 HttpStatus.OK
         ), HttpStatus.OK);
@@ -125,17 +74,17 @@ public class PostController {
     public ResponseEntity<?> getImageByName(@PathVariable("fileName") String name) throws IOException {
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
-                .body(postService.getImageByName(name));
+                .body(postService.getImage(name));
     }
 
     @GetMapping("/budget")
     @Operation(summary = "get all posts by budget (get all posts as long as the buyer can buy)")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> filterPostByBudget(@RequestParam Float budgetFrom,@RequestParam Float budgetTo) {
+    public ResponseEntity<ApiResponse<List<PostResponse>>> filterPostByBudget(@Valid @RequestBody RangeBudget budget) {
         return new ResponseEntity<>(new ApiResponse<>(
                 "posts filtered by budget fetched successfully",
-                postService.findByBudgetFromAndBudgetTo(budgetFrom,budgetTo),
+                postService.findByBudgetFromAndBudgetTo(budget),
                 HttpStatus.OK
-                ),HttpStatus.OK);
+        ),HttpStatus.OK);
     }
 
 
@@ -198,8 +147,9 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
-    @GetMapping("/currentUser")
+    @GetMapping("/current")
     @Operation(summary = "get all post for current user")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getPostsForCurrentUser(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "posts for current user fetched successfully",

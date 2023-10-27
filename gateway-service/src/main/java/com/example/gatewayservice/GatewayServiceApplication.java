@@ -2,12 +2,6 @@ package com.example.gatewayservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.servers.Server;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +32,7 @@ public class GatewayServiceApplication {
 
                 .route(r -> r.path("/post-service/v3/api-docs").uri("lb://post-service"))
                 .route(r -> r.path("/api/v1/posts/**").uri("lb://post-service"))
+                .route(r -> r.path("/api/v1/operation/**").uri("lb://post-service"))
 
                 .route(r -> r.path("/product-service/v3/api-docs").uri("lb://product-service"))
                 .route(r -> r.path("/api/v1/products/**").uri("lb://product-service"))

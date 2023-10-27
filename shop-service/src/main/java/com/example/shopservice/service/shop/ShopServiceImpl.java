@@ -310,7 +310,7 @@ public class ShopServiceImpl implements ShopService {
                         .get()
                         .uri(uriBuilder -> uriBuilder
                                 .path("api/v1/sub-categories")
-                                .queryParam("name", name)
+                                .queryParam("name", name.toUpperCase())
                                 .build())
                         .retrieve()
                         .bodyToMono(ApiResponse.class)

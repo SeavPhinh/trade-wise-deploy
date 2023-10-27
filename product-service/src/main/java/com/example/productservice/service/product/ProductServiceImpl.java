@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
+import com.example.commonservice.model.Post;
 import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
@@ -53,11 +54,19 @@ public class ProductServiceImpl implements ProductService{
     public ProductResponse saveListFile(UUID productId, List<MultipartFile> files, HttpServletRequest request) throws IOException {
 
         UUID shopId = shop(UUID.fromString(currentUser())).getId();
-        Product preData = productRepository.findById(productId).orElseThrow();
+
+        Optional<Product> pre = productRepository.findById(productId);
+
+        if(pre.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_PRODUCT);
+        }
+
+        Product preData = pre.get();
 
         if(!shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
             throw new IllegalArgumentException(ValidationConfig.CANNOT_UPLOAD);
         }
+
 
         isLegal(UUID.fromString(currentUser()));
         List<String> listFiles = new ArrayList<>();

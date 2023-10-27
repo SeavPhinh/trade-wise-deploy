@@ -97,8 +97,14 @@ public class ValidationConfig {
     public static final String NOTFOUND_POST = "This post is not found";
     public static final String NOT_EXIST_IN_POST = "This post is not containing comment from seller";
     public static final String NOT_OWNER_PRODUCT = "You are not owner of this product";
+    public static final String NOT_OWNER_POST = "You are not owner of this post";
     public static final String NOT_YET_ADD_TO_POST = "You haven't add a product to this post";
     public static final String UR_PRODUCT_NOT_FOUND = "Your products is not found in this post";
+    public static final String CANNOT_SMALLER = "Budget from cannot smaller than Budget To";
+    public static final String POST_NOT_CONTAIN = "Waiting BUYER to add new post";
+    public static final String NOT_FOUND_POST = "post not found";
+    public static final String UR_POST_LIST_NOT_CONTAIN = "you post's list is empty";
+    public static final String INVALID_RANGE = "this filed cannot be negative";
     public static final int MIN_SUB_CATEGORY = 1;
 
 }

@@ -21,28 +21,25 @@ public class PostRequest {
 
     @NotBlank(message = ValidationConfig.POST_TITLE_REQUIRE)
     @NotEmpty(message = ValidationConfig.POST_TITLE_REQUIRE)
-    @Size(min = 5,max =25,message = ValidationConfig.POST_TITLE_MESSAGE)
+    @Size(min = 5,max =25, message = ValidationConfig.POST_TITLE_MESSAGE)
     private String title;
-
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private List<String> file;
     @Size(max =ValidationConfig.POST_DESCRIPTION_MAX ,message = ValidationConfig.POST_DESCRIPTION_MESSAGE)
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private String description;
-
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private Float budgetFrom;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private Float budgetTo;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private String subCategory;
-
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private Boolean status;
 
 
     public Post toEntity(UUID userId){
-        return new Post(null,this.title,this.file.toString(),this.description, this.budgetFrom,this.budgetTo,this.subCategory,this.status, LocalDateTime.now(),LocalDateTime.now(),userId);
+        return new Post(null,this.title.trim(),this.file.toString(),this.description,this.budgetFrom,this.budgetTo,this.subCategory,this.status,LocalDateTime.now(),LocalDateTime.now(),userId);
     }
 
 }
