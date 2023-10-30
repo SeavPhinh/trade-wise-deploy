@@ -14,7 +14,7 @@ public interface SellerFavoriteService {
 
     List<SellerFavoriteResponse> getAllPostedFromSellerFavoriteListByOwnerId();
 
-    SellerFavoriteResponse removePostedFromFavoriteList(UUID id);
+    Void removePostedFromFavoriteList(UUID id);
 
     SellerFavoriteResponse addedShopToFavoriteList(SellerFavoriteRequest request);
 }

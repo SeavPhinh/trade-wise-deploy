@@ -43,7 +43,7 @@ public class SellerFavoriteController {
     @DeleteMapping(value = "/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "remove posted by id from favorite list")
-    public ResponseEntity<ApiResponse<SellerFavoriteResponse>> removePostedFromFavoriteList(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<?>> removePostedFromFavoriteList(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "remove posted by id from favorite list successfully",
                 sellerFavoriteService.removePostedFromFavoriteList(id),

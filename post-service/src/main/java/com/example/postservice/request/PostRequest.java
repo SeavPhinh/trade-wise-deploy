@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -18,7 +17,7 @@ public class PostRequest {
 
     @NotBlank(message = ValidationConfig.POST_TITLE_REQUIRE)
     @NotEmpty(message = ValidationConfig.POST_TITLE_REQUIRE)
-    @Size(min = 5,max =25, message = ValidationConfig.POST_TITLE_MESSAGE)
+    @Size(min = 5, max =25, message = ValidationConfig.POST_TITLE_MESSAGE)
     private String title;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private String file;
@@ -26,11 +25,11 @@ public class PostRequest {
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private String description;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
-    @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_RANGE)
+    @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_RANGE_BUDGET_TO)
 
     private Float budgetFrom;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
-    @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_RANGE)
+    @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_RANGE_BUDGET_FROM)
     private Float budgetTo;
     @NotNull(message = ValidationConfig.NULL_MESSAGE)
     private String subCategory;

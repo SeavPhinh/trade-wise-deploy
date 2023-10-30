@@ -35,6 +35,7 @@ VALUES
     (uuid_generate_v4(), 'TVS, VIDEO & AUDIO', (SELECT id FROM categories WHERE name = 'ELECTRONICS & APPLIANCES')),
 
     (uuid_generate_v4(), 'WOMEN `S FASHION', (SELECT id FROM categories WHERE name = 'FASHION & BEAUTY')),
+    (uuid_generate_v4(), 'PERFUME', (SELECT id FROM categories WHERE name = 'FASHION & BEAUTY')),
     (uuid_generate_v4(), 'MEN `S FASHION', (SELECT id FROM categories WHERE name = 'FASHION & BEAUTY')),
     (uuid_generate_v4(), 'BABY & KIDS', (SELECT id FROM categories WHERE name = 'FASHION & BEAUTY')),
 

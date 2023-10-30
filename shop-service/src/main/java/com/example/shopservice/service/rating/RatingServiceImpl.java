@@ -45,6 +45,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponse ratingShop(RatingRequest request) {
+        isLegal(UUID.fromString(currentUser()));
         if(request.getLevel() == null || request.getShopId() == null){
             throw new NullExceptionClass(ValidationConfig.NULL_FIELD);
         }

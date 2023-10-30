@@ -6,7 +6,7 @@ spring:
     password: '{cipher}9ea912480434f64cb60f47fb6cfc696a2a4c73ee0969a426479240c203aeb984'
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
   servlet:
     multipart:

@@ -1,6 +1,7 @@
 package com.example.manageuserservice.response;
 
 import com.example.commonservice.model.Shop;
+import com.example.commonservice.response.ShopResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,5 @@ import java.util.UUID;
 public class BuyerFavoriteResponse {
     private UUID id;
     private UUID userId;
-    private Shop shop;
+    private ShopResponse shop;
 }

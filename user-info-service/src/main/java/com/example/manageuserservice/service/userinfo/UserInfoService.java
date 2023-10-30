@@ -1,7 +1,9 @@
 package com.example.manageuserservice.service.userinfo;
 
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.response.FileResponse;
 import com.example.manageuserservice.request.UserInfoRequest;
+import com.example.manageuserservice.request.UserInfoRequestUpdate;
 import com.example.manageuserservice.response.UserInfoResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ByteArrayResource;
@@ -21,7 +23,9 @@ public interface UserInfoService {
 
     UserInfoResponse getCurrentUserInfo();
 
-    UserInfoResponse updateCurrentUserInfo(UserInfoRequest request);
+    UserInfoResponse updateCurrentUserInfo(UserInfoRequestUpdate request);
 
     ByteArrayResource getImage(String fileName) throws IOException;
+
+    Void switchRole(Role role);
 }

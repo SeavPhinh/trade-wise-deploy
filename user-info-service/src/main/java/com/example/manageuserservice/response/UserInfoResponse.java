@@ -20,8 +20,7 @@ import java.util.UUID;
 public class UserInfoResponse {
     private UUID id;
     private Gender gender;
-    @Temporal(TemporalType.DATE)
-    private Date dob;
+    private LocalDateTime dob;
     private String phoneNumber;
     private String profileImage;
     private User user;

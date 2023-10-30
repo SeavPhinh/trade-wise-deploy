@@ -23,8 +23,7 @@ public class UserInfo {
     private UUID id;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @Temporal(TemporalType.DATE)
-    private Date dob;
+    private LocalDateTime dob;
     private String phoneNumber;
     @Column(nullable = false)
     private String profileImage;

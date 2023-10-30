@@ -53,7 +53,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ProductResponse saveListFile(UUID productId, List<MultipartFile> files, HttpServletRequest request) throws IOException {
 
-        UUID shopId = shop(UUID.fromString(currentUser())).getId();
+        UUID shopId = shop().getId();
 
         Optional<Product> pre = productRepository.findById(productId);
 
@@ -92,7 +92,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public ProductResponse addProduct(ProductRequest postRequest) {
         isLegal(UUID.fromString(currentUser()));
-        return productRepository.save(postRequest.toEntity(shop(UUID.fromString(currentUser())).getId())).toDto(postRequest.getFiles());
+        return productRepository.save(postRequest.toEntity(shop().getId())).toDto(postRequest.getFiles());
     }
 
     // This method need to update for related products
@@ -118,7 +118,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public ProductResponse deleteProductById(UUID id) {
-        UUID shopId = shop(UUID.fromString(currentUser())).getId();
+        UUID shopId = shop().getId();
         Product preData = productRepository.findById(id).orElseThrow();
         if(shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
             isLegal(UUID.fromString(currentUser()));
@@ -134,7 +134,7 @@ public class ProductServiceImpl implements ProductService{
     public ProductResponse updateProductById(UUID id, ProductRequest request) {
 
         Product preData = productRepository.findById(id).orElseThrow();
-        UUID shopId = shop(UUID.fromString(currentUser())).getId();
+        UUID shopId = shop().getId();
         if(shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
             isLegal(UUID.fromString(currentUser()));
             // Update Previous Data
@@ -198,7 +198,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     // Return Shop
-    public ShopResponse shop(UUID userId){
+    public ShopResponse shop(){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -206,7 +206,8 @@ public class ProductServiceImpl implements ProductService{
             if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                         .get()
-                        .uri("api/v1/shops/user/{userId}", userId)
+                        .uri("api/v1/shops/current")
+                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(), ShopResponse.class);

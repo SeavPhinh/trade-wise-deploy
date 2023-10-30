@@ -4,9 +4,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
-import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.ShopResponse;
 import com.example.manageuserservice.exception.NotFoundExceptionClass;
 import com.example.manageuserservice.model.BuyerFavorite;
 import com.example.manageuserservice.repository.BuyerFavoriteRepository;
@@ -14,6 +14,9 @@ import com.example.manageuserservice.request.BuyerFavoriteRequest;
 import com.example.manageuserservice.response.BuyerFavoriteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,25 +30,33 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     private final BuyerFavoriteRepository buyerFavoriteRepository;
     private final WebClient webClient;
+    private final Keycloak keycloak;
 
-    public BuyerFavoriteServiceImpl(BuyerFavoriteRepository buyerFavoriteRepository, WebClient.Builder webClient) {
+    @Value("${keycloak.realm}")
+    private String realm;
+
+
+    public BuyerFavoriteServiceImpl(BuyerFavoriteRepository buyerFavoriteRepository, WebClient.Builder webClient, Keycloak keycloak) {
         this.buyerFavoriteRepository = buyerFavoriteRepository;
         this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.keycloak = keycloak;
     }
 
     @Override
     public BuyerFavoriteResponse addedShopToFavoriteList(BuyerFavoriteRequest request) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyerFav = buyerFavoriteRepository.findByUserIdAndShopId(request.getShopId(),createdBy(UUID.fromString(currentUser())).getId());
         if(buyerFav != null){
             throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_SHOP);
         }
-        Shop shop = shop(request.getShopId());
+        ShopResponse shop = shop(request.getShopId());
         return buyerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(shop);
     }
 
     @Override
     public List<BuyerFavoriteResponse> getCurrentUserInfo() {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         List<BuyerFavoriteResponse> list = buyerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(shop(h.getShopId()))).collect(Collectors.toList());
         if(list.isEmpty()){
@@ -55,15 +66,17 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
     }
 
     @Override
-    public BuyerFavoriteResponse removeShopFromFavoriteList(UUID id) {
+    public Void removeShopFromFavoriteList(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         BuyerFavoriteResponse delete = getShopFromFavoriteList(id);
         buyerFavoriteRepository.deleteById(delete.getId());
-        return delete;
+        return null;
     }
 
     @Override
     public BuyerFavoriteResponse getShopFromFavoriteList(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyer = buyerFavoriteRepository.findByShopIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(buyer != null){
@@ -73,7 +86,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
     }
 
     // Return Shop
-    public Shop shop(UUID id){
+    public ShopResponse shop(UUID id){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -85,7 +98,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
                         .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
-                        .block()).getPayload(),Shop.class);
+                        .block()).getPayload(), ShopResponse.class);
 
             }catch (Exception e){
                 throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
@@ -125,6 +138,14 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
     public void isLegal(UUID id){
         if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.BUYER))){
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
+        }
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
         }
     }
 

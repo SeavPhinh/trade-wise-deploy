@@ -269,6 +269,14 @@ public class UserServiceImpl implements UserService {
         return passwordCredentials;
     }
 
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
+    }
+
     public List<User> findByEmail(String email) {
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().searchByEmail(email.replaceAll("\\s+",""),true);
 

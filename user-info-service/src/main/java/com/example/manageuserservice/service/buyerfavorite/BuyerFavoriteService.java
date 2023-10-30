@@ -14,7 +14,7 @@ public interface BuyerFavoriteService {
 
     List<BuyerFavoriteResponse> getCurrentUserInfo();
 
-    BuyerFavoriteResponse removeShopFromFavoriteList(UUID id);
+    Void removeShopFromFavoriteList(UUID id);
 
     BuyerFavoriteResponse getShopFromFavoriteList(UUID id);
 }

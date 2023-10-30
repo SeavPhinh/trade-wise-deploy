@@ -1,12 +1,11 @@
 package com.example.postservice.controller;
-import com.example.postservice.request.RangeBudget;
+import com.example.postservice.enums.Filter;
 import com.example.postservice.response.PostResponse;
 import com.example.postservice.service.PostService;
 import com.example.commonservice.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -109,41 +108,22 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
-    @GetMapping("/a-z")
-    @Operation(summary = "get all post sorted buy a-z")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedByAZ(){
+    @GetMapping("/alphabet")
+    @Operation(summary = "get all post sorted by alphabet")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedByAlphabet(@RequestParam(defaultValue = "AZ")Filter filter){
         return new ResponseEntity<>(new ApiResponse<>(
-                "posts filtered by a-z fetched successfully",
-                postService.getAllPostSortedByAZ(),
-                HttpStatus.OK
-        ),HttpStatus.OK);
-    }
-    @GetMapping("/z-a")
-    @Operation(summary = "get all post sorted buy z-a")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedByZA(){
-        return new ResponseEntity<>(new ApiResponse<>(
-                "posts filtered by z-a fetched successfully",
-                postService.getAllPostSortedByZA(),
+                "posts filtered by alphabet fetched successfully",
+                postService.getAllPostSortedByAlphabet(filter),
                 HttpStatus.OK
         ),HttpStatus.OK);
     }
 
-    @GetMapping("/sub-category")
-    @Operation(summary = "get all post sorted sub-category")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostSortedBySubCategory(@RequestParam String subCategory){
+    @GetMapping("/sub-category/list")
+    @Operation(summary = "search all post by based on sub-category")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> searchPostBySubCategory(@RequestParam List<String> filter){
         return new ResponseEntity<>(new ApiResponse<>(
-                "posts filtered by sub-category fetched successfully",
-                postService.getAllPostSortedBySubCategory(subCategory),
-                HttpStatus.OK
-        ),HttpStatus.OK);
-    }
-
-    @GetMapping("/sub-category/search")
-    @Operation(summary = "search all post by sub-category")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> searchPostBySubCategory(@RequestParam String subCategory){
-        return new ResponseEntity<>(new ApiResponse<>(
-                "posts searched by sub-category fetched successfully",
-                postService.searchPostBySubCategory(subCategory),
+                "posts searched based on sub-category fetched successfully",
+                postService.searchPostBySubCategory(filter),
                 HttpStatus.OK
         ),HttpStatus.OK);
     }

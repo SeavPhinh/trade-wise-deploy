@@ -78,7 +78,7 @@ public class ValidationConfig {
     public static final String EXISTING_CATEGORIES = "This category is already exist";
     public static final String NOT_FOUND_SUB_CATEGORIES = "This subcategories are empty";
     public static final String EXISTING_SUB_CATEGORIES = "This subcategories is already exist";
-    public static final String POST_TITLE_MESSAGE = "Title must be between 3 and 25 characters";
+    public static final String POST_TITLE_MESSAGE = "Title must be between 5 and 25 characters";
     public static final String POST_TITLE_REQUIRE = "Title is required";
     public static final String POST_DESCRIPTION_MESSAGE = "Description mustn't be more than 200 characters ";
     public static final String NULL_MESSAGE = "Field cannot be null ";
@@ -91,20 +91,23 @@ public class ValidationConfig {
     public static final String SUB_CATEGORY_RESPONSE = "SubCategory contain at least 1";
     public static final String INVALID_STRING = "This field is invalid";
     public static final String REGEX_ROLES = "\\[|\\]";
-    public static final String CANNOT_UPDATE = "You cannot update this product";
-    public static final String CANNOT_DELETE = "You cannot delete this product";
-    public static final String CANNOT_UPLOAD = "You cannot upload a photo to this product";
-    public static final String NOTFOUND_POST = "This post is not found";
-    public static final String NOT_EXIST_IN_POST = "This post is not containing comment from seller";
-    public static final String NOT_OWNER_PRODUCT = "You are not owner of this product";
-    public static final String NOT_OWNER_POST = "You are not owner of this post";
-    public static final String NOT_YET_ADD_TO_POST = "You haven't add a product to this post";
-    public static final String UR_PRODUCT_NOT_FOUND = "Your products is not found in this post";
-    public static final String CANNOT_SMALLER = "Budget from cannot smaller than Budget To";
-    public static final String POST_NOT_CONTAIN = "Waiting BUYER to add new post";
+    public static final String CANNOT_UPDATE = "you cannot update this product";
+    public static final String CANNOT_DELETE = "you cannot delete this product";
+    public static final String CANNOT_UPLOAD = "you cannot upload a photo to this product";
+    public static final String NOTFOUND_POST = "this post is not found";
+    public static final String NOT_EXIST_IN_POST = "this post is not containing comment from seller";
+    public static final String NOT_OWNER_PRODUCT = "you are not owner of this product";
+    public static final String NOT_OWNER_POST = "you are not owner of this post";
+    public static final String NOT_YET_ADD_TO_POST = "you haven't add a product to this post";
+    public static final String UR_PRODUCT_NOT_FOUND = "your products is not found in this post";
+    public static final String CANNOT_SMALLER = "budget from cannot smaller than Budget To";
+    public static final String POST_NOT_CONTAIN = "waiting BUYER to add new post";
     public static final String NOT_FOUND_POST = "post not found";
     public static final String UR_POST_LIST_NOT_CONTAIN = "you post's list is empty";
     public static final String INVALID_RANGE = "this filed cannot be negative";
+    public static final String NOT_SET_UP_DETAIL = "you don't have any information to update";
+    public static final String INVALID_RANGE_BUDGET_TO = "budget to field cannot be negative";
+    public static final String INVALID_RANGE_BUDGET_FROM = "budget from field cannot be negative";
     public static final int MIN_SUB_CATEGORY = 1;
 
 }

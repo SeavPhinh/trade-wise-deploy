@@ -1,5 +1,6 @@
 package com.example.manageuserservice.model;
 import com.example.commonservice.model.Shop;
+import com.example.commonservice.response.ShopResponse;
 import com.example.manageuserservice.response.BuyerFavoriteResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ public class BuyerFavorite {
     private UUID userId;
     private UUID shopId;
 
-    public BuyerFavoriteResponse toDto(Shop shop){
+    public BuyerFavoriteResponse toDto(ShopResponse shop){
         return new BuyerFavoriteResponse(this.id,this.userId,shop);
     }
 

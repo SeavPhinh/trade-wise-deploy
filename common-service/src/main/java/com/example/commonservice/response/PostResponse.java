@@ -15,10 +15,11 @@ public class PostResponse {
 
     private UUID id;
     private String title;
-    private List<String> file;
+    private String file;
     private String description;
-    private Float budget;
-    private UUID subCategoryId;
+    private Float budgetFrom;
+    private Float budgetTo;
+    private String subCategory;
     private Boolean status;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;

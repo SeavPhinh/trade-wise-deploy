@@ -5,19 +5,22 @@ import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.response.CategorySubCategoryResponse;
 import com.example.commonservice.response.FileResponse;
 import com.example.postservice.config.FileStorageProperties;
+import com.example.postservice.enums.Filter;
 import com.example.postservice.exception.NotFoundExceptionClass;
 import com.example.postservice.model.Post;
 import com.example.postservice.repository.PostRepository;
 import com.example.postservice.request.PostRequest;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.example.postservice.request.RangeBudget;
 import com.example.postservice.response.PostResponse;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,15 +44,22 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final FileStorageProperties fileStorageProperties;
     private final WebClient webClient;
+    private final Keycloak keycloak;
 
-    public PostServiceImpl(PostRepository postRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient) {
+    @Value("${keycloak.realm}")
+    private String realm;
+
+
+    public PostServiceImpl(PostRepository postRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.postRepository = postRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.keycloak = keycloak;
     }
 
     @Override
     public PostResponse createPost(PostRequest postRequest) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         if(!postRequest.getSubCategory().equalsIgnoreCase(categoriesList(postRequest.getSubCategory()))){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
@@ -63,6 +73,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public FileResponse saveListFile(MultipartFile file, HttpServletRequest request) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         String uploadPath = fileStorageProperties.getUploadPath();
 
@@ -101,7 +112,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public String deletePostById(UUID id) {
+    public Void deletePostById(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         Optional<Post> post= postRepository.findById(id);
         if(post.isPresent()){
@@ -109,7 +121,8 @@ public class PostServiceImpl implements PostService {
             PostResponse response = getPostById(id);
             if(response.getCreatedBy().getId().toString().equalsIgnoreCase(currentUser())){
                 postRepository.deleteById(id);
-                return "Post delete successfully";
+//                return "Post delete successfully";
+                return null;
             }
             throw new IllegalArgumentException(ValidationConfig.NOT_OWNER_POST);
         }
@@ -118,6 +131,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponse updatePostById(UUID id, PostRequest postRequest) {
+        isNotVerify(UUID.fromString(currentUser()));
         Optional<Post> pre = postRepository.findById(id);
         if(pre.isPresent()){
             Post preData = pre.get();
@@ -208,39 +222,32 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponse> getAllPostSortedByAZ() {
-        List<Post> posts = postRepository.findAllSortedByAZ();
-        if(!posts.isEmpty()){
-            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+    public List<PostResponse> getAllPostSortedByAlphabet(Filter filter) {
+        if(filter.name().equalsIgnoreCase(Filter.AZ.name())){
+            List<PostResponse> AZ = postRepository.findAllSortedByAZ().stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            if(!AZ.isEmpty()){
+                return AZ;
+            }
+        }else if (filter.name().equalsIgnoreCase(Filter.ZA.name())){
+            List<PostResponse> ZA = postRepository.findAllSortedByZA().stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            if(!ZA.isEmpty()){
+                return ZA;
+            }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
 
     @Override
-    public List<PostResponse> getAllPostSortedByZA() {
-        List<Post> posts = postRepository.findAllSortedByZA();
-        if(!posts.isEmpty()){
-            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+    public List<PostResponse> searchPostBySubCategory(List<String> filter) {
+        List<PostResponse> responses = new ArrayList<>();
+        for (String subCategory: filter) {
+            List<Post> eachSub = postRepository.getAllPostSortedBySubCategory(subCategory);
+            responses.addAll(eachSub.stream().map(post-> post.toDto(createdBy(post.getUserId()))).toList());
         }
-        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
-    }
-
-    @Override
-    public List<PostResponse> getAllPostSortedBySubCategory(String subCategory) {
-        List<Post> posts = postRepository.getAllPostSortedBySubCategory(subCategory);
-        if(!posts.isEmpty()){
-            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+        if (responses.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
         }
-        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
-    }
-
-    @Override
-    public List<PostResponse> searchPostBySubCategory(String subCategory) {
-        List<Post> posts = postRepository.searchPostBySubCategory(subCategory);
-        if(!posts.isEmpty()){
-            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
-        }
-        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
+        return responses;
     }
 
     @Override
@@ -269,10 +276,8 @@ public class PostServiceImpl implements PostService {
 
     // Return User
     public User createdBy(UUID id){
-
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
-
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                 .get()
                 .uri("api/v1/users/{id}", id)
@@ -320,6 +325,14 @@ public class PostServiceImpl implements PostService {
         }
         if (!isValidExtension) {
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_FILE);
+        }
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
         }
     }
 

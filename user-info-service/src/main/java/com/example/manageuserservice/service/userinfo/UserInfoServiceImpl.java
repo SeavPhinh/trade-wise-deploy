@@ -3,6 +3,7 @@ package com.example.manageuserservice.service.userinfo;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.FileResponse;
@@ -11,6 +12,7 @@ import com.example.manageuserservice.exception.NotFoundExceptionClass;
 import com.example.manageuserservice.model.UserInfo;
 import com.example.manageuserservice.repository.UserInfoRepository;
 import com.example.manageuserservice.request.UserInfoRequest;
+import com.example.manageuserservice.request.UserInfoRequestUpdate;
 import com.example.manageuserservice.response.UserInfoResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -55,6 +57,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     public FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         String uploadPath = fileStorageProperties.getUploadPath();
         Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
         java.io.File directory = directoryPath.toFile();
@@ -70,6 +73,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     public UserInfoResponse addUserDetail(UserInfoRequest request) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         UserInfo user = userInfoRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(request.getGender() == null){
             throw new IllegalArgumentException(ValidationConfig.NULL_GENDER);
@@ -83,17 +87,31 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     public UserInfoResponse getUserInfoByUserId(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         return isNotExisting(id);
     }
 
     @Override
     public UserInfoResponse getCurrentUserInfo() {
+        isNotVerify(UUID.fromString(currentUser()));
         return isNotExisting(createdBy(UUID.fromString(currentUser())).getId());
     }
 
     @Override
-    public UserInfoResponse updateCurrentUserInfo(UserInfoRequest request) {
+    public UserInfoResponse updateCurrentUserInfo(UserInfoRequestUpdate request) {
+        isNotVerify(UUID.fromString(currentUser()));
         UserInfo preUserInfo = userInfoRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+
+        if(preUserInfo == null){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_SET_UP_DETAIL);
+        }
+
+        if(request.getGender() == null){
+            throw new IllegalArgumentException(ValidationConfig.NULL_GENDER);
+        }
+
+        isValidString(request.getFirstname());
+        isValidString(request.getLastname());
 
         // Update Firstname & Lastname of user in keycloak
         UserRepresentation updatedUser = new UserRepresentation();
@@ -105,9 +123,10 @@ public class UserInfoServiceImpl implements UserInfoService {
         // Update In User-info database
         preUserInfo.setGender(request.getGender());
         preUserInfo.setDob(request.getDob());
-        preUserInfo.setPhoneNumber(request.getPhoneNumber());
-//        preUserInfo.setProfileImage(request.getProfileImage());
+        preUserInfo.setPhoneNumber(isAccept(request.getPhoneNumber()));
+
         return userInfoRepository.save(preUserInfo).toDto(createdBy(preUserInfo.getUserId()));
+
     }
 
     @Override
@@ -121,6 +140,24 @@ public class UserInfoServiceImpl implements UserInfoService {
         String uploadPath = fileStorageProperties.getUploadPath();
         Path paths = Paths.get(uploadPath + fileName);
         return new ByteArrayResource(Files.readAllBytes(paths));
+    }
+
+    @Override
+    public Void switchRole(Role role) {
+        isNotVerify(UUID.fromString(currentUser()));
+        // Update logged as role of user in keycloak
+        UserRepresentation user = resource(UUID.fromString(currentUser())).toRepresentation();
+        user.singleAttribute("logged_as", role.name());
+        resource(UUID.fromString(currentUser())).update(user);
+        return null;
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
     }
 
     // User doesn't exist
@@ -209,6 +246,17 @@ public class UserInfoServiceImpl implements UserInfoService {
             }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+    }
+
+    // firstname and lastname Validating
+    public void isValidString(String data){
+        try {
+            if(data.matches(".*\\d+.*")){
+                throw new IllegalArgumentException(ValidationConfig.INVALID_STRING);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(ValidationConfig.INVALID_STRING);
+        }
     }
 
 

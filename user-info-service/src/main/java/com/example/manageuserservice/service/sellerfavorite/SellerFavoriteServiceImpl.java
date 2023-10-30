@@ -13,6 +13,9 @@ import com.example.manageuserservice.request.SellerFavoriteRequest;
 import com.example.manageuserservice.response.SellerFavoriteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -29,14 +32,20 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     private final SellerFavoriteRepository sellerFavoriteRepository;
     private final WebClient webClient;
+    private final Keycloak keycloak;
 
-    public SellerFavoriteServiceImpl(SellerFavoriteRepository favoriteRepository, WebClient.Builder webClient) {
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    public SellerFavoriteServiceImpl(SellerFavoriteRepository favoriteRepository, WebClient.Builder webClient, Keycloak keycloak) {
         this.sellerFavoriteRepository = favoriteRepository;
         this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.keycloak = keycloak;
     }
 
     @Override
     public SellerFavoriteResponse addedShopToFavoriteList(SellerFavoriteRequest request) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         SellerFavorite buyerFav = sellerFavoriteRepository.findByUserIdAndPostId(request.getPostId(),createdBy(UUID.fromString(currentUser())).getId());
         if(buyerFav != null){
@@ -48,6 +57,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     @Override
     public List<SellerFavoriteResponse> getAllPostedFromSellerFavoriteListByOwnerId() {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         List<SellerFavoriteResponse> list = sellerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(post(h.getPostId()))).collect(Collectors.toList());
         if(list.isEmpty()){
@@ -57,15 +67,17 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
     }
 
     @Override
-    public SellerFavoriteResponse removePostedFromFavoriteList(UUID id) {
+    public Void removePostedFromFavoriteList(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         SellerFavoriteResponse delete = getPostedFromFavoriteList(id);
         sellerFavoriteRepository.deleteById(delete.getId());
-        return delete;
+        return null;
     }
 
     @Override
     public SellerFavoriteResponse getPostedFromFavoriteList(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         SellerFavorite seller = sellerFavoriteRepository.findByPostIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(seller != null){
@@ -126,6 +138,14 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
     public void isLegal(UUID id){
         if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.SELLER))){
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
+        }
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
         }
     }
 

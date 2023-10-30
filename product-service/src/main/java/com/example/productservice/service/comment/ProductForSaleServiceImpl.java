@@ -80,8 +80,8 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
 
     @Override
     public ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest) {
-        Optional<Product> product = productRepository.findById(postRequest.getPostId());
-        if(product.isPresent()){
+        Post product = post(postRequest.getPostId());
+        if(product != null){
             return productForSaleRepository.save(postRequest.toEntity(shop().getId())).toDto(postRequest.getFiles());
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_POST);

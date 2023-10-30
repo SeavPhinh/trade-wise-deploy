@@ -1,8 +1,10 @@
 package com.example.manageuserservice.controller;
 
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.FileResponse;
 import com.example.manageuserservice.request.UserInfoRequest;
+import com.example.manageuserservice.request.UserInfoRequestUpdate;
 import com.example.manageuserservice.response.UserInfoResponse;
 import com.example.manageuserservice.service.userinfo.UserInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,10 +68,21 @@ public class UserInfoController {
     @PutMapping("/current")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "update current user's information")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> updateCurrentUserInfo( @Valid @RequestBody UserInfoRequest request){
+    public ResponseEntity<ApiResponse<UserInfoResponse>> updateCurrentUserInfo( @Valid @RequestBody UserInfoRequestUpdate request){
         return new ResponseEntity<>(new ApiResponse<>(
                 " updated current user information successfully",
                 userInfoService.updateCurrentUserInfo(request),
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/current/role")
+    @SecurityRequirement(name = "oAuth2")
+    @Operation(summary = "user switch role")
+    public ResponseEntity<ApiResponse<Void>> switchRole(@RequestParam(defaultValue = "BUYER")Role role){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "user switch role successfully",
+                userInfoService.switchRole(role),
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }

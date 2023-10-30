@@ -24,5 +24,4 @@ public class PostResponse {
     private LocalDateTime lastModified;
     private User createdBy;
 
-
 }
