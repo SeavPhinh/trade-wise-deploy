@@ -3,12 +3,15 @@ package com.example.manageuserservice.response;
 import com.example.commonservice.model.User;
 import com.example.manageuserservice.model.Gender;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -17,8 +20,8 @@ import java.util.UUID;
 public class UserInfoResponse {
     private UUID id;
     private Gender gender;
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private LocalDateTime dob;
+    @Temporal(TemporalType.DATE)
+    private Date dob;
     private String phoneNumber;
     private String profileImage;
     private User user;

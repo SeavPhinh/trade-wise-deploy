@@ -4,6 +4,8 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.manageuserservice.model.Gender;
 import com.example.manageuserservice.model.UserInfo;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +16,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -22,9 +25,8 @@ import java.util.UUID;
 public class UserInfoRequest {
 
     private Gender gender;
-
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private LocalDateTime dob;
+    @Temporal(TemporalType.DATE)
+    private Date dob;
     private String phoneNumber;
     @NotEmpty(message = ValidationConfig.PROFILE_IMAGE_RESPONSE)
     private String profileImage;

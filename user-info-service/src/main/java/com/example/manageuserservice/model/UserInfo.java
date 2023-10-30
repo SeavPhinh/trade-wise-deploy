@@ -2,13 +2,13 @@ package com.example.manageuserservice.model;
 
 import com.example.commonservice.model.User;
 import com.example.manageuserservice.response.UserInfoResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -23,8 +23,8 @@ public class UserInfo {
     private UUID id;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private LocalDateTime dob;
+    @Temporal(TemporalType.DATE)
+    private Date dob;
     private String phoneNumber;
     @Column(nullable = false)
     private String profileImage;
