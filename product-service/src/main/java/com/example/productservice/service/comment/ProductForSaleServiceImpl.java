@@ -8,17 +8,22 @@ import com.example.commonservice.model.Post;
 import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.PostResponse;
+import com.example.commonservice.response.ShopResponse;
 import com.example.productservice.config.FileStorageProperties;
 import com.example.productservice.exception.NotFoundExceptionClass;
-import com.example.productservice.model.Product;
 import com.example.productservice.model.ProductForSale;
 import com.example.productservice.repository.ProductForSaleRepository;
 import com.example.productservice.repository.ProductRepository;
 import com.example.productservice.request.ProductForSaleRequest;
+import com.example.productservice.request.ProductForSaleRequestUpdate;
 import com.example.productservice.response.ProductForSaleResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,17 +48,22 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     private final FileStorageProperties fileStorageProperties;
     private final ProductRepository productRepository;
     private final WebClient webClient;
+    private final Keycloak keycloak;
 
-    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, ProductRepository productRepository, WebClient.Builder webClient) {
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, ProductRepository productRepository, WebClient.Builder webClient, Keycloak keycloak) {
         this.productForSaleRepository = productForSaleRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.productRepository = productRepository;
         this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.keycloak = keycloak;
     }
 
     @Override
     public ProductForSaleResponse saveListFile(UUID id, List<MultipartFile> files, HttpServletRequest request) throws IOException {
-
+        isNotVerify(UUID.fromString(currentUser()));
         UUID shopId = shop().getId();
         ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
 
@@ -79,8 +89,13 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     }
 
     @Override
-    public ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest) {
-        Post product = post(postRequest.getPostId());
+    public ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
+        PostResponse product = post(postRequest.getPostId());
+
+        for (String image : postRequest.getFiles()) {
+            validateFile(image);
+        }
         if(product != null){
             return productForSaleRepository.save(postRequest.toEntity(shop().getId())).toDto(postRequest.getFiles());
         }
@@ -107,10 +122,11 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
 
     @Override
     public String deleteProductById(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         // Create new object to store before delete
         ProductForSaleResponse response = getProductById(id);
         if(response.getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
-           currentUser().equalsIgnoreCase(post(id).getUserId().toString())){
+           currentUser().equalsIgnoreCase(post(id).getCreatedBy().getId().toString())){
             productForSaleRepository.deleteById(id);
             return "You have delete this product successfully";
         }
@@ -118,8 +134,14 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     }
 
     @Override
-    public ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequest request) {
+    public ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequestUpdate request) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
+
+        for (String image : request.getFiles()) {
+            validateFile(image);
+        }
+
         if(preData.getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
         preData.getPostId().toString().equalsIgnoreCase(post(id).getId().toString())){
             // Update Previous Data
@@ -139,7 +161,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         List<ProductForSale> listFiles = productForSaleRepository.getProductByPostId(id);
         if(!listFiles.isEmpty()){
             // Not Owner Post (seller)
-            if(!currentUser().equalsIgnoreCase(post(id).getUserId().toString())){
+            if(!currentUser().equalsIgnoreCase(post(id).getCreatedBy().getId().toString())){
                 if(productForSaleRepository.getProductByPostIdAndUserId(id, shop().getId()).isEmpty()){
                     throw new NotFoundExceptionClass(ValidationConfig.UR_PRODUCT_NOT_FOUND);
                 }
@@ -191,24 +213,28 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     }
 
     // Return Shop
-    public Shop shop(){
+    public ShopResponse shop(){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication.getPrincipal() instanceof Jwt jwt){
-            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                    .get()
-                    .uri("api/v1/shops/current")
-                    .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
-                    .retrieve()
-                    .bodyToMono(ApiResponse.class)
-                    .block()).getPayload(), Shop.class);
+        try{
+            if(authentication.getPrincipal() instanceof Jwt jwt){
+                return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .get()
+                        .uri("api/v1/shops/current")
+                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
+                        .retrieve()
+                        .bodyToMono(ApiResponse.class)
+                        .block()).getPayload(), ShopResponse.class);
+            }
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
 
     // Return Post
-    public Post post(UUID id){
+    public PostResponse post(UUID id){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -219,7 +245,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
                     .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                     .retrieve()
                     .bodyToMono(ApiResponse.class)
-                    .block()).getPayload(), Post.class);
+                    .block()).getPayload(), PostResponse.class);
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
@@ -240,6 +266,28 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     public void validationShop (UUID shopId, ProductForSale preShop){
         if(!shopId.toString().equalsIgnoreCase(preShop.getShopId().toString())){
             throw new IllegalArgumentException(ValidationConfig.CANNOT_UPLOAD);
+        }
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
+    }
+    // Validation String image
+    public static void validateFile(String fileName) throws Exception {
+        String[] validExtensions = {".jpg", ".jpeg", ".png", ".tiff"};
+        boolean isValidExtension = false;
+        for (String extension : validExtensions) {
+            if (fileName.toLowerCase().endsWith(extension)) {
+                isValidExtension = true;
+                break;
+            }
+        }
+        if (!isValidExtension) {
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_FILE);
         }
     }
 

@@ -35,7 +35,7 @@ public class ProductController {
     @PostMapping("")
     @Operation(summary = "shop adding a product by current user")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<ProductResponse>> addProduct(@Valid @RequestBody ProductRequest postRequest){
+    public ResponseEntity<ApiResponse<ProductResponse>> addProduct(@Valid @RequestBody ProductRequest postRequest) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop has added new product successfully",
                 productService.addProduct(postRequest),
@@ -89,7 +89,7 @@ public class ProductController {
     @Operation(summary = "update products by id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProductById(@PathVariable UUID id,
-                                                                            @Valid @RequestBody ProductRequest request){
+                                                                            @Valid @RequestBody ProductRequest request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 " Updated products by id successfully",
                 productService.updateProductById(id, request),

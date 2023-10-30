@@ -23,6 +23,7 @@ public class KeyCloakSecurityConfig {
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/{id}").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/alphabet").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/sub-category/list").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/sub-category/random").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/oldest").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/newest").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/image/{fileName}").permitAll();

@@ -98,7 +98,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public UserInfoResponse updateCurrentUserInfo(UserInfoRequestUpdate request) {
+    public UserInfoResponse updateCurrentUserInfo(UserInfoRequestUpdate request) throws Exception {
         isNotVerify(UUID.fromString(currentUser()));
         UserInfo preUserInfo = userInfoRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
 
@@ -110,8 +110,8 @@ public class UserInfoServiceImpl implements UserInfoService {
             throw new IllegalArgumentException(ValidationConfig.NULL_GENDER);
         }
 
-        isValidString(request.getFirstname());
-        isValidString(request.getLastname());
+        isValidString(request.getFirstname(), "FirstName");
+        isValidString(request.getLastname(),"LastName");
 
         // Update Firstname & Lastname of user in keycloak
         UserRepresentation updatedUser = new UserRepresentation();
@@ -122,6 +122,8 @@ public class UserInfoServiceImpl implements UserInfoService {
 
         // Update In User-info database
         preUserInfo.setGender(request.getGender());
+        validateFile(request.getProfileImage());
+        preUserInfo.setProfileImage(request.getProfileImage());
         preUserInfo.setDob(request.getDob());
         preUserInfo.setPhoneNumber(isAccept(request.getPhoneNumber()));
 
@@ -249,10 +251,15 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     // firstname and lastname Validating
-    public void isValidString(String data){
+    public void isValidString(String data, String field){
         try {
+            if(field.equalsIgnoreCase("FirstName")){
+                if(data.matches(".*\\d+.*")){
+                    throw new IllegalArgumentException(field + ValidationConfig.INVALID_FIELD);
+                }
+            }
             if(data.matches(".*\\d+.*")){
-                throw new IllegalArgumentException(ValidationConfig.INVALID_STRING);
+                throw new IllegalArgumentException(field + ValidationConfig.INVALID_FIELD);
             }
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(ValidationConfig.INVALID_STRING);

@@ -1,7 +1,6 @@
 package com.example.shopservice.service.shop;
 
-import com.example.commonservice.response.FileResponse;
-import com.example.shopservice.request.FileRequest;
+import com.example.shopservice.enumeration.Filter;
 import com.example.shopservice.request.ShopRequest;
 import com.example.shopservice.response.ShopResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,20 +16,14 @@ import java.util.UUID;
 public interface ShopService {
 
     ShopResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException;
-
     ShopResponse setUpShop(ShopRequest request) throws Exception;
-
     List<ShopResponse> getAllShop();
-
     ShopResponse getShopById(UUID id);
-
     ShopResponse updateShopById(ShopRequest request);
-
     ShopResponse getShopByOwnerId();
-
     ShopResponse shopAction(Boolean isActive);
     ByteArrayResource getImage(String fileName) throws IOException;
     List<ShopResponse> getShopBasedOnRating();
-
-    ShopResponse getShopByUserId(UUID userId);
+    List<ShopResponse> getShopBasedOnSort(Filter filter);
+    List<ShopResponse> getShopBasedOnFilter(String subCategory);
 }

@@ -121,7 +121,6 @@ public class PostServiceImpl implements PostService {
             PostResponse response = getPostById(id);
             if(response.getCreatedBy().getId().toString().equalsIgnoreCase(currentUser())){
                 postRepository.deleteById(id);
-//                return "Post delete successfully";
                 return null;
             }
             throw new IllegalArgumentException(ValidationConfig.NOT_OWNER_POST);
@@ -259,6 +258,18 @@ public class PostServiceImpl implements PostService {
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
 
+    @Override
+    public List<PostResponse> randomPostBySubCategory(String subCategory) {
+        List<Post> posts = postRepository.getAllPostSortedBySubCategory(subCategory);
+        if(!posts.isEmpty()){
+            // Random 3 posts
+            Collections.shuffle(posts);
+            List<Post> randomThreePosts = posts.subList(0, Math.min(posts.size(), 3));
+            return randomThreePosts.stream().map(post-> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
+    }
+
     // Returning Token
     public String currentUser() {
         try{
@@ -293,7 +304,7 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    // Converting Category list as UUID to List<String>
+    // Returning list category
     public String categoriesList(String categories) {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());

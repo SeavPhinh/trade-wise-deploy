@@ -18,7 +18,6 @@ public class ProductResponse {
     private List<String> file;
     private String description;
     private Float price;
-    private Boolean status;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
     private UUID shopId;

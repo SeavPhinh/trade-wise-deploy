@@ -1,8 +1,7 @@
 package com.example.shopservice.controller;
 
-import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.response.ApiResponse;
-import com.example.commonservice.response.FileResponse;
+import com.example.shopservice.enumeration.Filter;
 import com.example.shopservice.request.ShopRequest;
 import com.example.shopservice.response.ShopResponse;
 import com.example.shopservice.service.shop.ShopService;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.apache.http.protocol.HTTP;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,9 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -90,15 +85,26 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-//    @GetMapping("/user/{userId}")
-//    @Operation(summary = "fetch shop by owner id")
-//    public ResponseEntity<ApiResponse<ShopResponse>> getShopByUserId(@PathVariable UUID userId){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "Shop fetched by user id successfully",
-//                shopService.getShopByUserId(userId),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
+    @GetMapping("/sort")
+    @Operation(summary = "fetch shop by sort")
+    public ResponseEntity<ApiResponse<List<ShopResponse>>> sortShop(@RequestParam(defaultValue = "NEWEST") Filter filter){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Shop fetched based on sorting successfully",
+                shopService.getShopBasedOnSort(filter),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
+    @GetMapping("/filter")
+    @Operation(summary = "fetch shop by filter")
+    public ResponseEntity<ApiResponse<List<ShopResponse>>> filterShop(@RequestParam String subCategory){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Shop fetched based on filter successfully",
+                shopService.getShopBasedOnFilter(subCategory),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
 
     @PutMapping("/current")
     @Operation(summary = "update shop by id")
@@ -121,7 +127,6 @@ public class ShopController {
                 HttpStatus.ACCEPTED
         ), HttpStatus.ACCEPTED);
     }
-
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "oAuth2")

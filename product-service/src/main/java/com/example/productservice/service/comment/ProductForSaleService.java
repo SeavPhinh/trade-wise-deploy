@@ -2,6 +2,7 @@ package com.example.productservice.service.comment;
 
 import com.example.productservice.request.FileRequest;
 import com.example.productservice.request.ProductForSaleRequest;
+import com.example.productservice.request.ProductForSaleRequestUpdate;
 import com.example.productservice.response.ProductForSaleResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ByteArrayResource;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public interface ProductForSaleService {
     ProductForSaleResponse saveListFile(UUID id,List<MultipartFile> files, HttpServletRequest request) throws IOException;
 
-    ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest);
+    ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest) throws Exception;
 
     List<ProductForSaleResponse> getAllProduct();
 
@@ -24,7 +25,7 @@ public interface ProductForSaleService {
 
     String deleteProductById(UUID id);
 
-    ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequest request);
+    ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequestUpdate request) throws Exception;
 
     List<ProductForSaleResponse> getProductByPostId(UUID id);
 

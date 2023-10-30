@@ -68,7 +68,7 @@ public class UserInfoController {
     @PutMapping("/current")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "update current user's information")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> updateCurrentUserInfo( @Valid @RequestBody UserInfoRequestUpdate request){
+    public ResponseEntity<ApiResponse<UserInfoResponse>> updateCurrentUserInfo(@Valid @RequestBody UserInfoRequestUpdate request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 " updated current user information successfully",
                 userInfoService.updateCurrentUserInfo(request),

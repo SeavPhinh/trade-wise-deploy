@@ -8,6 +8,7 @@ import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.CategorySubCategoryResponse;
 import com.example.shopservice.config.FileStorageProperties;
+import com.example.shopservice.enumeration.Filter;
 import com.example.shopservice.enumeration.Level;
 import com.example.shopservice.exception.NotFoundExceptionClass;
 import com.example.shopservice.model.Address;
@@ -19,6 +20,9 @@ import com.example.shopservice.response.ShopResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,19 +48,24 @@ public class ShopServiceImpl implements ShopService {
     private final RatingRepository ratingRepository;
     private final WebClient webClient;
     private final WebClient subCategoryWeb;
+    private final Keycloak keycloak;
 
-    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, RatingRepository ratingRepository, WebClient.Builder webClient, WebClient.Builder subCategoryWeb) {
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, RatingRepository ratingRepository, WebClient.Builder webClient, WebClient.Builder subCategoryWeb, Keycloak keycloak) {
         this.shopRepository = shopRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.ratingRepository = ratingRepository;
         this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
         this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:8080/").build();
+        this.keycloak = keycloak;
     }
 
 
     @Override
     public ShopResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException {
-
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
 
         if (file != null && !isImageFile(file)) {
@@ -86,6 +95,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public ShopResponse setUpShop(ShopRequest request) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         isExistingShop(createdBy(UUID.fromString(currentUser())).getId());
         isContainWhitespace(request.getAddress().getUrl());
@@ -114,6 +124,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public ShopResponse updateShopById(ShopRequest request) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         Shop preShop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(preShop != null){
@@ -135,6 +146,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public ShopResponse getShopByOwnerId() {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         Shop shop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(shop != null){
@@ -145,6 +157,7 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public ShopResponse shopAction(Boolean isActive) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         Shop preShop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
         if(preShop != null){
@@ -228,13 +241,52 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public ShopResponse getShopByUserId(UUID userId) {
-        isLegal(userId);
-        Shop shop = shopRepository.getShopByOwnerId(userId);
-        if(shop != null){
-            return shop.toDto(categoriesList(shop.getSubCategoryList()),ratedCount(shop.getId()), ratedPercentage(shop.getId()));
+    public List<ShopResponse> getShopBasedOnSort(Filter filter) {
+        List<Shop> shopList;
+        if(filter.name().equalsIgnoreCase(Filter.OLDEST.name())){
+            shopList = shopRepository.getOldestShop();
+            if(!shopList.isEmpty()){
+                return shopList.stream().map(h-> h.toDto(categoriesList(h.getSubCategoryList()),ratedCount(h.getId()), ratedPercentage(h.getId()))).collect(Collectors.toList());
+            }
+        } else if (filter.name().equalsIgnoreCase(Filter.NEWEST.name())) {
+            shopList = shopRepository.getNewestShop();
+            if(!shopList.isEmpty()){
+                return shopList.stream().map(h-> h.toDto(categoriesList(h.getSubCategoryList()),ratedCount(h.getId()), ratedPercentage(h.getId()))).collect(Collectors.toList());
+            }
+        }else if (filter.name().equalsIgnoreCase(Filter.AZ.name())) {
+            shopList = shopRepository.getAZShop();
+            if(!shopList.isEmpty()){
+                return shopList.stream().map(h-> h.toDto(categoriesList(h.getSubCategoryList()),ratedCount(h.getId()), ratedPercentage(h.getId()))).collect(Collectors.toList());
+            }
+        }else if (filter.name().equalsIgnoreCase(Filter.ZA.name())) {
+            shopList = shopRepository.getZAShop();
+            if(!shopList.isEmpty()){
+                return shopList.stream().map(h-> h.toDto(categoriesList(h.getSubCategoryList()),ratedCount(h.getId()), ratedPercentage(h.getId()))).collect(Collectors.toList());
+            }
         }
-        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CREATED);
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
+    }
+
+    @Override
+    public List<ShopResponse> getShopBasedOnFilter(String subCategory) {
+        isContainingCategory(subCategory);
+        List<Shop> shopList = shopRepository.getAllActiveShop();
+        List<Shop> response = new ArrayList<>();
+        if(shopList.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
+        }
+        for (Shop shop : shopList) {
+            List<String> listCategoryShop = categoriesList(shop.getSubCategoryList());
+            for (String category: listCategoryShop) {
+                if(category.equalsIgnoreCase(subCategory)){
+                    response.add(shop);
+                }
+            }
+        }
+        if(!response.isEmpty()){
+            return response.stream().map(h-> h.toDto(categoriesList(h.getSubCategoryList()),ratedCount(h.getId()), ratedPercentage(h.getId()))).collect(Collectors.toList());
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
     }
 
     private static List<UUID> sortKeysByValueDescending(Map<UUID, Float> map) {
@@ -297,9 +349,27 @@ public class ShopServiceImpl implements ShopService {
                 .collect(Collectors.toList());
     }
 
-    // Converting Category list as UUID to List<String>
-    public List<String> categoriesList(String categories) {
+    // Is Containing Category
+    public void isContainingCategory(String category){
+        try {
+            ObjectMapper covertSpecificClass = new ObjectMapper();
+            covertSpecificClass.registerModule(new JavaTimeModule());
+            covertSpecificClass.convertValue(Objects.requireNonNull(subCategoryWeb
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("api/v1/sub-categories")
+                            .queryParam("name", category.toUpperCase())
+                            .build())
+                    .retrieve()
+                    .bodyToMono(ApiResponse.class)
+                    .block()).getPayload(), CategorySubCategoryResponse.class);
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+        }
+    }
 
+    // Returning list category
+    public List<String> categoriesList(String categories) {
         List<String> uuidList = category(categories);
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
@@ -323,6 +393,7 @@ public class ShopServiceImpl implements ShopService {
         }
 
     }
+
 
     // Validation Whitespace
     public void isContainWhitespace(String text){
@@ -385,6 +456,14 @@ public class ShopServiceImpl implements ShopService {
             return 0F;
         }
         return (float) (sum/level.size());
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
     }
 
 }

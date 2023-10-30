@@ -3,6 +3,7 @@ package com.example.productservice.controller;
 import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.response.ApiResponse;
 import com.example.productservice.request.ProductForSaleRequest;
+import com.example.productservice.request.ProductForSaleRequestUpdate;
 import com.example.productservice.response.ProductForSaleResponse;
 import com.example.productservice.service.comment.ProductForSaleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +36,7 @@ public class ProductForSaleController {
     @PostMapping("")
     @Operation(summary = "shop adding a product to buyer")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<ProductForSaleResponse>> addProductToPost(@Valid @RequestBody ProductForSaleRequest postRequest){
+    public ResponseEntity<ApiResponse<ProductForSaleResponse>> addProductToPost(@Valid @RequestBody ProductForSaleRequest postRequest) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop has added a product to buyer's post successfully",
                 productForSaleService.addProductToPost(postRequest),
@@ -43,17 +44,8 @@ public class ProductForSaleController {
         ), HttpStatus.CREATED);
     }
 
-//    @GetMapping("")
-//    @Operation(summary = "fetch all products")
-//    public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getAllProductForSale(){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "products fetched successfully",
-//                productForSaleService.getAllProduct(),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
-
     @GetMapping("/{id}")
+    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetch product for sale by id")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -64,6 +56,7 @@ public class ProductForSaleController {
     }
 
     @GetMapping("/post/{id}")
+    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetch all product for sale by posted id")
     public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -88,7 +81,7 @@ public class ProductForSaleController {
     @Operation(summary = "update post by id")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> updateProductForSaleById(@PathVariable UUID id,
-                                                               @Valid @RequestBody ProductForSaleRequest request){
+                                                               @Valid @RequestBody ProductForSaleRequestUpdate request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 " updated product by id successfully",
                 productForSaleService.updateProductById(id, request),

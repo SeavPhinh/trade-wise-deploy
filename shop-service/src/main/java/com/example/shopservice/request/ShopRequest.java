@@ -27,7 +27,7 @@ public class ShopRequest {
     @NotNull(message = ValidationConfig.NULL_IMAGE)
     private String profileImage;
 
-    @NotEmpty(message = ValidationConfig.EMPTY_FIELD)
+    @NotEmpty(message = ValidationConfig.NOT_SUB_CATEGORY)
     @Size(min = ValidationConfig.MIN_SUB_CATEGORY, message = ValidationConfig.SUB_CATEGORY_RESPONSE)
     private List<String> subCategoryList;
 

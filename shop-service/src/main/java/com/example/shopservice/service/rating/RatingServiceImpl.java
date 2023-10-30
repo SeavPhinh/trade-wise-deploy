@@ -19,6 +19,9 @@ import com.example.shopservice.response.RatingResponse;
 import com.example.shopservice.response.ShopResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -35,16 +38,22 @@ public class RatingServiceImpl implements RatingService {
     private final ShopRepository service;
     private final WebClient webClient;
     private final WebClient subCategoryWeb;
+    private final Keycloak keycloak;
 
-    public RatingServiceImpl(RatingRepository ratingRepository, ShopRepository service, WebClient.Builder webClient, WebClient.Builder subCategoryWeb) {
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    public RatingServiceImpl(RatingRepository ratingRepository, ShopRepository service, WebClient.Builder webClient, WebClient.Builder subCategoryWeb, Keycloak keycloak) {
         this.ratingRepository = ratingRepository;
         this.service = service;
         this.webClient = webClient.baseUrl("http://localhost:8081/").build();
         this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:1688/").build();
+        this.keycloak = keycloak;
     }
 
     @Override
     public RatingResponse ratingShop(RatingRequest request) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         if(request.getLevel() == null || request.getShopId() == null){
             throw new NullExceptionClass(ValidationConfig.NULL_FIELD);
@@ -178,6 +187,14 @@ public class RatingServiceImpl implements RatingService {
             }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
     }
 
 }

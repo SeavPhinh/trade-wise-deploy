@@ -4,22 +4,21 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
-import com.example.commonservice.model.Post;
-import com.example.commonservice.model.Shop;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.ShopResponse;
 import com.example.productservice.config.FileStorageProperties;
 import com.example.productservice.exception.NotFoundExceptionClass;
-import com.example.productservice.model.FileStorage;
 import com.example.productservice.model.Product;
 import com.example.productservice.repository.ProductRepository;
-import com.example.productservice.request.FileRequest;
 import com.example.productservice.request.ProductRequest;
 import com.example.productservice.response.ProductResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,16 +42,21 @@ public class ProductServiceImpl implements ProductService{
     private final ProductRepository productRepository;
     private final FileStorageProperties fileStorageProperties;
     private final WebClient webClient;
+    private final Keycloak keycloak;
 
-    public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient) {
+    @Value("${keycloak.realm}")
+    private String realm;
+
+    public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.productRepository = productRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.keycloak = keycloak;
     }
 
     @Override
     public ProductResponse saveListFile(UUID productId, List<MultipartFile> files, HttpServletRequest request) throws IOException {
-
+        isNotVerify(UUID.fromString(currentUser()));
         UUID shopId = shop().getId();
 
         Optional<Product> pre = productRepository.findById(productId);
@@ -66,7 +70,6 @@ public class ProductServiceImpl implements ProductService{
         if(!shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
             throw new IllegalArgumentException(ValidationConfig.CANNOT_UPLOAD);
         }
-
 
         isLegal(UUID.fromString(currentUser()));
         List<String> listFiles = new ArrayList<>();
@@ -90,8 +93,12 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductResponse addProduct(ProductRequest postRequest) {
+    public ProductResponse addProduct(ProductRequest postRequest) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
+        for (String image : postRequest.getFiles()) {
+            validateFile(image);
+        }
         return productRepository.save(postRequest.toEntity(shop().getId())).toDto(postRequest.getFiles());
     }
 
@@ -118,6 +125,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public ProductResponse deleteProductById(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         UUID shopId = shop().getId();
         Product preData = productRepository.findById(id).orElseThrow();
         if(shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
@@ -131,9 +139,14 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductResponse updateProductById(UUID id, ProductRequest request) {
-
+    public ProductResponse updateProductById(UUID id, ProductRequest request) throws Exception {
+        isNotVerify(UUID.fromString(currentUser()));
         Product preData = productRepository.findById(id).orElseThrow();
+
+        for (String image : request.getFiles()) {
+            validateFile(image);
+        }
+
         UUID shopId = shop().getId();
         if(shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
             isLegal(UUID.fromString(currentUser()));
@@ -141,7 +154,6 @@ public class ProductServiceImpl implements ProductService{
             preData.setTitle(request.getTitle());
             preData.setFile(request.getFiles().toString());
             preData.setDescription(request.getDescription());
-            preData.setStatus(request.getStatus());
             preData.setLastModified(LocalDateTime.now());
             return productRepository.save(preData).toDto(getFiles(preData));
         }
@@ -151,10 +163,12 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public List<ProductResponse> getAllProductByShopId(UUID id) {
-        shopById(id);
-        List<ProductResponse> responseList = productRepository.getAllProductByShopId(id).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
-        if(!responseList.isEmpty()){
-            return responseList;
+        ShopResponse shop = shopById(id);
+        if(shop != null){
+            List<ProductResponse> responseList = productRepository.getAllProductByShopId(id).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
+            if(!responseList.isEmpty()){
+                return responseList;
+            }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_PRODUCTS_IN_UR_SHOP);
     }
@@ -219,22 +233,19 @@ public class ProductServiceImpl implements ProductService{
     }
 
     // Return Shop
-    public Shop shopById(UUID id){
+    public ShopResponse shopById(UUID id){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try{
-            if(authentication.getPrincipal() instanceof Jwt jwt){
-                return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                         .get()
-                        .uri("api/v1/shops/{id}", id).retrieve()
+                        .uri("api/v1/shops/{id}", id)
+                        .retrieve()
                         .bodyToMono(ApiResponse.class)
-                        .block()).getPayload(), Shop.class);
-            }
+                        .block()).getPayload(), ShopResponse.class);
         }catch (Exception e){
             throw new IllegalArgumentException(ValidationConfig.SHOP_NOTFOUND);
         }
-        throw new IllegalArgumentException(ValidationConfig.SHOP_NOTFOUND);
     }
 
     // Separate file -> List
@@ -248,6 +259,30 @@ public class ProductServiceImpl implements ProductService{
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
         }
     }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
+    }
+
+    // Validation String image
+    public static void validateFile(String fileName) throws Exception {
+        String[] validExtensions = {".jpg", ".jpeg", ".png", ".tiff"};
+        boolean isValidExtension = false;
+        for (String extension : validExtensions) {
+            if (fileName.toLowerCase().endsWith(extension)) {
+                isValidExtension = true;
+                break;
+            }
+        }
+        if (!isValidExtension) {
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_FILE);
+        }
+    }
+
 
 
 

@@ -31,4 +31,5 @@ public interface PostService {
     List<PostResponse> getAllPostSortedByAlphabet(Filter filter);
     List<PostResponse> searchPostBySubCategory(List<String> filter);
     List<PostResponse> getPostsForCurrentUser();
+    List<PostResponse> randomPostBySubCategory(String subCategory);
 }

@@ -17,7 +17,7 @@ public interface ProductService {
 
     ProductResponse saveListFile(UUID productId, List<MultipartFile> files, HttpServletRequest request) throws IOException;
 
-    ProductResponse addProduct(ProductRequest postRequest);
+    ProductResponse addProduct(ProductRequest postRequest) throws Exception;
 
     List<ProductResponse> getAllProduct();
 
@@ -25,7 +25,7 @@ public interface ProductService {
 
     ProductResponse deleteProductById(UUID id);
 
-    ProductResponse updateProductById(UUID id, ProductRequest request);
+    ProductResponse updateProductById(UUID id, ProductRequest request) throws Exception;
 
     List<ProductResponse> getAllProductByShopId(UUID id);
     ByteArrayResource getImage(String fileName) throws IOException;

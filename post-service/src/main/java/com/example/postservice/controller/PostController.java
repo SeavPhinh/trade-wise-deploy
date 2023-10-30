@@ -128,6 +128,16 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
+    @GetMapping("/sub-category/random")
+    @Operation(summary = "random three post based on sub-category")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> randomPostBySubCategory(@RequestParam String subCategory){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "random three post by based on sub-category fetched successfully",
+                postService.randomPostBySubCategory(subCategory),
+                HttpStatus.OK
+        ),HttpStatus.OK);
+    }
+
     @GetMapping("/current")
     @Operation(summary = "get all post for current user")
     @SecurityRequirement(name = "oAuth2")

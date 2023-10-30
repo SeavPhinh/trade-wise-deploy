@@ -16,7 +16,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductForSaleRequest {
+public class ProductForSaleRequestUpdate {
 
     @NotEmpty(message = ValidationConfig.POST_TITLE_REQUIRE)
     @NotNull(message = ValidationConfig.NULL_TITLE)
@@ -34,12 +34,5 @@ public class ProductForSaleRequest {
 
     @NotNull(message = ValidationConfig.NULL_STATUS)
     private Boolean status;
-
-    @NotNull(message = ValidationConfig.NULL_POST_ID)
-    private UUID postId;
-
-    public ProductForSale toEntity(UUID shopId){
-        return new ProductForSale(null, this.title.trim(),this.files.toString(),this.description.trim(),this.status,shopId,this.postId, LocalDateTime.now(), LocalDateTime.now());
-    }
 
 }

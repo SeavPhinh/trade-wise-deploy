@@ -23,7 +23,7 @@ public interface UserInfoService {
 
     UserInfoResponse getCurrentUserInfo();
 
-    UserInfoResponse updateCurrentUserInfo(UserInfoRequestUpdate request);
+    UserInfoResponse updateCurrentUserInfo(UserInfoRequestUpdate request) throws Exception;
 
     ByteArrayResource getImage(String fileName) throws IOException;
 
