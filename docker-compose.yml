@@ -1,0 +1,167 @@
+version: '3'
+
+networks:
+  trade-wise:
+
+services:
+  # Keycloak Database
+  keycloak-db:
+    image: postgres:14.4-alpine
+    networks:
+      - trade-wise
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+  # Keycloak
+  keycloak:
+    image: jboss/keycloak
+    networks:
+      - trade-wise
+    ports:
+      - "1234:8080"
+    depends_on:
+      - keycloak-db
+    environment:
+      - DB_VENDOR=postgres
+      - DB_ADDR=keycloak-db
+      - DB_DATABASE=keycloak
+      - DB_USER=keycloak
+      - DB_PASSWORD=keycloak
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+#      - KEYCLOAK_IMPORT=keycloak/realm-export.json
+#      - KEYCLOAK_PROFILE_FEATURE_UPLOAD_SCRIPTS=enabled
+  # Config Server
+  config-server:
+    build:
+      context: .
+      dockerfile: deployment/config-server.Dockerfile
+    healthcheck:
+      test: "curl --fail --silent http://localhost:8080/actuator/health | grep UP || exit 1"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    container_name: config-server
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+    ports:
+      - "8888:8080"
+    networks:
+      - trade-wise
+  # Eureka Server
+  eureka-server:
+    build:
+      context: .
+      dockerfile: deployment/eureka.Dockerfile
+    container_name: eureka-server
+    environment:
+      SPRING_APPLICATION_NAME: eureka-server
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://localhost:8888"
+    ports:
+      - "8761:8761"
+    networks:
+      - trade-wise
+  # Gateway
+  gateway-service:
+    build:
+      context: .
+      dockerfile: deployment/gateway.Dockerfile
+    container_name: gateway-service
+    environment:
+      SPRING_APPLICATION_NAME: gateway-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8080:8080"
+    networks:
+      - trade-wise
+  # User info Service
+  user-service:
+    build:
+      context: .
+      dockerfile: deployment/user.Dockerfile
+    container_name: user-service
+    environment:
+      SPRING_APPLICATION_NAME: user-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8081:8080"
+    networks:
+      - trade-wise
+  # Post Service
+  post-service:
+    build:
+      context: .
+      dockerfile: deployment/post.Dockerfile
+    container_name: post-service
+    environment:
+      SPRING_APPLICATION_NAME: post-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8083:8080"
+    networks:
+      - trade-wise
+  # Product Service
+  product-service:
+    build:
+      context: .
+      dockerfile: deployment/product.Dockerfile
+    container_name: product-service
+    environment:
+      SPRING_APPLICATION_NAME: product-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8089:8080"
+    networks:
+      - trade-wise
+  # Product Service
+  shop-service:
+    build:
+      context: .
+      dockerfile: deployment/shop.Dockerfile
+    container_name: shop-service
+    environment:
+      SPRING_APPLICATION_NAME: shop-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8088:8080"
+    networks:
+      - trade-wise
+  # User info Service
+  user-info-service:
+    build:
+      context: .
+      dockerfile: deployment/user-info.Dockerfile
+    container_name: user-info-service
+    environment:
+      SPRING_APPLICATION_NAME: user-info-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8084:8080"
+    networks:
+      - trade-wise
+  # Category Service
+  category-service:
+    build:
+      context: .
+      dockerfile: deployment/category.Dockerfile
+    container_name: category-service
+    environment:
+      SPRING_APPLICATION_NAME: category-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8087:8080"
+    networks:
+      - trade-wise
+
+volumes:
+  keycloak-db-data:
