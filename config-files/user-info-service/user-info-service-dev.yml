@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://34.143.202.207:5432/user-info_db
+    url: jdbc:postgresql://35.240.242.176:5432/user-info_db
     username: '{cipher}cb149f3fb4e5611382132c16617c52d7f0b604d6b8c3fed1e4433b9c5a2ffdce'
     password: '{cipher}9ea912480434f64cb60f47fb6cfc696a2a4c73ee0969a426479240c203aeb984'
   jpa:

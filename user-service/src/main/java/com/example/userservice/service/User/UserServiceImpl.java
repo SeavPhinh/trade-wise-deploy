@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             if (user.getId().equalsIgnoreCase(String.valueOf(getUserById(userId).getId()))) {
                 keycloak.realm(realm).users().delete(String.valueOf(userId));
-                return "User has deleted successfully";
+                return "user has deleted successfully";
             }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
