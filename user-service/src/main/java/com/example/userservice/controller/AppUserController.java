@@ -115,7 +115,7 @@ public class AppUserController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "logging account")
+    @Operation(summary = "*logging account")
     public ResponseEntity<ApiResponse<UserResponse>> login(@RequestParam(defaultValue = "BUYER") Role role, @Valid @RequestBody UserLogin login){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account logged successfully",
