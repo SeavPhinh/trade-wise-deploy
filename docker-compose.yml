@@ -4,35 +4,6 @@ networks:
   trade-wise:
 
 services:
-  # Keycloak Database
-  keycloak-db:
-    image: postgres:14.4-alpine
-    networks:
-      - trade-wise
-    volumes:
-      - keycloak-db-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=keycloak
-  # Keycloak
-  keycloak:
-    image: jboss/keycloak
-    networks:
-      - trade-wise
-    ports:
-      - "1234:8080"
-    depends_on:
-      - keycloak-db
-    environment:
-      - DB_VENDOR=postgres
-      - DB_ADDR=keycloak-db
-      - DB_DATABASE=keycloak
-      - DB_USER=keycloak
-      - DB_PASSWORD=keycloak
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
-#      - KEYCLOAK_IMPORT=keycloak/realm-export.json
-#      - KEYCLOAK_PROFILE_FEATURE_UPLOAD_SCRIPTS=enabled
   # Config Server
   config-server:
     build:
