@@ -16,8 +16,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:1234/auth/realms/go-selling-api
-          jwk-set-uri: http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/certs
+          #         https
+          issuer-uri: https://keycloak.trade-wise.online/auth/realms/go-selling-api
+          jwk-set-uri: https://keycloak.trade-wise.online/auth/realms/go-selling-api/protocol/openid-connect/certs
+#          local
+#          issuer-uri: http://localhost:1234/auth/realms/go-selling-api
+#          jwk-set-uri: http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/certs
 eureka:
   client:
     serviceUrl:

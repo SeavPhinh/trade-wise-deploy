@@ -16,8 +16,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:1234/auth/realms/go-selling-api
-          jwk-set-uri: http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/certs
+          #         https
+          issuer-uri: https://keycloak.trade-wise.online/auth/realms/go-selling-api
+          jwk-set-uri: https://keycloak.trade-wise.online/auth/realms/go-selling-api/protocol/openid-connect/certs
+#          local
+#          issuer-uri: http://localhost:1234/auth/realms/go-selling-api
+#          jwk-set-uri: http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/certs
 eureka:
   client:
     serviceUrl:
@@ -25,12 +29,12 @@ eureka:
 keycloak:
   realm: go-selling-api
   resource: go-selling
-  auth-server-url: http://localhost:1234/auth
+  auth-server-url: https://keycloak.trade-wise.online/auth
   credentials:
     username: 'admin'
     password: 'admin'
     client-id: '{cipher}68cb01c2cb6cc09d52d307bb77df71dd6ea99df0449c664e7031b6cbb6529055'
-    secret: '{cipher}17a058ed6a1cfb9e45c48c567154bf0c424936c2a4a78330270b8e651be4ff65fd8cabdf6534b386018fd079b1cc86dc7415a6c77b5f1897fa7181971de2fbc1'
+    secret: '{cipher}5807f6195a8c82e7b84659a7f0a2fe0cff482c808748f1a45339b7f9ff16a59a3e1a4274e2a96271282d4af50bdd5faddd1c55e9fa5d6cf5076411d1c49e0d57'
     provider: secret
 file:
   uploadPath: user-info-service/src/main/resources/storage/
@@ -47,5 +51,5 @@ springdoc:
     oauth:
       realm: 'go-selling-api'
       client-id: '{cipher}68cb01c2cb6cc09d52d307bb77df71dd6ea99df0449c664e7031b6cbb6529055'
-      clientSecret: '{cipher}17a058ed6a1cfb9e45c48c567154bf0c424936c2a4a78330270b8e651be4ff65fd8cabdf6534b386018fd079b1cc86dc7415a6c77b5f1897fa7181971de2fbc1'
+      clientSecret: '{cipher}5807f6195a8c82e7b84659a7f0a2fe0cff482c808748f1a45339b7f9ff16a59a3e1a4274e2a96271282d4af50bdd5faddd1c55e9fa5d6cf5076411d1c49e0d57'
     path: /user-info-service/swagger-ui.html

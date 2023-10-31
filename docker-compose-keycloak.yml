@@ -17,6 +17,9 @@ services:
   # Keycloak
   keycloak:
     image: jboss/keycloak
+    container_name: keycloak-server-mini
+    volumes:
+      - ./keycloak/realm-export.json:/opt/realm.json
     networks:
       - trade-wise
     ports:
@@ -31,8 +34,8 @@ services:
       - DB_PASSWORD=keycloak
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
-#      - KEYCLOAK_IMPORT=keycloak/realm-export.json
-#      - KEYCLOAK_PROFILE_FEATURE_UPLOAD_SCRIPTS=enabled
+      - KEYCLOAK_IMPORT=/opt/realm.json
+      - KEYCLOAK_PROFILE_FEATURE_UPLOAD_SCRIPTS=enabled
 
 volumes:
   keycloak-db-data:
