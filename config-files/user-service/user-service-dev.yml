@@ -53,4 +53,8 @@ springdoc:
   api-docs:
     path: /user-service/v3/api-docs
   swagger-ui:
+    oauth:
+      realm: 'go-selling-api'
+      client-id: '{cipher}68cb01c2cb6cc09d52d307bb77df71dd6ea99df0449c664e7031b6cbb6529055'
+      clientSecret: '{cipher}5807f6195a8c82e7b84659a7f0a2fe0cff482c808748f1a45339b7f9ff16a59a3e1a4274e2a96271282d4af50bdd5faddd1c55e9fa5d6cf5076411d1c49e0d57'
     path: /user-service/swagger-ui.html
