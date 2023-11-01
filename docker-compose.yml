@@ -9,44 +9,25 @@ services:
     build:
       context: .
       dockerfile: deployment/config-server.Dockerfile
-    healthcheck:
-      test: "curl --fail --silent http://localhost:8080/actuator/health | grep UP || exit 1"
-      interval: 5s
-      timeout: 5s
-      retries: 5
     container_name: config-server
     environment:
       SPRING_PROFILES_ACTIVE: default
     ports:
-      - "8888:8080"
+      - "8888:8888"
     networks:
       - trade-wise
   # Eureka Server
   eureka-server:
     build:
       context: .
-      dockerfile: deployment/eureka.Dockerfile
+      dockerfile: deployment/eureka-server.Dockerfile
     container_name: eureka-server
     environment:
       SPRING_APPLICATION_NAME: eureka-server
-      SPRING_PROFILES_ACTIVE: native,dev
-      SPRING_CONFIG_IMPORT: "configserver:http://localhost:8888"
-    ports:
-      - "8761:8761"
-    networks:
-      - trade-wise
-  # Gateway
-  gateway-service:
-    build:
-      context: .
-      dockerfile: deployment/gateway.Dockerfile
-    container_name: gateway-service
-    environment:
-      SPRING_APPLICATION_NAME: gateway-service
-      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
-      - "8080:8080"
+      - "8761:8761"
     networks:
       - trade-wise
   # User info Service
@@ -54,13 +35,13 @@ services:
     build:
       context: .
       dockerfile: deployment/user.Dockerfile
-    container_name: user-service
+    container_name: user-container
     environment:
       SPRING_APPLICATION_NAME: user-service
-      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
-      - "8081:8080"
+      - "8081:8081"
     networks:
       - trade-wise
   # Post Service
@@ -127,10 +108,24 @@ services:
     container_name: category-service
     environment:
       SPRING_APPLICATION_NAME: category-service
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8087:8087"
+    networks:
+      - trade-wise
+  # Gateway
+  gateway-service:
+    build:
+      context: .
+      dockerfile: deployment/gateway.Dockerfile
+    container_name: gateway-service
+    environment:
+      SPRING_APPLICATION_NAME: gateway-service
       SPRING_PROFILES_ACTIVE: native,dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
-      - "8087:8080"
+      - "8080:8080"
     networks:
       - trade-wise
 

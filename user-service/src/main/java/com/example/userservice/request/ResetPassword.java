@@ -21,7 +21,7 @@ public class ResetPassword {
     @NotBlank
     private String otpCode;
     @NotBlank(message = ValidationConfig.PASSWORD_REQUIRED_MESSAGE)
-    @Size(min = ValidationConfig.PASSWORD_VALIDATION_MIN, message = ValidationConfig.FIRSTNAME_RESPONSE_MESSAGE)
+    @Size(min = ValidationConfig.PASSWORD_VALIDATION_MIN, message = ValidationConfig.PASSWORD_RESPONSE_MESSAGE)
     @Pattern(regexp = ValidationConfig.PASSWORD_VALIDATION_REG, message = ValidationConfig.PASSWORD_RESPONSE_REG_MESSAGE)
     private String newPassword;
     @NotBlank(message = ValidationConfig.PASSWORD_REQUIRED_MESSAGE)

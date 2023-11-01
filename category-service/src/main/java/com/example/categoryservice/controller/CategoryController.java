@@ -26,7 +26,7 @@ public class CategoryController {
     }
 
     @GetMapping("")
-    @Operation(summary = "fetch all categories")
+    @Operation(summary = "*fetch all categories")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Categories fetched successfully",
@@ -36,7 +36,7 @@ public class CategoryController {
     }
 
     @GetMapping("/name")
-    @Operation(summary = "fetch categories by name")
+    @Operation(summary = "*fetch categories by name")
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Categories fetched by name successfully",
@@ -46,7 +46,7 @@ public class CategoryController {
     }
 
     @GetMapping("/sub-categories")
-    @Operation(summary = "fetch category with sub categories by name")
+    @Operation(summary = "*fetch category with sub categories by name")
     public ResponseEntity<ApiResponse<CategorySubCategory>> getCategoryAndSubCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Category and SubCategory fetched by name successfully",
@@ -56,7 +56,7 @@ public class CategoryController {
     }
 
     @PostMapping("")
-    @Operation(summary = "adding category")
+    @Operation(summary = "*adding category")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategoryResponse>> addCategory(@Valid @RequestBody CategoryRequest request){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -67,7 +67,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("")
-    @Operation(summary = "delete categories by name")
+    @Operation(summary = "*delete categories by name")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategoryResponse>> deleteCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -78,7 +78,7 @@ public class CategoryController {
     }
 
     @PutMapping("")
-    @Operation(summary = "update categories by name")
+    @Operation(summary = "*update categories by name")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategoryResponse>> updateCategoryById(@RequestParam String name,
                                                                             @Valid @RequestBody CategoryRequest request){

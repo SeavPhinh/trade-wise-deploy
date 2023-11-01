@@ -53,11 +53,16 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponse ratingShop(RatingRequest request) {
+
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        if(request.getLevel() == null || request.getShopId() == null){
-            throw new NullExceptionClass(ValidationConfig.NULL_FIELD);
+
+        if(request.getLevel() == null){
+            throw new NullExceptionClass("level"+ValidationConfig.NULL_INPUT);
+        }else if(request.getShopId() == null){
+            throw new NullExceptionClass("shop id"+ValidationConfig.NULL_INPUT);
         }
+
         Optional<Shop> shop = service.findById(request.getShopId());
         if(shop.isPresent()){
             if(!shop.get().getStatus()){

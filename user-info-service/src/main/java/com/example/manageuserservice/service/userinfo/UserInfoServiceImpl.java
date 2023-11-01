@@ -87,7 +87,6 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     public UserInfoResponse getUserInfoByUserId(UUID id) {
-        isNotVerify(UUID.fromString(currentUser()));
         return isNotExisting(id);
     }
 

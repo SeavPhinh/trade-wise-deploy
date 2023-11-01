@@ -10,7 +10,7 @@ public class ValidationConfig {
     public static final int USER_VALIDATION_MAX = 50;
     public static final String PASSWORD_REQUIRED_MESSAGE = "password is required";
     public static final String PASSWORD_RESPONSE_MESSAGE = "password must be at least 6 characters";
-    public static final String PASSWORD_RESPONSE_REG_MESSAGE = "a valid password must at least 6 characters, and it must include at least one uppercase letter, one lowercase letter, and one number";
+    public static final String PASSWORD_RESPONSE_REG_MESSAGE = "a valid password must at least 6 characters, and it must include at least one uppercase letter, one lowercase letter,one symbol, and one number";
     public static final String PASSWORD_VALIDATION_REG = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\\-_=+{};:,<.>])(?!.*\\s).{6,}$";
     public static final int PASSWORD_VALIDATION_MIN = 6;
     public static final int PASSWORD_VALIDATION_MAX = 30;
@@ -122,6 +122,10 @@ public class ValidationConfig {
     public static final String NULL_STATUS = "status cannot be null";
     public static final String NULL_PRICE = "price cannot be null";
     public static final String NULL_POST_ID = "post id cannot be null";
+    public static final String NOT_FOUND_BEST_RATE_SHOP = "top three rated by user is not containing yet";
+    public static final String NULL_INPUT = " cannot be null";
+    public static final String NOT_FOUND_FILE = "please upload a file";
+    public static final String OUT_OF_SCOPE_LEVEL = "level is out of scope (ONE_STAR,TWO_STARS,THREE_STARS,FOUR_STARS,FIVE_STARS)";
     public static final int MIN_SUB_CATEGORY = 1;
 
 }

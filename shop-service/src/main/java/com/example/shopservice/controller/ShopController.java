@@ -32,7 +32,6 @@ public class ShopController {
         this.shopService = shopService;
     }
 
-
     @PostMapping("")
     @Operation(summary = "set up shop")
     @SecurityRequirement(name = "oAuth2")
@@ -109,7 +108,7 @@ public class ShopController {
     @PutMapping("/current")
     @Operation(summary = "update shop by id")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<ShopResponse>> updateShopById(@Valid @RequestBody ShopRequest request){
+    public ResponseEntity<ApiResponse<ShopResponse>> updateShopById(@Valid @RequestBody ShopRequest request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
                 " Updated shop by id successfully",
                 shopService.updateShopById(request),

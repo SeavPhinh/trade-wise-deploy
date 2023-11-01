@@ -1,7 +1,7 @@
 package com.example.productservice.controller;
 
-import com.example.commonservice.exception.NotFoundExceptionClass;
 import com.example.commonservice.response.ApiResponse;
+import com.example.productservice.exception.NotFoundExceptionClass;
 import com.example.productservice.request.ProductRequest;
 import com.example.productservice.response.ProductResponse;
 import com.example.productservice.service.product.ProductService;

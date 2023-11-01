@@ -27,7 +27,7 @@ public interface UserService {
 
     UserCreated postUser(UserRequest request) throws MessagingException;
 
-    String deleteUser(UUID id);
+    Void deleteUser(UUID id);
 
     UserResponse verifiedAccount(Role role, VerifyLogin login) throws MessagingException;
 

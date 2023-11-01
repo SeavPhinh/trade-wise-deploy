@@ -61,12 +61,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<User> findByUsername(String username) {
-        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(username.replaceAll("\\s+",""));
 
+        List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(username.replaceAll("\\s+",""));
         if(userRepresentations.stream().toList().isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
         }
-
         return userRepresentations.stream()
                 .map(UserDto::toDto)
                 .collect(Collectors.toList());
@@ -123,11 +122,11 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    public String deleteUser(UUID userId) {
+    public Void deleteUser(UUID userId) {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             if (user.getId().equalsIgnoreCase(String.valueOf(getUserById(userId).getId()))) {
                 keycloak.realm(realm).users().delete(String.valueOf(userId));
-                return "user has deleted successfully";
+                return null;
             }
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
@@ -171,6 +170,7 @@ public class UserServiceImpl implements UserService {
         if(whiteSpace(change.getNewPassword()) || whiteSpace(change.getConfirmPassword())){
             throw new IllegalArgumentException(ValidationConfig.WHITE_SPACE);
         }
+
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             String accountId = change.getAccount().replaceAll("\\s+","");
             if (user.getEmail().equalsIgnoreCase(accountId) || user.getUsername().equalsIgnoreCase(accountId)) {
@@ -205,7 +205,6 @@ public class UserServiceImpl implements UserService {
                 emailService.resetPassword(reset.getEmail().replaceAll("\\s+",""));
                 return reset;
             }
-            throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }

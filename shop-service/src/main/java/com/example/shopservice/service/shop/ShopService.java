@@ -19,7 +19,7 @@ public interface ShopService {
     ShopResponse setUpShop(ShopRequest request) throws Exception;
     List<ShopResponse> getAllShop();
     ShopResponse getShopById(UUID id);
-    ShopResponse updateShopById(ShopRequest request);
+    ShopResponse updateShopById(ShopRequest request) throws Exception;
     ShopResponse getShopByOwnerId();
     ShopResponse shopAction(Boolean isActive);
     ByteArrayResource getImage(String fileName) throws IOException;

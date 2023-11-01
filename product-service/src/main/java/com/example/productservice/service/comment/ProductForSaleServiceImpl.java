@@ -64,11 +64,10 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     @Override
     public ProductForSaleResponse saveListFile(UUID id, List<MultipartFile> files, HttpServletRequest request) throws IOException {
         isNotVerify(UUID.fromString(currentUser()));
+        isLegal(UUID.fromString(currentUser()));
         UUID shopId = shop().getId();
         ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
-
         validationShop(shopId,preData);
-        isLegal(UUID.fromString(currentUser()));
         List<String> listFiles = new ArrayList<>();
         for (MultipartFile file : files) {
 
@@ -91,6 +90,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     @Override
     public ProductForSaleResponse addProductToPost(ProductForSaleRequest postRequest) throws Exception {
         isNotVerify(UUID.fromString(currentUser()));
+        isLegal(UUID.fromString(currentUser()));
         PostResponse product = post(postRequest.getPostId());
 
         for (String image : postRequest.getFiles()) {
@@ -123,6 +123,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     @Override
     public String deleteProductById(UUID id) {
         isNotVerify(UUID.fromString(currentUser()));
+        isLegal(UUID.fromString(currentUser()));
         // Create new object to store before delete
         ProductForSaleResponse response = getProductById(id);
         if(response.getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
@@ -136,6 +137,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     @Override
     public ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequestUpdate request) throws Exception {
         isNotVerify(UUID.fromString(currentUser()));
+        isLegal(UUID.fromString(currentUser()));
         ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
 
         for (String image : request.getFiles()) {
@@ -238,16 +240,20 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication.getPrincipal() instanceof Jwt jwt){
-            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                    .get()
-                    .uri("api/v1/posts/{id}", id)
-                    .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
-                    .retrieve()
-                    .bodyToMono(ApiResponse.class)
-                    .block()).getPayload(), PostResponse.class);
+        try{
+            if(authentication.getPrincipal() instanceof Jwt jwt){
+                return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .get()
+                        .uri("api/v1/posts/{id}", id)
+                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
+                        .retrieve()
+                        .bodyToMono(ApiResponse.class)
+                        .block()).getPayload(), PostResponse.class);
+            }
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
         }
-        throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
 
     // Separate file -> List

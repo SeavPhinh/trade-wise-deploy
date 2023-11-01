@@ -45,7 +45,6 @@ public class ProductForSaleController {
     }
 
     @GetMapping("/{id}")
-    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetch product for sale by id")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -56,7 +55,6 @@ public class ProductForSaleController {
     }
 
     @GetMapping("/post/{id}")
-    @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "fetch all product for sale by posted id")
     public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(

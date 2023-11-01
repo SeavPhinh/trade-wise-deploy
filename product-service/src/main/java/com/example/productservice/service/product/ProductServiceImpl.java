@@ -64,7 +64,9 @@ public class ProductServiceImpl implements ProductService{
         if(pre.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_PRODUCT);
         }
-
+        if(files.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_FILE);
+        }
         Product preData = pre.get();
 
         if(!shopId.toString().equalsIgnoreCase(preData.getShopId().toString())){
@@ -73,8 +75,10 @@ public class ProductServiceImpl implements ProductService{
 
         isLegal(UUID.fromString(currentUser()));
         List<String> listFiles = new ArrayList<>();
-        for (MultipartFile file : files) {
 
+
+
+        for (MultipartFile file : files) {
             String uploadPath = fileStorageProperties.getUploadPath();
             Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
             java.io.File directory = directoryPath.toFile();

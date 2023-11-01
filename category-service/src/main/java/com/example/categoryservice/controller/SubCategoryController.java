@@ -24,7 +24,7 @@ public class SubCategoryController {
     }
 
     @GetMapping("")
-    @Operation(summary = "fetch sub category by sub category name")
+    @Operation(summary = "*fetch sub category by sub category name")
     public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> getSubCategoryById(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
                 "SubCategories fetched by id successfully",
@@ -34,7 +34,7 @@ public class SubCategoryController {
     }
 
     @PostMapping("")
-    @Operation(summary = "adding subcategory by category name")
+    @Operation(summary = "*adding subcategory by category name")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> addSubCategory(@RequestParam String categoryName,
                                                                                    @Valid @RequestBody SubCategoryRequest request){
@@ -46,7 +46,7 @@ public class SubCategoryController {
     }
 
     @DeleteMapping("")
-    @Operation(summary = "delete sub categories by name")
+    @Operation(summary = "*delete sub categories by name")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> deleteSubCategoryByName(@RequestParam String name){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -58,7 +58,7 @@ public class SubCategoryController {
 
 
     @PutMapping("")
-    @Operation(summary = "update subcategories by name")
+    @Operation(summary = "*update subcategories by name")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<CategorySubCategoryResponse>> updateSubCategoryByName(@RequestParam String name,
                                                                             @Valid @RequestBody SubCategoryRequest request){

@@ -123,7 +123,7 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public ShopResponse updateShopById(ShopRequest request) {
+    public ShopResponse updateShopById(ShopRequest request) throws Exception {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         Shop preShop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
@@ -131,6 +131,7 @@ public class ShopServiceImpl implements ShopService {
             if(!preShop.getUserId().toString().equalsIgnoreCase(createdBy(UUID.fromString(currentUser())).getId().toString())){
                 throw new IllegalArgumentException(ValidationConfig.ILLEGAL_SHOP_UPDATE);
             }
+            validateFile(request.getProfileImage());
             Address address = preShop.getAddress();
             address.setAddress(request.getAddress().getAddress());
             address.setUrl(request.getAddress().getUrl());
@@ -189,12 +190,12 @@ public class ShopServiceImpl implements ShopService {
 
         List<Shop> getAllActiveShop = shopRepository.getAllActiveShop();
         if(getAllActiveShop.isEmpty()){
-            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_BEST_RATE_SHOP);
         }
         List<UUID> getAllShopIdFromRating = ratingRepository.getAllShopIdFromRating();
 
         if(getAllShopIdFromRating.isEmpty()){
-            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_BEST_RATE_SHOP);
         }
         List<UUID> activeShopInRating = new ArrayList<>(getAllShopIdFromRating);
 
@@ -385,6 +386,7 @@ public class ShopServiceImpl implements ShopService {
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(), CategorySubCategoryResponse.class);
+                System.out.println("SubCateName: " + subName);
                 responses.add(subName.getSubCategory().getName());
             }
             return responses;

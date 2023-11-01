@@ -53,7 +53,7 @@ public class AppUserController {
     }
 
     @GetMapping("/current")
-    @Operation(summary = "fetch current from keycloak")
+    @Operation(summary = "*fetch current from keycloak")
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<User>> getCurrentUser(){
         return new ResponseEntity<>(new ApiResponse<>(
@@ -96,7 +96,7 @@ public class AppUserController {
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "delete user by id from keycloak")
-    public ResponseEntity<ApiResponse<String>> deleteUserById(@PathVariable UUID id){
+    public ResponseEntity<ApiResponse<Void>> deleteUserById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "User delete by id successfully",
                 userService.deleteUser(id),

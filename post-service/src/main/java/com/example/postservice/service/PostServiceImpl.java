@@ -157,6 +157,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponse> getAllDraftPosts() {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         List<PostResponse> draftList = postRepository.getAllDraftPosts().stream().map(post -> post.toDto(createdBy(post.getUserId()))).toList();
         if(!draftList.isEmpty()){
@@ -167,6 +168,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponse getDraftedPostById(UUID id) {
+        isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         Post post = postRepository.findDraftedPostById(id);
         if(post != null){
@@ -251,6 +253,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponse> getPostsForCurrentUser() {
+        isNotVerify(UUID.fromString(currentUser()));
         List<Post> posts = postRepository.findAllPostForCurrentUser(UUID.fromString(currentUser()));
         if(!posts.isEmpty()){
             return posts.stream().map(post-> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
@@ -289,12 +292,16 @@ public class PostServiceImpl implements PostService {
     public User createdBy(UUID id){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
-        return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                .get()
-                .uri("api/v1/users/{id}", id)
-                .retrieve()
-                .bodyToMono(ApiResponse.class)
-                .block()).getPayload(), User.class);
+        try{
+            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .get()
+                    .uri("api/v1/users/{id}", id)
+                    .retrieve()
+                    .bodyToMono(ApiResponse.class)
+                    .block()).getPayload(), User.class);
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+        }
     }
 
     // Validation legal Role
