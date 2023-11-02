@@ -1,5 +1,6 @@
 package com.example.manageuserservice.config;
 
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -8,10 +9,17 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @EnableWebSecurity
 @Configuration
 public class KeyCloakSecurityConfig {
+//    String baseUrl = "http://gateway-service";
+//    @Bean
+//    @LoadBalanced
+//    public WebClient.Builder userClient(){
+//        return WebClient.builder().baseUrl(baseUrl);
+//    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

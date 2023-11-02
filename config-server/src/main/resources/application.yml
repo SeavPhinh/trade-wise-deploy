@@ -5,7 +5,7 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/goselling/trade-wise-config
+          uri: https://github.com/goselling/trade-wise-test-config.git
           clone-on-start: true
           search-paths:
             - category-service

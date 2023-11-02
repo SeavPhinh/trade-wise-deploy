@@ -2,11 +2,13 @@ package com.example.gatewayservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
+@EnableDiscoveryClient
 public class GatewayServiceApplication {
 
     public static void main(String[] args) {
@@ -18,6 +20,8 @@ public class GatewayServiceApplication {
         return builder
 
                 .routes()
+
+                .route(r -> r.path("/gateway-service/v3/api-docs").uri("lb://gateway-service"))
 
                 .route(r -> r.path("/category-service/v3/api-docs").uri("lb://category-service"))
                 .route(r -> r.path("/api/v1/categories/**").uri("lb://category-service"))

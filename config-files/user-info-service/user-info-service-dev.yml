@@ -24,8 +24,9 @@ spring:
 #          jwk-set-uri: http://localhost:1234/auth/realms/go-selling-api/protocol/openid-connect/certs
 eureka:
   client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka
+    fetch-registry: true
+    register-with-eureka: true
+    eureka-server-u-r-l-defaultZone: http://eureka-server:8761/eureka/
 keycloak:
   realm: go-selling-api
   resource: go-selling
