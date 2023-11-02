@@ -46,18 +46,16 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
 
     private final ProductForSaleRepository productForSaleRepository;
     private final FileStorageProperties fileStorageProperties;
-    private final ProductRepository productRepository;
     private final WebClient webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
     private String realm;
 
-    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, ProductRepository productRepository, WebClient.Builder webClient, Keycloak keycloak) {
+    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.productForSaleRepository = productForSaleRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.productRepository = productRepository;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient.baseUrl("http://localhost:8080/").build();
         this.keycloak = keycloak;
     }
 

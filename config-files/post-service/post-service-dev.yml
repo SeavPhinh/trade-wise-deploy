@@ -42,7 +42,7 @@ openapi:
   service:
     title: post-service
     version: 1.0.0
-    url: http://localhost:1688
+    url: http://localhost:8080
 
 springdoc:
   api-docs:

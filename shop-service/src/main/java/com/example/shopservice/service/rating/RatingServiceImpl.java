@@ -37,17 +37,15 @@ public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
     private final ShopRepository service;
     private final WebClient webClient;
-    private final WebClient subCategoryWeb;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
     private String realm;
 
-    public RatingServiceImpl(RatingRepository ratingRepository, ShopRepository service, WebClient.Builder webClient, WebClient.Builder subCategoryWeb, Keycloak keycloak) {
+    public RatingServiceImpl(RatingRepository ratingRepository, ShopRepository service, WebClient.Builder webClient, Keycloak keycloak) {
         this.ratingRepository = ratingRepository;
         this.service = service;
-        this.webClient = webClient.baseUrl("http://localhost:8081/").build();
-        this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:1688/").build();
+        this.webClient = webClient.baseUrl("http://localhost:8080/").build();
         this.keycloak = keycloak;
     }
 
@@ -179,7 +177,7 @@ public class RatingServiceImpl implements RatingService {
         if(!uuidList.isEmpty()){
             for (UUID subId : uuidList) {
                 try{
-                    SubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(subCategoryWeb
+                    SubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                             .get()
                             .uri("api/v1/subcategories/{id}", subId)
                             .retrieve()

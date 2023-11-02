@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService{
     public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.productRepository = productRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient.baseUrl("http://localhost:8080/").build();
         this.keycloak = keycloak;
     }
 

@@ -53,7 +53,7 @@ public class PostServiceImpl implements PostService {
     public PostServiceImpl(PostRepository postRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.postRepository = postRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient.baseUrl("http://localhost:8080/").build();
         this.keycloak = keycloak;
     }
 

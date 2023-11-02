@@ -39,7 +39,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     public SellerFavoriteServiceImpl(SellerFavoriteRepository favoriteRepository, WebClient.Builder webClient, Keycloak keycloak) {
         this.sellerFavoriteRepository = favoriteRepository;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient.baseUrl("http://localhost:8080/").build();
         this.keycloak = keycloak;
     }
 

@@ -52,7 +52,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         this.userInfoRepository = userInfoRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.keycloak = keycloak;
-        this.userWeb = userWeb.baseUrl("http://192.168.154.1:8080/").build();
+        this.userWeb = userWeb.baseUrl("http://localhost:8080/").build();
     }
 
     @Override
