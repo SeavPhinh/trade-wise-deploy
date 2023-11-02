@@ -108,7 +108,7 @@ services:
     container_name: category-service
     environment:
       SPRING_APPLICATION_NAME: category-service
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: native,dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8087:8087"
