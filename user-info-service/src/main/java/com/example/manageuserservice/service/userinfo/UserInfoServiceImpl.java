@@ -43,7 +43,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     private final UserInfoRepository userInfoRepository;
     private final FileStorageProperties fileStorageProperties;
     private final Keycloak keycloak;
-    private final WebClient userWeb;
+    private final WebClient.Builder userWeb;
 
     @Value("${keycloak.realm}")
     private String realm;
@@ -52,8 +52,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         this.userInfoRepository = userInfoRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.keycloak = keycloak;
-        this.userWeb = userWeb.baseUrl("http://gateway-service/").build();
-//        this.userWeb = userWeb;
+        this.userWeb = userWeb;
     }
 
     @Override
@@ -207,6 +206,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(userWeb
+                .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
                 .retrieve()

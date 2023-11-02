@@ -4,116 +4,6 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.3'
 }
 
-project("post-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.auth0
-        implementation libraries.webFlux
-        implementation libraries.webMvc
-        implementation libraries.validation
-        implementation libraries.jpa
-        implementation libraries.postgresql
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.keycloakAdmin
-        implementation libraries.cloudClient
-        implementation libraries.eurekaClient
-        implementation libraries.resourceServer
-
-    }
-
-}
-project("category-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.webFlux
-        implementation libraries.webMvc
-        implementation libraries.validation
-        implementation libraries.jpa
-        implementation libraries.postgresql
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.keycloakAdmin
-        implementation libraries.cloudClient
-        implementation libraries.eurekaClient
-        implementation libraries.resourceServer
-    }
-
-}
 project("chat-service"){
 
     // Apply external plugin
@@ -199,172 +89,6 @@ project("notification-service"){
 
     dependencies {
 
-    }
-
-}
-project("user-info-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.auth0
-        implementation libraries.webFlux
-        implementation libraries.webMvc
-        implementation libraries.validation
-        implementation libraries.jpa
-        implementation libraries.postgresql
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.keycloakAdmin
-        implementation libraries.cloudClient
-        implementation libraries.eurekaClient
-        implementation libraries.resourceServer
-    }
-
-}
-project("product-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.auth0
-        implementation libraries.webFlux
-        implementation libraries.webMvc
-        implementation libraries.validation
-        implementation libraries.jpa
-        implementation libraries.postgresql
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.keycloakAdmin
-        implementation libraries.cloudClient
-        implementation libraries.eurekaClient
-        implementation libraries.resourceServer
-    }
-
-}
-project("shop-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.auth0
-        implementation libraries.webFlux
-        implementation libraries.webMvc
-        implementation libraries.validation
-        implementation libraries.jpa
-        implementation libraries.postgresql
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.keycloakAdmin
-        implementation libraries.cloudClient
-        implementation libraries.eurekaClient
-        implementation libraries.resourceServer
     }
 
 }
@@ -498,65 +222,6 @@ project("gateway-service"){
     }
 
 }
-project("user-service"){
-
-    // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    ext {
-        set('springCloudVersion', "2022.0.4")
-    }
-
-    dependencyManagement {
-        imports {
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation project(':common-service')
-        implementation libraries.auth0
-        implementation libraries.actuator
-        implementation libraries.keycloak
-        implementation libraries.cloudClient
-//        implementation libraries.eurekaClient
-        implementation libraries.keycloakAdmin
-        implementation libraries.webMvc
-        implementation libraries.resourceServer
-//        implementation libraries.springWeb
-        implementation libraries.thymleaf
-        implementation libraries.starterMail
-        implementation libraries.validation
-        implementation libraries.eurekaClient
-//        implementation libraries.zipkinTracking
-//        implementation libraries.zipkinReporter
-    }
-
-}
 project("common-service"){
 
     // Apply external plugin
@@ -633,17 +298,61 @@ allprojects {
         }
     }
 
+    ext {
+        set('springCloudVersion', "2022.0.4")
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     repositories {
         mavenCentral()
     }
 
     dependencies {
 
-        if(!projectDir.name.startsWith("gateway-service")){
-            implementation libraries.keycloak
-            implementation libraries.springWeb
-        }
+        if (
+                projectDir.name.startsWith("user-service") ||
+                        projectDir.name.startsWith("shop-service") ||
+                        projectDir.name.startsWith("product-service") ||
+                        projectDir.name.startsWith("user-info-service") ||
+                        projectDir.name.startsWith("category-service") ||
+                        projectDir.name.startsWith("post-service")
+        ) {
 
+            if (!projectDir.name.startsWith("gateway-service")) {
+                implementation libraries.keycloak
+                implementation libraries.springWeb
+            }
+
+            if (!projectDir.name.startsWith("user-service")) {
+                implementation libraries.webFlux
+                implementation libraries.jpa
+                implementation libraries.postgresql
+            }
+
+            if(projectDir.name.startsWith("user-service")){
+                implementation libraries.thymleaf
+                implementation libraries.starterMail
+            }
+
+            if (!projectDir.name.startsWith("category-service")) {
+                implementation libraries.auth0
+            }
+
+            implementation project(':common-service')
+            implementation libraries.webMvc
+            implementation libraries.eurekaClient
+            implementation libraries.cloudClient
+            implementation libraries.validation
+            implementation libraries.keycloak
+            implementation libraries.keycloakAdmin
+            implementation libraries.actuator
+            implementation libraries.resourceServer
+        }
 
         compileOnly libraries.lombok
         developmentOnly libraries.devtools

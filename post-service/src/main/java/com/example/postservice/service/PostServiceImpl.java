@@ -43,7 +43,7 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final FileStorageProperties fileStorageProperties;
-    private final WebClient webClient;
+    private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
@@ -53,7 +53,7 @@ public class PostServiceImpl implements PostService {
     public PostServiceImpl(PostRepository postRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.postRepository = postRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.webClient = webClient.baseUrl("http://localhost:8080/").build();
+        this.webClient = webClient;
         this.keycloak = keycloak;
     }
 
@@ -294,6 +294,7 @@ public class PostServiceImpl implements PostService {
         covertSpecificClass.registerModule(new JavaTimeModule());
         try{
             return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .build()
                     .get()
                     .uri("api/v1/users/{id}", id)
                     .retrieve()
@@ -317,6 +318,7 @@ public class PostServiceImpl implements PostService {
         covertSpecificClass.registerModule(new JavaTimeModule());
         try {
             CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .build()
                     .get()
                     .uri(uriBuilder -> uriBuilder
                             .path("api/v1/sub-categories")

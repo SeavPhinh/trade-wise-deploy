@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     private final SellerFavoriteRepository sellerFavoriteRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
@@ -39,7 +39,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     public SellerFavoriteServiceImpl(SellerFavoriteRepository favoriteRepository, WebClient.Builder webClient, Keycloak keycloak) {
         this.sellerFavoriteRepository = favoriteRepository;
-        this.webClient = webClient.baseUrl("http://localhost:8080/").build();
+        this.webClient = webClient;
         this.keycloak = keycloak;
     }
 
@@ -94,6 +94,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
         if(authentication.getPrincipal() instanceof Jwt jwt){
             try {
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .build()
                         .get()
                         .uri("api/v1/posts/{id}", id)
                         .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
@@ -127,6 +128,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
                 .retrieve()
