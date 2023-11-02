@@ -55,7 +55,7 @@ services:
       SPRING_PROFILES_ACTIVE: native,dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
-      - "8083:8080"
+      - "8083:8083"
     networks:
       - trade-wise
   # Product Service
@@ -69,7 +69,7 @@ services:
       SPRING_PROFILES_ACTIVE: native,dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
-      - "8089:8080"
+      - "8089:8089"
     networks:
       - trade-wise
   # Product Service
@@ -83,7 +83,7 @@ services:
       SPRING_PROFILES_ACTIVE: native,dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
-      - "8088:8080"
+      - "8088:8088"
     networks:
       - trade-wise
   # User info Service
@@ -97,7 +97,7 @@ services:
       SPRING_PROFILES_ACTIVE: native,dev
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
-      - "8084:8080"
+      - "8084:8084"
     networks:
       - trade-wise
   # Category Service
