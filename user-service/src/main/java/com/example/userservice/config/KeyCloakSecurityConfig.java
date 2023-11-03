@@ -16,6 +16,8 @@ public class KeyCloakSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors()
+                .and()
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
                     authorize.requestMatchers("user-service/v3/api-docs/**", "user-service/swagger-ui/**", "user-service/swagger-ui.html").permitAll();

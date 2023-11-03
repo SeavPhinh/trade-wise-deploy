@@ -21,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/seller-favorite")
 @Tag(name = "Seller Favorite")
+@CrossOrigin("*")
 public class SellerFavoriteController {
 
     private final SellerFavoriteService sellerFavoriteService;

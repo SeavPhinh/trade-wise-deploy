@@ -14,16 +14,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableWebSecurity
 @Configuration
 public class KeyCloakSecurityConfig {
-//    String baseUrl = "http://gateway-service";
-//    @Bean
-//    @LoadBalanced
-//    public WebClient.Builder userClient(){
-//        return WebClient.builder().baseUrl(baseUrl);
-//    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors()
+                .and()
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
                     authorize.requestMatchers("user-info-service/v3/api-docs/**", "user-info-service/swagger-ui/**", "user-info-service/swagger-ui.html").permitAll();

@@ -16,16 +16,11 @@ public class KeyCloakSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors()
+                .and()
                 .authorizeHttpRequests(authorize -> {
                     //For OpenAPI
                     authorize.requestMatchers("shop-service/v3/api-docs/**", "shop-service/swagger-ui/**", "shop-service/swagger-ui.html").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/filter").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/sort").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/best").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/{id}").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/user/{userId}").permitAll();
-                    authorize.requestMatchers(HttpMethod.GET,"api/v1/shops/image").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();

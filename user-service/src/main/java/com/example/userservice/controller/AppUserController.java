@@ -24,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/users")
 @Tag(name = "AppUser")
+@CrossOrigin("*")
 public class AppUserController {
 
     private final UserService userService;

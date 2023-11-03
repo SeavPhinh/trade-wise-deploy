@@ -24,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/shops")
 @Tag(name = "Shop")
+@CrossOrigin("*")
 public class ShopController {
 
     private final ShopService shopService;
@@ -45,6 +46,7 @@ public class ShopController {
 
     @GetMapping("")
     @Operation(summary = "fetch all shops")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ShopResponse>>> getAllShop(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shops fetched successfully",
@@ -55,6 +57,7 @@ public class ShopController {
 
     @GetMapping("/best")
     @Operation(summary = "fetch three shop based on ratings")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ShopResponse>>> bestThreeShop(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Best Shops fetched successfully",
@@ -65,6 +68,7 @@ public class ShopController {
 
     @GetMapping("/{id}")
     @Operation(summary = "fetch shop by id")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ShopResponse>> getShopById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop fetched by id successfully",
@@ -86,6 +90,7 @@ public class ShopController {
 
     @GetMapping("/sort")
     @Operation(summary = "fetch shop by sort")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ShopResponse>>> sortShop(@RequestParam(defaultValue = "NEWEST") Filter filter){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop fetched based on sorting successfully",
@@ -96,6 +101,7 @@ public class ShopController {
 
     @GetMapping("/filter")
     @Operation(summary = "fetch shop by filter")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ShopResponse>>> filterShop(@RequestParam String subCategory){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop fetched based on filter successfully",
@@ -141,6 +147,7 @@ public class ShopController {
 
     @GetMapping("/image")
     @Operation(summary = "fetched image")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(shopService.getImage(fileName));
     }

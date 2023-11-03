@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequestMapping("api/v1/ratings")
 @Tag(name = "Rating")
 @SecurityRequirement(name = "oAuth2")
+@CrossOrigin("*")
 public class RatingController {
 
     private final RatingService ratingService;
@@ -37,16 +38,5 @@ public class RatingController {
                 HttpStatus.CREATED
         ), HttpStatus.CREATED);
     }
-
-//    @GetMapping("/shops/current")
-//    @Operation(summary = "fetch rated shop by owner id")
-//    @SecurityRequirement(name = "oAuth2")
-//    public ResponseEntity<ApiResponse<List<ShopResponse>>> getRatedShopByCurrentId(){
-//        return new ResponseEntity<>(new ApiResponse<>(
-//                "Rated Shop fetched by owner id successfully",
-//                ratingService.getRatedShopByCurrentId(),
-//                HttpStatus.OK
-//        ), HttpStatus.OK);
-//    }
 
 }
