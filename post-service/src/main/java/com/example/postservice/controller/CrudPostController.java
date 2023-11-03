@@ -20,6 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/operation")
 @Tag(name = "Crud Post Operation")
+@CrossOrigin
 public class CrudPostController {
 
     private final PostService postService;

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("api/v1/sub-categories")
 @Tag(name = "SubCategory")
-@CrossOrigin("*")
+@CrossOrigin
 public class SubCategoryController {
 
     private final SubCategoryService subCategoryService;

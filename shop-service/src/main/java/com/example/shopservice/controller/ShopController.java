@@ -24,7 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/shops")
 @Tag(name = "Shop")
-@CrossOrigin("*")
+@CrossOrigin
 public class ShopController {
 
     private final ShopService shopService;

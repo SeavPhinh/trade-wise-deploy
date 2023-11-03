@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequestMapping("api/v1/ratings")
 @Tag(name = "Rating")
 @SecurityRequirement(name = "oAuth2")
-@CrossOrigin("*")
+@CrossOrigin
 public class RatingController {
 
     private final RatingService ratingService;
