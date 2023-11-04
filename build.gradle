@@ -165,6 +165,7 @@ project("chat-service"){
         implementation libraries.webSocket
         implementation libraries.resourceServer
         implementation libraries.webMvc
+
     }
 
 }

@@ -38,7 +38,7 @@ public class WebSocketController {
 
     @GetMapping("/destination/{firstUser}/{secondUser}")
     public MessageModel findDestination(@PathVariable UUID firstUser,
-                                   @PathVariable UUID secondUser){
+                                        @PathVariable UUID secondUser){
         return chatService.isContainDestination(firstUser,secondUser);
     }
 }
