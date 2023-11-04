@@ -62,6 +62,17 @@ public class WebSocketController {
         ), HttpStatus.OK);
     }
 
+    @PutMapping("/update/{connectedUser}")
+    @Operation(summary = "update all unseen message")
+    @SecurityRequirement(name = "oAuth2")
+    public ResponseEntity<ApiResponse<String>> UpdateAllUnseenMessage(@PathVariable UUID connectedUser){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "read all messages successfully",
+                chatService.updateAllMessages(connectedUser),
+                HttpStatus.OK
+        ), HttpStatus.OK);
+    }
+
 
 }
 

@@ -38,5 +38,15 @@ public interface ChatMessageRepository extends JpaRepository<MessageModel, UUID>
     @Modifying
     @Query(value = "SELECT * FROM chats WHERE sender_id = :#{#id} AND receiver_id = :#{#userId} OR receiver_id = :#{#id} AND sender_id = :#{#userId}", nativeQuery = true)
     List<MessageModel> getAllMessageWithConnectedUser(UUID id, UUID userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE chats set status = 'true' WHERE sender_id = :#{#id} AND receiver_id = :#{#userId} OR receiver_id = :#{#id} AND sender_id = :#{#userId}", nativeQuery = true)
+    void updateAllUnseenMessages(UUID id, UUID userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "SELECT * FROM chats WHERE sender_id = :#{#id} OR receiver_id = :#{#id}", nativeQuery = true)
+    List<MessageModel> getByUserId(UUID id);
 }
 

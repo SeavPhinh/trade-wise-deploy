@@ -16,4 +16,6 @@ public interface ChatService {
     MessageModel isContainDestination(UUID firstUser, UUID secondUser);
 
     List<ConnectedResponse> getAllContactUser();
+
+    String updateAllMessages(UUID connectedUser);
 }

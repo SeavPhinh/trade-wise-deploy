@@ -95,7 +95,7 @@ public class ChatServiceImpl implements ChatService{
     }
 
     public List<ConnectedResponse> getAllContactUser() {
-
+        checkChat(UUID.fromString(currentUser()));
         List<ConnectedResponse> responses = new ArrayList<>();
         List<UUID> uniqueIds = new ArrayList<>();
         List<MessageModel> listMessage = chatMessageRepository.getUserByCurrentUserId(UUID.fromString(currentUser()));
@@ -144,6 +144,22 @@ public class ChatServiceImpl implements ChatService{
             return responses;
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_USER_CONTACT);
+    }
+
+    @Override
+    public String updateAllMessages(UUID connectedUser) {
+        checkChat(connectedUser);
+        checkChat(UUID.fromString(currentUser()));
+        chatMessageRepository.updateAllUnseenMessages(connectedUser,UUID.fromString(currentUser()));
+        return "Messages updated successfully";
+    }
+
+
+    // Validation if user haven't chat with other
+    public void checkChat(UUID id){
+        if(chatMessageRepository.getByUserId(id) == null){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_YET_TEXTING);
+        }
     }
 
     // Return User
