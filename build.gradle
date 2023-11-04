@@ -219,6 +219,7 @@ project("gateway-service"){
         implementation libraries.gateway
         implementation libraries.eurekaClient
         implementation libraries.cloudClient
+        implementation libraries.resourceServer
     }
 
 }
@@ -333,6 +334,7 @@ allprojects {
                 implementation libraries.jpa
                 implementation libraries.postgresql
             }
+
 
             if(projectDir.name.startsWith("user-service")){
                 implementation libraries.thymleaf
