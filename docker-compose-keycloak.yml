@@ -32,10 +32,11 @@ services:
       - DB_DATABASE=keycloak
       - DB_USER=keycloak
       - DB_PASSWORD=keycloak
-      - KEYCLOAK_USER=admin
-      - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_USER=tradewise
+      - KEYCLOAK_PASSWORD=tradewise321
       - KEYCLOAK_IMPORT=/opt/realm.json
       - KEYCLOAK_PROFILE_FEATURE_UPLOAD_SCRIPTS=enabled
+      - KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS=true
 
 volumes:
   keycloak-db-data:

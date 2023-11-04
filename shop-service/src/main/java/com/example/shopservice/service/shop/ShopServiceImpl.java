@@ -46,19 +46,17 @@ public class ShopServiceImpl implements ShopService {
     private final ShopRepository shopRepository;
     private final FileStorageProperties fileStorageProperties;
     private final RatingRepository ratingRepository;
-    private final WebClient webClient;
-    private final WebClient subCategoryWeb;
+    private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
     private String realm;
 
-    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, RatingRepository ratingRepository, WebClient.Builder webClient, WebClient.Builder subCategoryWeb, Keycloak keycloak) {
+    public ShopServiceImpl(ShopRepository shopRepository, FileStorageProperties fileStorageProperties, RatingRepository ratingRepository, WebClient.Builder webClient, Keycloak keycloak) {
         this.shopRepository = shopRepository;
         this.fileStorageProperties = fileStorageProperties;
         this.ratingRepository = ratingRepository;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
-        this.subCategoryWeb = subCategoryWeb.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient;
         this.keycloak = keycloak;
     }
 
@@ -320,6 +318,7 @@ public class ShopServiceImpl implements ShopService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
                 .retrieve()
@@ -355,7 +354,8 @@ public class ShopServiceImpl implements ShopService {
         try {
             ObjectMapper covertSpecificClass = new ObjectMapper();
             covertSpecificClass.registerModule(new JavaTimeModule());
-            covertSpecificClass.convertValue(Objects.requireNonNull(subCategoryWeb
+            covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .build()
                     .get()
                     .uri(uriBuilder -> uriBuilder
                             .path("api/v1/sub-categories")
@@ -377,7 +377,8 @@ public class ShopServiceImpl implements ShopService {
         List<String> responses = new ArrayList<>();
         try {
             for (String name : uuidList) {
-                CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(subCategoryWeb
+                CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .build()
                         .get()
                         .uri(uriBuilder -> uriBuilder
                                 .path("api/v1/sub-categories")

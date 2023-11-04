@@ -25,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/product-for-sales")
 @Tag(name = "Product For Sales")
+@CrossOrigin
 public class ProductForSaleController {
 
     private final ProductForSaleService productForSaleService;
@@ -46,6 +47,7 @@ public class ProductForSaleController {
 
     @GetMapping("/{id}")
     @Operation(summary = "fetch product for sale by id")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> getProductForSaleById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product for sale fetched by id successfully",
@@ -56,6 +58,7 @@ public class ProductForSaleController {
 
     @GetMapping("/post/{id}")
     @Operation(summary = "fetch all product for sale by posted id")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by posted id successfully",
@@ -101,6 +104,7 @@ public class ProductForSaleController {
 
     @GetMapping("/image")
     @Operation(summary = "fetched image")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(productForSaleService.getImage(fileName));
     }

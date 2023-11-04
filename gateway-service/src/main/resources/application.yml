@@ -1,9 +1,12 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: gateway-service
   profiles:
     active: dev
   config:
     import: optional:configserver:http://localhost:8888
+#    import: optional:configserver:http://8.222.225.41:8888
 server:
   port: 8080

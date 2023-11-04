@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     private final BuyerFavoriteRepository buyerFavoriteRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
@@ -38,7 +38,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     public BuyerFavoriteServiceImpl(BuyerFavoriteRepository buyerFavoriteRepository, WebClient.Builder webClient, Keycloak keycloak) {
         this.buyerFavoriteRepository = buyerFavoriteRepository;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient;
         this.keycloak = keycloak;
     }
 
@@ -93,6 +93,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             try {
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .build()
                         .get()
                         .uri("api/v1/shops/{id}", id)
                         .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
@@ -127,6 +128,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
                 .retrieve()

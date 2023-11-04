@@ -41,7 +41,7 @@ public class ProductServiceImpl implements ProductService{
 
     private final ProductRepository productRepository;
     private final FileStorageProperties fileStorageProperties;
-    private final WebClient webClient;
+    private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService{
     public ProductServiceImpl(ProductRepository productRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.productRepository = productRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient;
         this.keycloak = keycloak;
     }
 
@@ -208,6 +208,7 @@ public class ProductServiceImpl implements ProductService{
         covertSpecificClass.registerModule(new JavaTimeModule());
 
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
                 .retrieve()
@@ -223,6 +224,7 @@ public class ProductServiceImpl implements ProductService{
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .build()
                         .get()
                         .uri("api/v1/shops/current")
                         .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
@@ -242,6 +244,7 @@ public class ProductServiceImpl implements ProductService{
         covertSpecificClass.registerModule(new JavaTimeModule());
         try{
             return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .build()
                         .get()
                         .uri("api/v1/shops/{id}", id)
                         .retrieve()

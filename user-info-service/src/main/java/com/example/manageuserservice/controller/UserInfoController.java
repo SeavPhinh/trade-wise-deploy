@@ -25,6 +25,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/user-info")
 @Tag(name = "User Info")
+@CrossOrigin
 public class UserInfoController {
 
     private final UserInfoService userInfoService;

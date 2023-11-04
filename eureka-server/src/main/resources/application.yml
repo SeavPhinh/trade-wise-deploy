@@ -2,6 +2,20 @@ spring:
   application:
     name: eureka-server
   profiles:
-    active: dev
+    active: default
   config:
-    import: optional:configserver:http://localhost:8888
+#    service deploy
+    import: optional:configserver:http://8.222.225.41:8888
+#    localhost
+#    import: optional:configserver:http://localhost:8888
+
+server:
+  port: 8761
+
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+  instance:
+    hostname: localhost
+    prefer-ip-address: true

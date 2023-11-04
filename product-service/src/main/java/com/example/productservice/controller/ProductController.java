@@ -24,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/products")
 @Tag(name = "Product")
+@CrossOrigin
 public class ProductController {
 
     private final ProductService productService;
@@ -45,6 +46,7 @@ public class ProductController {
 
     @GetMapping("")
     @Operation(summary = "fetch all products")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "products fetched successfully",
@@ -55,6 +57,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     @Operation(summary = "fetch product by id")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by id successfully",
@@ -65,6 +68,7 @@ public class ProductController {
 
     @GetMapping("/shop/{id}")
     @Operation(summary = "fetch product by shop id")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProductByShopId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by shop id successfully",
@@ -112,6 +116,7 @@ public class ProductController {
 
     @GetMapping("/image")
     @Operation(summary = "fetched image")
+    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(productService.getImage(fileName));
     }

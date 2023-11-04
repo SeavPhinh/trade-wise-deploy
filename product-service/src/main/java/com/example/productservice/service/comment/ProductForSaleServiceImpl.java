@@ -46,18 +46,16 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
 
     private final ProductForSaleRepository productForSaleRepository;
     private final FileStorageProperties fileStorageProperties;
-    private final ProductRepository productRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
     private String realm;
 
-    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, ProductRepository productRepository, WebClient.Builder webClient, Keycloak keycloak) {
+    public ProductForSaleServiceImpl(ProductForSaleRepository productForSaleRepository, FileStorageProperties fileStorageProperties, WebClient.Builder webClient, Keycloak keycloak) {
         this.productForSaleRepository = productForSaleRepository;
         this.fileStorageProperties = fileStorageProperties;
-        this.productRepository = productRepository;
-        this.webClient = webClient.baseUrl("http://192.168.154.1:8080/").build();
+        this.webClient = webClient;
         this.keycloak = keycloak;
     }
 
@@ -207,6 +205,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         covertSpecificClass.registerModule(new JavaTimeModule());
 
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
                 .retrieve()
@@ -222,6 +221,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .build()
                         .get()
                         .uri("api/v1/shops/current")
                         .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
@@ -243,6 +243,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .build()
                         .get()
                         .uri("api/v1/posts/{id}", id)
                         .headers(h -> h.setBearerAuth(jwt.getTokenValue()))

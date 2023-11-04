@@ -17,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("api/v1/posts")
 @Tag(name = "Post")
+@CrossOrigin
 public class PostController {
 
     private final PostService postService;
