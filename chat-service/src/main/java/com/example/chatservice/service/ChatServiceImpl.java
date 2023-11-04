@@ -155,6 +155,7 @@ public class ChatServiceImpl implements ChatService{
     }
 
 
+
     // Validation if user haven't chat with other
     public void checkChat(UUID id){
         if(chatMessageRepository.getByUserId(id) == null){

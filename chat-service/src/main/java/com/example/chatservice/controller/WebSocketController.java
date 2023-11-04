@@ -37,11 +37,11 @@ public class WebSocketController {
         return message;
     }
 
-    @GetMapping("/history/{connectedUser}")
+    @GetMapping("/history/{userId}")
     @Operation(summary = "getting chat messages with connected user")
     @SecurityRequirement(name = "oAuth2")
-    public List<MessageModel> getHistory(@PathVariable UUID connectedUser){
-        return chatService.getHistoryMessage(connectedUser);
+    public List<MessageModel> getHistory(@PathVariable UUID userId){
+        return chatService.getHistoryMessage(userId);
     }
 
     @GetMapping("/destination/{firstUser}/{secondUser}")
@@ -62,13 +62,13 @@ public class WebSocketController {
         ), HttpStatus.OK);
     }
 
-    @PutMapping("/update/{connectedUser}")
+    @PutMapping("/update/{userId}")
     @Operation(summary = "update all unseen message")
     @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<String>> UpdateAllUnseenMessage(@PathVariable UUID connectedUser){
+    public ResponseEntity<ApiResponse<String>> UpdateAllUnseenMessage(@PathVariable UUID userId){
         return new ResponseEntity<>(new ApiResponse<>(
                 "read all messages successfully",
-                chatService.updateAllMessages(connectedUser),
+                chatService.updateAllMessages(userId),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }

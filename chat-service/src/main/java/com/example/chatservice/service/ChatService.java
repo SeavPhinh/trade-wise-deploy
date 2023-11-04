@@ -18,4 +18,5 @@ public interface ChatService {
     List<ConnectedResponse> getAllContactUser();
 
     String updateAllMessages(UUID connectedUser);
+
 }
