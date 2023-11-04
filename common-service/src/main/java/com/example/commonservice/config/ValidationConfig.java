@@ -126,6 +126,7 @@ public class ValidationConfig {
     public static final String NULL_INPUT = " cannot be null";
     public static final String NOT_FOUND_FILE = "please upload a file";
     public static final String OUT_OF_SCOPE_LEVEL = "level is out of scope (ONE_STAR,TWO_STARS,THREE_STARS,FOUR_STARS,FIVE_STARS)";
+    public static final String NOT_FOUND_USER_CONTACT = "your contact list is empty";
     public static final int MIN_SUB_CATEGORY = 1;
 
 }

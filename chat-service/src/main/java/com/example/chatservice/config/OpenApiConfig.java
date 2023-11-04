@@ -25,6 +25,10 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 clientCredentials = @OAuthFlow(
                         tokenUrl = "https://keycloak.trade-wise.online/auth/realms/go-selling-api/protocol/openid-connect/token"
                 )
+                ,
+                password = @OAuthFlow(
+                        tokenUrl = "https://keycloak.trade-wise.online/auth/realms/go-selling-api/protocol/openid-connect/token"
+                )
         )
 )
 public class OpenApiConfig { }

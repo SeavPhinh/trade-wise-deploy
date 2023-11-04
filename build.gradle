@@ -1,17 +1,17 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.4'
-    id 'io.spring.dependency-management' version '1.1.3'
+    id 'org.springframework.boot' version '3.0.5' apply false
+    id 'io.spring.dependency-management' version '1.1.0' apply false
 }
 
 project("chat-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
     // Apply external dependencies
     apply from: "$rootProject.projectDir/dependencies.gradle"
@@ -55,6 +55,7 @@ project("chat-service"){
         implementation libraries.webSocket
         implementation libraries.resourceServer
         implementation libraries.webMvc
+        implementation libraries.auth0
 
     }
 
@@ -62,11 +63,11 @@ project("chat-service"){
 project("notification-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
     // Apply external dependencies
     apply from: "$rootProject.projectDir/dependencies.gradle"
@@ -96,11 +97,11 @@ project("notification-service"){
 project("config-server"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
     // Apply external dependencies
     apply from: "$rootProject.projectDir/dependencies.gradle"
@@ -132,11 +133,11 @@ project("config-server"){
 project("eureka-server"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
     // Apply external dependencies
     apply from: "$rootProject.projectDir/dependencies.gradle"
@@ -180,11 +181,11 @@ project("eureka-server"){
 project("gateway-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
     // Apply external dependencies
     apply from: "$rootProject.projectDir/dependencies.gradle"
@@ -227,11 +228,11 @@ project("gateway-service"){
 project("common-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
     // Apply external dependencies
     apply from: "$rootProject.projectDir/dependencies.gradle"
@@ -278,11 +279,11 @@ project("common-service"){
 allprojects {
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
-    apply plugin: tools.java
-    apply plugin: tools.springboot
-    apply plugin: tools.dependencies
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
     // Apply external dependencies
     apply from: "$rootProject.projectDir/dependencies.gradle"

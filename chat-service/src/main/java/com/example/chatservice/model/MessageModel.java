@@ -23,6 +23,7 @@ public class MessageModel {
     private UUID senderId;
     private UUID receiverId;
     private LocalDateTime timestamp;
+    private Boolean status;
 
 }
 

@@ -15,4 +15,4 @@ spring:
     allow-bean-definition-overriding: true
 server:
   port: 8082
-
+baseUrl: http://gateway-service/
