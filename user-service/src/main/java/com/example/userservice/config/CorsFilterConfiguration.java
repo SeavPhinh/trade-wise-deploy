@@ -15,7 +15,7 @@ public class CorsFilterConfiguration {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(Collections.singletonList("*")); // Allows all origin
+        config.setAllowedOriginPatterns(Collections.singletonList("*"));
         config.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept",
                 "Authorization", "Access-Control-Allow-Credentials", "Access-Control-Allow-Headers", "Access-Control-Allow-Methods",
                 "Access-Control-Allow-Origin", "Access-Control-Expose-Headers", "Access-Control-Max-Age",

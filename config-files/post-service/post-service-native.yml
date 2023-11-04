@@ -34,7 +34,7 @@ keycloak:
     username: 'admin'
     password: 'admin'
     client-id: '{cipher}68cb01c2cb6cc09d52d307bb77df71dd6ea99df0449c664e7031b6cbb6529055'
-    secret: '{cipher}17a058ed6a1cfb9e45c48c567154bf0c424936c2a4a78330270b8e651be4ff65fd8cabdf6534b386018fd079b1cc86dc7415a6c77b5f1897fa7181971de2fbc1'
+    secret: '{cipher}99bec8cc39b5461f7110a488ba1d2e213fbc7fd5adc557fb6a12e1724a366ea4cc59bd64ee9b7bba877615b6dff336c0a47780fbaf930d369f9a3ba2ceb8fa82'
     provider: secret
 file:
   uploadPath: post-service/src/main/resources/storage/
@@ -51,5 +51,5 @@ springdoc:
     oauth:
       realm: 'go-selling-api'
       client-id: '{cipher}68cb01c2cb6cc09d52d307bb77df71dd6ea99df0449c664e7031b6cbb6529055'
-      clientSecret: '{cipher}17a058ed6a1cfb9e45c48c567154bf0c424936c2a4a78330270b8e651be4ff65fd8cabdf6534b386018fd079b1cc86dc7415a6c77b5f1897fa7181971de2fbc1'
+      clientSecret: '{cipher}99bec8cc39b5461f7110a488ba1d2e213fbc7fd5adc557fb6a12e1724a366ea4cc59bd64ee9b7bba877615b6dff336c0a47780fbaf930d369f9a3ba2ceb8fa82'
     path: /post-service/swagger-ui.html
