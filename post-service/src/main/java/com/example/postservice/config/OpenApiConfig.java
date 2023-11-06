@@ -23,10 +23,10 @@ import io.swagger.v3.oas.annotations.servers.Server;
         in = SecuritySchemeIn.HEADER,
         flows = @OAuthFlows(
                 clientCredentials = @OAuthFlow(
-                        tokenUrl = "https://keycloak.trade-wise.online/auth/realms/go-selling-api/protocol/openid-connect/token"
+                        tokenUrl = "https://keycloak.trade-wise.store/auth/realms/go-selling-api/protocol/openid-connect/token"
                 ),
                 password = @OAuthFlow(
-                        tokenUrl = "https://keycloak.trade-wise.online/auth/realms/go-selling-api/protocol/openid-connect/token"
+                        tokenUrl = "https://keycloak.trade-wise.store/auth/realms/go-selling-api/protocol/openid-connect/token"
                 )
         )
 )
