@@ -221,7 +221,7 @@ project("gateway-service"){
         implementation libraries.gateway
         implementation libraries.eurekaClient
         implementation libraries.cloudClient
-        implementation libraries.resourceServer
+//        implementation libraries.resourceServer
     }
 
 }

@@ -13,7 +13,7 @@ spring:
             - chat-service
             - gateway-service
             - post-service
-            - product-service\
+            - product-service
             - shop-service
             - user-info-service
             - user-service
