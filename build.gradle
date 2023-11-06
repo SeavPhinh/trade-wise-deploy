@@ -7,7 +7,7 @@ plugins {
 project("chat-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -55,13 +55,15 @@ project("chat-service"){
         implementation libraries.webSocket
         implementation libraries.resourceServer
         implementation libraries.webMvc
+        implementation libraries.auth0
+
     }
 
 }
 project("notification-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -95,7 +97,7 @@ project("notification-service"){
 project("config-server"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -131,7 +133,7 @@ project("config-server"){
 project("eureka-server"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -179,7 +181,7 @@ project("eureka-server"){
 project("gateway-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -226,7 +228,7 @@ project("gateway-service"){
 project("common-service"){
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -277,7 +279,7 @@ project("common-service"){
 allprojects {
 
     // Apply external plugin
-    apply from: "$rootProject.projectDir/plugin.gradle"
+//    apply from: "$rootProject.projectDir/plugin.gradle"
 
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
