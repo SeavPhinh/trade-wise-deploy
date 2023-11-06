@@ -318,6 +318,7 @@ public class ShopServiceImpl implements ShopService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .baseUrl("http://8.222.225.41:8081/")
                 .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
@@ -355,6 +356,7 @@ public class ShopServiceImpl implements ShopService {
             ObjectMapper covertSpecificClass = new ObjectMapper();
             covertSpecificClass.registerModule(new JavaTimeModule());
             covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .baseUrl("http://8.222.225.41:8087/")
                     .build()
                     .get()
                     .uri(uriBuilder -> uriBuilder
@@ -378,6 +380,7 @@ public class ShopServiceImpl implements ShopService {
         try {
             for (String name : uuidList) {
                 CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .baseUrl("http://8.222.225.41:8087/")
                         .build()
                         .get()
                         .uri(uriBuilder -> uriBuilder
@@ -387,7 +390,6 @@ public class ShopServiceImpl implements ShopService {
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(), CategorySubCategoryResponse.class);
-                System.out.println("SubCateName: " + subName);
                 responses.add(subName.getSubCategory().getName());
             }
             return responses;

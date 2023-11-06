@@ -208,6 +208,7 @@ public class ProductServiceImpl implements ProductService{
         covertSpecificClass.registerModule(new JavaTimeModule());
 
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .baseUrl("http://8.222.225.41:8081/")
                 .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
@@ -224,6 +225,7 @@ public class ProductServiceImpl implements ProductService{
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .baseUrl("http://8.222.225.41:8088/")
                         .build()
                         .get()
                         .uri("api/v1/shops/current")
@@ -244,7 +246,8 @@ public class ProductServiceImpl implements ProductService{
         covertSpecificClass.registerModule(new JavaTimeModule());
         try{
             return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                        .build()
+                    .baseUrl("http://8.222.225.41:8088/")
+                    .build()
                         .get()
                         .uri("api/v1/shops/{id}", id)
                         .retrieve()

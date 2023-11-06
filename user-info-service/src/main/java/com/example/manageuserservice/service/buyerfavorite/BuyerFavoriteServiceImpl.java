@@ -93,6 +93,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             try {
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .baseUrl("http://8.222.225.41:8088/")
                         .build()
                         .get()
                         .uri("api/v1/shops/{id}", id)
@@ -128,6 +129,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .baseUrl("http://8.222.225.41:8081/")
                 .build()
                 .get()
                 .uri("api/v1/users/{id}", id)

@@ -94,6 +94,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
         if(authentication.getPrincipal() instanceof Jwt jwt){
             try {
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .baseUrl("http://8.222.225.41:8083/")
                         .build()
                         .get()
                         .uri("api/v1/posts/{id}", id)
@@ -128,6 +129,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .baseUrl("http://8.222.225.41:8081/")
                 .build()
                 .get()
                 .uri("api/v1/users/{id}", id)

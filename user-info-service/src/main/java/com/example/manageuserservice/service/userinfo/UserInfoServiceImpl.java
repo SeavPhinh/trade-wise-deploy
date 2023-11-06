@@ -206,6 +206,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         return covertSpecificClass.convertValue(Objects.requireNonNull(userWeb
+                .baseUrl("http://8.222.225.41:8081/")
                 .build()
                 .get()
                 .uri("api/v1/users/{id}", id)

@@ -294,6 +294,7 @@ public class PostServiceImpl implements PostService {
         covertSpecificClass.registerModule(new JavaTimeModule());
         try{
             return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .baseUrl("http://8.222.225.41:8081/")
                     .build()
                     .get()
                     .uri("api/v1/users/{id}", id)
@@ -318,6 +319,7 @@ public class PostServiceImpl implements PostService {
         covertSpecificClass.registerModule(new JavaTimeModule());
         try {
             CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .baseUrl("http://8.222.225.41:8087/")
                     .build()
                     .get()
                     .uri(uriBuilder -> uriBuilder
