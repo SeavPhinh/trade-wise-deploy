@@ -24,6 +24,7 @@ services:
       - trade-wise
     ports:
       - "1234:8080"
+      - "8443:8443"
     depends_on:
       - keycloak-db
     environment:

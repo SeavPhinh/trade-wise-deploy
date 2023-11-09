@@ -23,6 +23,7 @@ public class ProductForSale {
     private String title;
     private String file;
     private String description;
+    private Float price;
     private Boolean status;
     private UUID shopId;
     private UUID postId;
@@ -30,7 +31,7 @@ public class ProductForSale {
     private LocalDateTime lastModified;
 
     public ProductForSaleResponse toDto(List<String> files){
-        return new ProductForSaleResponse(this.id,this.title,files,this.description,this.status,this.shopId,this.postId,this.createdDate,this.lastModified);
+        return new ProductForSaleResponse(this.id,this.title,files,this.description,this.price,this.status,this.shopId,this.postId,this.createdDate,this.lastModified);
     }
 
 }

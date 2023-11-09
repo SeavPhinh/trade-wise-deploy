@@ -202,7 +202,7 @@ public class UserServiceImpl implements UserService {
         for (UserRepresentation user : keycloak.realm(realm).users().list()) {
             if(user.getEmail().equalsIgnoreCase(reset.getEmail())){
                 setAttribute(findUser(reset.getEmail()),reset.getEmail().replaceAll("\\s+",""));
-                emailService.resetPassword(reset.getEmail().replaceAll("\\s+",""));
+//                emailService.resetPassword(reset.getEmail().replaceAll("\\s+",""));
                 return reset;
             }
         }
@@ -375,7 +375,7 @@ public class UserServiceImpl implements UserService {
 
     // Set otp attribute for user
     public void setAttribute (UserRepresentation user, String email) throws MessagingException {
-        user.singleAttribute("otp_code",String.valueOf(emailService.verifyCode(email)));
+        user.singleAttribute("otp_code",String.valueOf(emailService.resetPassword(email)));
         resource(UUID.fromString(user.getId())).update(user);
     }
 

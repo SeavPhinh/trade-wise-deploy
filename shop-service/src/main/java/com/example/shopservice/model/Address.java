@@ -18,6 +18,7 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String address;
+    @Column(length=10485760)
     private String url;
 
 }

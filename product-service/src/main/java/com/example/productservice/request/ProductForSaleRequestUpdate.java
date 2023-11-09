@@ -2,6 +2,7 @@ package com.example.productservice.request;
 
 import com.example.commonservice.config.ValidationConfig;
 import com.example.productservice.model.ProductForSale;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -31,6 +32,10 @@ public class ProductForSaleRequestUpdate {
     @NotNull(message = ValidationConfig.NULL_DESCRIPTION)
     @NotEmpty(message = ValidationConfig.EMPTY_DESCRIPTION)
     private String description;
+
+    @NotNull(message = ValidationConfig.NULL_PRICE)
+    @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_PRICE)
+    private Float price;
 
     @NotNull(message = ValidationConfig.NULL_STATUS)
     private Boolean status;

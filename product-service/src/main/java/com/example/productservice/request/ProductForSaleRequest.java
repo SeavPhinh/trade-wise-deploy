@@ -2,6 +2,7 @@ package com.example.productservice.request;
 
 import com.example.commonservice.config.ValidationConfig;
 import com.example.productservice.model.ProductForSale;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -32,6 +33,10 @@ public class ProductForSaleRequest {
     @NotEmpty(message = ValidationConfig.EMPTY_DESCRIPTION)
     private String description;
 
+    @NotNull(message = ValidationConfig.NULL_PRICE)
+    @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_PRICE)
+    private Float price;
+
     @NotNull(message = ValidationConfig.NULL_STATUS)
     private Boolean status;
 
@@ -39,7 +44,7 @@ public class ProductForSaleRequest {
     private UUID postId;
 
     public ProductForSale toEntity(UUID shopId){
-        return new ProductForSale(null, this.title.trim(),this.files.toString(),this.description.trim(),this.status,shopId,this.postId, LocalDateTime.now(), LocalDateTime.now());
+        return new ProductForSale(null, this.title.trim(),this.files.toString(),this.description.trim(),this.price,this.status,shopId,this.postId, LocalDateTime.now(), LocalDateTime.now());
     }
 
 }

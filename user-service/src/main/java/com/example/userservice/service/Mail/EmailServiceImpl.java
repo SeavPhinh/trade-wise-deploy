@@ -66,7 +66,7 @@ public class EmailServiceImpl implements EmailService {
 
         messageHelper.setFrom(sender);
         messageHelper.setTo(login);
-        messageHelper.setSubject("Reset Password");
+        messageHelper.setSubject("OTP Code");
         messageHelper.setText(emailContent, html);
         emailSender.send(mimeMessage);
         return otp;

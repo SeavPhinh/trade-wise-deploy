@@ -66,12 +66,12 @@ public class RatingServiceImpl implements RatingService {
             if(!shop.get().getStatus()){
                 throw new IllegalArgumentException(ValidationConfig.INACTIVE_SHOP);
             }
-            Rating rating = ratingRepository.getRatingRecordByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+            Rating rating = ratingRepository.getRatingRecordByOwnerId(createdBy(UUID.fromString(currentUser())).getId(), request.getShopId());
             if(rating != null){
                 rating.setLevel(request.getLevel());
                 return ratingRepository.save(rating).toDto(request.getShopId());
             }
-            return ratingRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId(),service.findById(request.getShopId()).orElseThrow())).toDto(request.getShopId());
+            return ratingRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId(),shop.get())).toDto(request.getShopId());
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
     }
@@ -113,11 +113,11 @@ public class RatingServiceImpl implements RatingService {
 
     // Return User
     public User createdBy(UUID id){
-
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
 
         return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                .baseUrl("http://8.222.225.41:8081/")
                 .build()
                 .get()
                 .uri("api/v1/users/{id}", id)
@@ -179,6 +179,7 @@ public class RatingServiceImpl implements RatingService {
             for (UUID subId : uuidList) {
                 try{
                     SubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                            .baseUrl("http://8.222.225.41:8087/")
                             .build()
                             .get()
                             .uri("api/v1/subcategories/{id}", subId)

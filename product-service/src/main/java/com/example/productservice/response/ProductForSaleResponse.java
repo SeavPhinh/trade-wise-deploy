@@ -17,6 +17,7 @@ public class ProductForSaleResponse {
     private String title;
     private List<String> files;
     private String description;
+    private Float price;
     private Boolean status;
     private UUID shopId;
     private UUID postId;

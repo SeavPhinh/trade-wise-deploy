@@ -31,7 +31,7 @@ public interface ChatMessageRepository extends JpaRepository<MessageModel, UUID>
 
     @Transactional
     @Modifying
-    @Query(value = "SELECT * FROM chats WHERE receiver_id = :#{#userId} AND status = 'false' ", nativeQuery = true)
+    @Query(value = "SELECT * FROM chats WHERE receiver_id = :#{#userId} AND status = false", nativeQuery = true)
     List<MessageModel> getAllUnseenMessage(UUID userId);
 
     @Transactional

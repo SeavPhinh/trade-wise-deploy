@@ -14,8 +14,8 @@ import java.util.UUID;
 public interface RatingRepository extends JpaRepository<Rating, UUID> {
 
     @Transactional
-    @Query(value = "SELECT * FROM ratings WHERE user_id = :#{#id}", nativeQuery = true)
-    Rating getRatingRecordByOwnerId(UUID id);
+    @Query(value = "SELECT * FROM ratings WHERE user_id = :#{#id} AND shop_id = :#{#shopId}", nativeQuery = true)
+    Rating getRatingRecordByOwnerId(UUID id, UUID shopId);
 
     @Transactional
     @Query(value = "SELECT * FROM ratings WHERE level = 'ONE_STAR'", nativeQuery = true)

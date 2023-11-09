@@ -38,6 +38,7 @@ project("chat-service"){
         }
     }
 
+
     repositories {
         mavenCentral()
     }
@@ -50,12 +51,15 @@ project("chat-service"){
         implementation libraries.postgresql
         implementation libraries.cloudClient
         implementation libraries.eurekaClient
-        implementation libraries.amqpStarter
-        testImplementation libraries.rabbitMQtest
+//        implementation libraries.amqpStarter
+//        testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket
         implementation libraries.resourceServer
         implementation libraries.webMvc
         implementation libraries.auth0
+        implementation libraries.keycloak
+        implementation libraries.keycloakAdmin
+        implementation libraries.actuator
 
     }
 

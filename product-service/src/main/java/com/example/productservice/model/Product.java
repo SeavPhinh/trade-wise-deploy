@@ -25,12 +25,13 @@ public class Product {
     private String file;
     private String description;
     private Float price;
+    private Integer quantity;
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
     private UUID shopId;
 
     public ProductResponse toDto(List<String> files){
-        return new ProductResponse(this.id,this.title,files,this.description,this.price,this.createdDate,this.lastModified,this.shopId);
+        return new ProductResponse(this.id,this.title,files,this.description,this.price,this.quantity,this.createdDate,this.lastModified,this.shopId);
     }
 
 }

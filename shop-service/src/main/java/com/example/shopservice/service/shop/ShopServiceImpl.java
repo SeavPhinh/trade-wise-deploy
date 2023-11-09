@@ -104,11 +104,14 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public List<ShopResponse> getAllShop(){
-        List<ShopResponse> shops = shopRepository.getAllActiveShop().stream().map(sub -> sub.toDto(categoriesList(sub.getSubCategoryList()),ratedCount(sub.getId()), ratedPercentage(sub.getId()))).collect(Collectors.toList());
-        if(!shops.isEmpty()){
-            return shops;
+        List<ShopResponse> shops = shopRepository.getAllActiveShop()
+                .stream()
+                .map(sub -> sub.toDto(categoriesList(sub.getSubCategoryList()),ratedCount(sub.getId()), ratedPercentage(sub.getId())))
+                .collect(Collectors.toList());
+        if(shops.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
         }
-        throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOT_CONTAIN);
+        return shops;
     }
 
     @Override
@@ -136,6 +139,7 @@ public class ShopServiceImpl implements ShopService {
             // Update Previous Data
             preShop.setName(request.getName());
             preShop.setAddress(address);
+            preShop.setSubCategoryList(request.getSubCategoryList().toString());
             preShop.setProfileImage(request.getProfileImage());
             preShop.setLastModified(LocalDateTime.now());
             return shopRepository.save(preShop).toDto(categoriesList(request.getSubCategoryList().toString()),ratedCount(preShop.getId()), ratedPercentage(preShop.getId()));
@@ -436,12 +440,14 @@ public class ShopServiceImpl implements ShopService {
     // Rated Count by Shop Id
     public Integer ratedCount(UUID shopId){
         List<String> level = ratingRepository.getRatedStarByShopId(shopId);
-        return level.size();
+        if(level != null){
+            return level.size();
+        }
+        return 0;
     }
 
     // Percentage Rating shop
     public Float ratedPercentage(UUID shopId){
-
         int sum = 0;
         List<String> level = ratingRepository.getRatedStarByShopId(shopId);
         for (String star : level) {

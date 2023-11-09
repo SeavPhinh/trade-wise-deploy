@@ -2,6 +2,7 @@ package com.example.chatservice.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.chatservice.config.FileStorageProperties;
 import com.example.chatservice.exception.NotFoundExceptionClass;
 import com.example.chatservice.model.ConnectedResponse;
 import com.example.chatservice.model.MessageModel;
@@ -10,11 +11,14 @@ import com.example.chatservice.repository.ChatMessageRepository;
 import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.FileResponse;
 import com.example.commonservice.response.UserContact;
 import com.example.commonservice.response.UserInfoResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.springframework.amqp.core.AmqpTemplate;
+import jakarta.servlet.http.HttpServletRequest;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,8 +26,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,41 +42,54 @@ import java.util.UUID;
 public class ChatServiceImpl implements ChatService{
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final AmqpTemplate rabbitTemplate;
     private final ChatMessageRepository chatMessageRepository;
     private final WebClient.Builder userWeb;
+    private final FileStorageProperties fileStorageProperties;
+    private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
     private String realm;
 
     @Autowired
     public ChatServiceImpl(SimpMessagingTemplate messagingTemplate,
-                           AmqpTemplate rabbitTemplate,
-                           ChatMessageRepository chatMessageRepository, WebClient.Builder webClient, WebClient.Builder userWeb) {
+                           ChatMessageRepository chatMessageRepository,
+                           WebClient.Builder userWeb,
+                           FileStorageProperties fileStorageProperties, Keycloak keycloak) {
+
         this.messagingTemplate = messagingTemplate;
-        this.rabbitTemplate = rabbitTemplate;
         this.chatMessageRepository = chatMessageRepository;
         this.userWeb = userWeb;
+        this.fileStorageProperties = fileStorageProperties;
+        this.keycloak = keycloak;
     }
 
     public void sendDirectMessage(MessageModel message){
-
-        MessageModel userDestination = isContainDestination(message.getSenderId(), message.getReceiverId());
+        MessageModel userDestination = new MessageModel();
+        List<MessageModel> messages = new ArrayList<>();
+        for (MessageModel mess : chatMessageRepository.findAll()) {
+            if(mess.getReceiverId().toString().equalsIgnoreCase(message.getSenderId().toString()) &&
+                    mess.getSenderId().toString().equalsIgnoreCase(message.getReceiverId().toString()) ||
+                    mess.getReceiverId().toString().equalsIgnoreCase(message.getReceiverId().toString()) &&
+                            mess.getSenderId().toString().equalsIgnoreCase(message.getSenderId().toString())
+            ){
+                messages.add(mess);
+                userDestination = messages.get(0);
+            }
+        }
 
         if(userDestination != null){
             messagingTemplate.convertAndSendToUser(userDestination.getSenderId()+"&"+userDestination.getReceiverId(), "/private", message);
         }else {
             messagingTemplate.convertAndSendToUser(message.getSenderId()+"&"+message.getReceiverId(), "/private", message);
         }
-
         message.setId(UUID.randomUUID());
         message.setTimestamp(LocalDateTime.now());
         message.setStatus(false);
         chatMessageRepository.persistData(message);
-
     }
 
     public List<MessageModel> getHistoryMessage(UUID connectedUser) {
+        isNotVerify(UUID.fromString(currentUser()));
         List<MessageModel> model = chatMessageRepository.findHistory(connectedUser, UUID.fromString(currentUser()));
         if(!model.isEmpty()){
             return model;
@@ -76,16 +97,14 @@ public class ChatServiceImpl implements ChatService{
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_MESSAGE);
     }
 
-    public MessageModel isContainDestination(UUID firstUser, UUID secondUser) {
-
-//        MessageModel message = chatMessageRepository.findFirstMessage(firstUser,secondUser);
-
+    public MessageModel isContainDestination(UUID userId) {
+        isNotVerify(UUID.fromString(currentUser()));
         List<MessageModel> messages = new ArrayList<>();
         for (MessageModel message : chatMessageRepository.findAll()) {
-            if(message.getReceiverId().toString().equalsIgnoreCase(firstUser.toString()) &&
-               message.getSenderId().toString().equalsIgnoreCase(secondUser.toString()) ||
-               message.getReceiverId().toString().equalsIgnoreCase(secondUser.toString()) &&
-               message.getSenderId().toString().equalsIgnoreCase(firstUser.toString())
+            if(message.getReceiverId().toString().equalsIgnoreCase(userId.toString()) &&
+               message.getSenderId().toString().equalsIgnoreCase(currentUser()) ||
+               message.getReceiverId().toString().equalsIgnoreCase(currentUser()) &&
+               message.getSenderId().toString().equalsIgnoreCase(userId.toString())
             ){
                 messages.add(message);
                 return messages.get(0);
@@ -95,13 +114,12 @@ public class ChatServiceImpl implements ChatService{
     }
 
     public List<ConnectedResponse> getAllContactUser() {
+        isNotVerify(UUID.fromString(currentUser()));
         checkChat(UUID.fromString(currentUser()));
         List<ConnectedResponse> responses = new ArrayList<>();
         List<UUID> uniqueIds = new ArrayList<>();
         List<MessageModel> listMessage = chatMessageRepository.getUserByCurrentUserId(UUID.fromString(currentUser()));
-
         if(!listMessage.isEmpty()){
-
             for (MessageModel message : listMessage) {
                 UUID senderId = message.getSenderId();
                 UUID receiverId = message.getReceiverId();
@@ -115,12 +133,13 @@ public class ChatServiceImpl implements ChatService{
 
             for (UUID id : uniqueIds) {
                 ConnectedResponse connectedResponse = new ConnectedResponse();
+                System.out.println("id: " + id);
                 User user = getUserById(id);
                 UserInfoResponse userInfo = getUserInfoById(user.getId());
-                if(userInfo == null){
-                    connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),null)));
-                }else{
+                if(userInfo != null){
                     connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),userInfo.getProfileImage())));
+                }else{
+                    connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),null)));
                 }
 
                 int lastIndex = chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size()-1;
@@ -148,6 +167,7 @@ public class ChatServiceImpl implements ChatService{
 
     @Override
     public String updateAllMessages(UUID connectedUser) {
+        isNotVerify(UUID.fromString(currentUser()));
         checkChat(connectedUser);
         checkChat(UUID.fromString(currentUser()));
         chatMessageRepository.updateAllUnseenMessages(connectedUser,UUID.fromString(currentUser()));
@@ -165,10 +185,12 @@ public class ChatServiceImpl implements ChatService{
 
     // Return User
     public User getUserById(UUID id){
+        isNotVerify(UUID.fromString(currentUser()));
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         try{
             return covertSpecificClass.convertValue(Objects.requireNonNull(userWeb
+                    .baseUrl("http://8.222.225.41:8081/")
                     .build()
                     .get()
                     .uri("api/v1/users/{id}", id)
@@ -186,6 +208,7 @@ public class ChatServiceImpl implements ChatService{
         covertSpecificClass.registerModule(new JavaTimeModule());
         try{
             return covertSpecificClass.convertValue(Objects.requireNonNull(userWeb
+                    .baseUrl("http://8.222.225.41:8084/")
                     .build()
                     .get()
                     .uri("api/v1/user-info/{userId}", id)
@@ -211,6 +234,31 @@ public class ChatServiceImpl implements ChatService{
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
     }
+
+    @Override
+    public FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws Exception {
+        System.out.println("File: "+ file);
+        isNotVerify(UUID.fromString(currentUser()));
+        String uploadPath = fileStorageProperties.getUploadPath();
+        Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
+        java.io.File directory = directoryPath.toFile();
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        String fileName = UUID.randomUUID() + file.getOriginalFilename().replaceAll("\\s+","");
+        File dest = new File(directoryPath.toFile(), fileName);
+        file.transferTo(dest);
+        return new FileResponse(fileName,file.getContentType(),file.getSize());
+    }
+
+    // Account not yet verify
+    public void isNotVerify(UUID id){
+        UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
+        if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
+    }
+
 
 }
 

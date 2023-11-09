@@ -158,6 +158,8 @@ public class ProductServiceImpl implements ProductService{
             preData.setTitle(request.getTitle());
             preData.setFile(request.getFiles().toString());
             preData.setDescription(request.getDescription());
+            preData.setPrice(request.getPrice());
+            preData.setQuantity(request.getQuantity());
             preData.setLastModified(LocalDateTime.now());
             return productRepository.save(preData).toDto(getFiles(preData));
         }
@@ -244,18 +246,24 @@ public class ProductServiceImpl implements ProductService{
     public ShopResponse shopById(UUID id){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try{
-            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                    .baseUrl("http://8.222.225.41:8088/")
-                    .build()
+            if(authentication.getPrincipal() instanceof Jwt jwt){
+                return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .baseUrl("http://8.222.225.41:8088/")
+                        .build()
                         .get()
                         .uri("api/v1/shops/{id}", id)
+                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(), ShopResponse.class);
+            }
+
         }catch (Exception e){
             throw new IllegalArgumentException(ValidationConfig.SHOP_NOTFOUND);
         }
+        throw new IllegalArgumentException(ValidationConfig.SHOP_NOTFOUND);
     }
 
     // Separate file -> List

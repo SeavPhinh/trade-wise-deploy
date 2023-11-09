@@ -84,7 +84,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategorySubCategory getCategoryAndSubCategoryByName(String name) {
-        System.out.println("Name: "+ name);
         Category category = categoryRepository.getCategoryByName(name);
         if(category != null){
             List<SubCategory> subCategory = subCategoryRepository.getAllSubCategoryByCategoryId(category.getId());

@@ -128,6 +128,8 @@ public class ValidationConfig {
     public static final String OUT_OF_SCOPE_LEVEL = "level is out of scope (ONE_STAR,TWO_STARS,THREE_STARS,FOUR_STARS,FIVE_STARS)";
     public static final String NOT_FOUND_USER_CONTACT = "your contact list is empty";
     public static final String NOT_YET_TEXTING = "this user haven't chatting with other";
+    public static final String INVALID_QUANTITY = "quantity cannot be negative";
+    public static final String NULL_QUANTITY = "quantity cannot be null";
     public static final int MIN_SUB_CATEGORY = 1;
 
 }

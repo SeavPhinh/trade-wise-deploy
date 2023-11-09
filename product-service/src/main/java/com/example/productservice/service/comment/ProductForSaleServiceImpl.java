@@ -82,6 +82,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
             file.transferTo(dest);
             listFiles.add(fileName);
         }
+        preData.setFile(listFiles.toString());
         return productForSaleRepository.save(preData).toDto(listFiles);
     }
 
@@ -90,7 +91,6 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         PostResponse product = post(postRequest.getPostId());
-
         for (String image : postRequest.getFiles()) {
             validateFile(image);
         }
@@ -148,6 +148,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
             preData.setTitle(request.getTitle());
             preData.setFile(request.getFiles().toString());
             preData.setDescription(request.getDescription());
+            preData.setPrice(request.getPrice());
             preData.setStatus(request.getStatus());
             preData.setLastModified(LocalDateTime.now());
             return productForSaleRepository.save(preData).toDto(getFiles(preData));

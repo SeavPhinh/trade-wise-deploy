@@ -37,8 +37,12 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_PRICE)
     private Float price;
 
+    @NotNull(message = ValidationConfig.NULL_QUANTITY)
+    @DecimalMin(value = "0", message = ValidationConfig.INVALID_QUANTITY)
+    private Integer quantity;
+
     public Product toEntity(UUID shopId){
-        return new Product(null,this.title.trim(),this.files.toString(),this.description.trim(),this.price, LocalDateTime.now(),LocalDateTime.now(),shopId);
+        return new Product(null,this.title.trim(),this.files.toString(),this.description.trim(),this.price,this.quantity, LocalDateTime.now(),LocalDateTime.now(),shopId);
     }
 
 }
