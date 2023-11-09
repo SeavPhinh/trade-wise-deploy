@@ -30,7 +30,7 @@ services:
       - "8761:8761"
     networks:
       - trade-wise
-  # User info Service
+  # User Service
   user-service:
     build:
       context: .
@@ -72,7 +72,7 @@ services:
       - "8089:8089"
     networks:
       - trade-wise
-  # Product Service
+  # Shop Service
   shop-service:
     build:
       context: .
@@ -112,6 +112,20 @@ services:
       SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
     ports:
       - "8087:8087"
+    networks:
+      - trade-wise
+  # Chat Service
+  chat-service:
+    build:
+      context: .
+      dockerfile: deployment/chat.Dockerfile
+    container_name: chat-service
+    environment:
+      SPRING_APPLICATION_NAME: chat-service
+      SPRING_PROFILES_ACTIVE: native,dev
+      SPRING_CONFIG_IMPORT: "configserver:http://config-server:8888"
+    ports:
+      - "8082:8082"
     networks:
       - trade-wise
   # Gateway
