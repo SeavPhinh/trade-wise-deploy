@@ -63,7 +63,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     public ProductForSaleResponse saveListFile(UUID id, List<MultipartFile> files, HttpServletRequest request) throws IOException {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        UUID shopId = shop().getId();
+        UUID shopId = shop(UUID.fromString(currentUser())).getId();
         ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
         validationShop(shopId,preData);
         List<String> listFiles = new ArrayList<>();
@@ -95,7 +95,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
             validateFile(image);
         }
         if(product != null){
-            return productForSaleRepository.save(postRequest.toEntity(shop().getId())).toDto(postRequest.getFiles());
+            return productForSaleRepository.save(postRequest.toEntity(shop(UUID.fromString(currentUser())).getId())).toDto(postRequest.getFiles());
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_POST);
     }
@@ -109,7 +109,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     public ProductForSaleResponse getProductById(UUID id) {
         Optional<ProductForSale> product = productForSaleRepository.findById(id);
         if(product.isPresent()){
-            if(product.get().getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
+            if(product.get().getShopId().toString().equalsIgnoreCase(shop(UUID.fromString(currentUser())).getId().toString()) ||
                product.get().getPostId().toString().equalsIgnoreCase(post(product.get().getPostId()).getId().toString())){
                 return product.get().toDto(getFiles(productForSaleRepository.findById(id).orElseThrow()));
             }
@@ -124,7 +124,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         isLegal(UUID.fromString(currentUser()));
         // Create new object to store before delete
         ProductForSaleResponse response = getProductById(id);
-        if(response.getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
+        if(response.getShopId().toString().equalsIgnoreCase(shop(UUID.fromString(currentUser())).getId().toString()) ||
            currentUser().equalsIgnoreCase(post(id).getCreatedBy().getId().toString())){
             productForSaleRepository.deleteById(id);
             return "You have delete this product successfully";
@@ -142,7 +142,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
             validateFile(image);
         }
 
-        if(preData.getShopId().toString().equalsIgnoreCase(shop().getId().toString()) ||
+        if(preData.getShopId().toString().equalsIgnoreCase(shop(UUID.fromString(currentUser())).getId().toString()) ||
         preData.getPostId().toString().equalsIgnoreCase(post(id).getId().toString())){
             // Update Previous Data
             preData.setTitle(request.getTitle());
@@ -163,10 +163,10 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
         if(!listFiles.isEmpty()){
             // Not Owner Post (seller)
             if(!currentUser().equalsIgnoreCase(post(id).getCreatedBy().getId().toString())){
-                if(productForSaleRepository.getProductByPostIdAndUserId(id, shop().getId()).isEmpty()){
+                if(productForSaleRepository.getProductByPostIdAndUserId(id, shop(UUID.fromString(currentUser())).getId()).isEmpty()){
                     throw new NotFoundExceptionClass(ValidationConfig.UR_PRODUCT_NOT_FOUND);
                 }
-                return productForSaleRepository.getProductByPostIdAndUserId(id, shop().getId()).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
+                return productForSaleRepository.getProductByPostIdAndUserId(id, shop(UUID.fromString(currentUser())).getId()).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
             }
             // Owner Post (buyer) can see all product comment
             return productForSaleRepository.getProductByPostId(id).stream().map(product -> product.toDto(getFiles(product))).collect(Collectors.toList());
@@ -216,7 +216,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     }
 
     // Return Shop
-    public ShopResponse shop(){
+    public ShopResponse shop(UUID userId){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -226,7 +226,7 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
                         .baseUrl("http://8.222.225.41:8088/")
                         .build()
                         .get()
-                        .uri("api/v1/shops/current")
+                        .uri("api/v1/shops/user/{userId}", userId)
                         .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                         .retrieve()
                         .bodyToMono(ApiResponse.class)

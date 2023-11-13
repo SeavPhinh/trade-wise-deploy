@@ -22,7 +22,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String title;
+    @Column(length = 1000000)
     private String file;
+    @Column(length = 1000000)
     private String description;
     private Float price;
     private Integer quantity;

@@ -6,6 +6,7 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.CategorySubCategoryResponse;
 import com.example.commonservice.response.SubCategoryResponse;
 import com.example.shopservice.enumeration.Level;
 import com.example.shopservice.exception.NotFoundExceptionClass;
@@ -161,38 +162,40 @@ public class RatingServiceImpl implements RatingService {
     }
 
     // Converting Category from Attribute as String to ArrayList
-    public List<UUID> category(String categories){
+    public List<String> category(String categories){
         List<String> categoriesList = Arrays.asList(categories.replaceAll("\\[|\\]", "").split(", "));
         return categoriesList.stream()
-                .map(UUID::fromString)
+                .map(String::toUpperCase)
                 .collect(Collectors.toList());
     }
 
-    // Converting Category list as UUID to List<String>
-    public List<String> categoriesList(String categories){
 
-        List<UUID> uuidList = category(categories);
+    // Returning list category
+    public List<String> categoriesList(String categories) {
+        List<String> uuidList = category(categories);
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
         List<String> responses = new ArrayList<>();
-        if(!uuidList.isEmpty()){
-            for (UUID subId : uuidList) {
-                try{
-                    SubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                            .baseUrl("http://8.222.225.41:8087/")
-                            .build()
-                            .get()
-                            .uri("api/v1/subcategories/{id}", subId)
-                            .retrieve()
-                            .bodyToMono(ApiResponse.class)
-                            .block()).getPayload(), SubCategoryResponse.class);
-                    responses.add(subName.getName());
-                }catch (Exception e){
-                    throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
-                }
+        try {
+            for (String name : uuidList) {
+                CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                        .baseUrl("http://8.222.225.41:8087/")
+                        .build()
+                        .get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("api/v1/sub-categories")
+                                .queryParam("name", name.toUpperCase())
+                                .build())
+                        .retrieve()
+                        .bodyToMono(ApiResponse.class)
+                        .block()).getPayload(), CategorySubCategoryResponse.class);
+                responses.add(subName.getSubCategory().getName());
             }
+            return responses;
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
         }
-        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+
     }
 
     // Account not yet verify

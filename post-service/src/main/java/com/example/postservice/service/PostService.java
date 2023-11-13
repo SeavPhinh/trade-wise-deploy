@@ -32,4 +32,5 @@ public interface PostService {
     List<PostResponse> searchPostBySubCategory(List<String> filter);
     List<PostResponse> getPostsForCurrentUser();
     List<PostResponse> randomPostBySubCategory(String subCategory);
+
 }

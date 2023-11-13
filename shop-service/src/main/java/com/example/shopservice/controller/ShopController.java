@@ -77,13 +77,12 @@ public class ShopController {
         ), HttpStatus.OK);
     }
 
-    @GetMapping("/current")
+    @GetMapping("/user/{userId}")
     @Operation(summary = "fetch shop by owner id")
-    @SecurityRequirement(name = "oAuth2")
-    public ResponseEntity<ApiResponse<ShopResponse>> getShopByOwnerId(){
+    public ResponseEntity<ApiResponse<ShopResponse>> getShopByOwnerId(@PathVariable UUID userId){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop fetched by owner id successfully",
-                shopService.getShopByOwnerId(),
+                shopService.getShopByOwnerId(userId),
                 HttpStatus.OK
         ), HttpStatus.OK);
     }
@@ -147,7 +146,6 @@ public class ShopController {
 
     @GetMapping("/image")
     @Operation(summary = "fetched image")
-    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(shopService.getImage(fileName));
     }

@@ -61,7 +61,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<User> findByUsername(String username) {
-
         List<UserRepresentation> userRepresentations = keycloak.realm(realm).users().search(username.replaceAll("\\s+",""));
         if(userRepresentations.stream().toList().isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);

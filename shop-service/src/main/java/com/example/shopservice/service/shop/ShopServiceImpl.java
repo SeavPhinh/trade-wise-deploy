@@ -65,7 +65,6 @@ public class ShopServiceImpl implements ShopService {
     public ShopResponse saveFile(MultipartFile file, HttpServletRequest request) throws IOException {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-
         if (file != null && !isImageFile(file)) {
             throw new IllegalArgumentException(ValidationConfig.INVALID_FILE);
         }
@@ -148,10 +147,9 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    public ShopResponse getShopByOwnerId() {
-        isNotVerify(UUID.fromString(currentUser()));
-        isLegal(UUID.fromString(currentUser()));
-        Shop shop = shopRepository.getShopByOwnerId(createdBy(UUID.fromString(currentUser())).getId());
+    public ShopResponse getShopByOwnerId(UUID id) {
+        isNotVerify(id);
+        Shop shop = shopRepository.getShopByOwnerId(createdBy(id).getId());
         if(shop != null){
             return shop.toDto(categoriesList(shop.getSubCategoryList()),ratedCount(shop.getId()), ratedPercentage(shop.getId()));
         }
@@ -189,7 +187,6 @@ public class ShopServiceImpl implements ShopService {
 
     @Override
     public List<ShopResponse> getShopBasedOnRating(){
-
         List<Shop> getAllActiveShop = shopRepository.getAllActiveShop();
         if(getAllActiveShop.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_BEST_RATE_SHOP);
@@ -226,20 +223,20 @@ public class ShopServiceImpl implements ShopService {
                     sum += 5;
                 }
             }
-
             shopIdAndRatedValue.put(id, Float.valueOf(sum/level.size()));
-
             sortedKeys = sortKeysByValueDescending(shopIdAndRatedValue);
         }
 
+        System.out.println("SortedKey: " + sortedKeys);
+
         for (int i = 0; i < sortedKeys.size(); i++) {
-            if(sortedKeys.size() > 3){
+            if(i > 3){
                 break;
             }else{
                 topThreeShop.add(shopRepository.getActiveShopById(sortedKeys.get(i)).toDto(categoriesList(shopRepository.getActiveShopById(sortedKeys.get(i)).getSubCategoryList()), ratedCount(sortedKeys.get(i)), ratedPercentage(sortedKeys.get(i))));
             }
         }
-
+        System.out.println("topThree: " + topThreeShop);
         return topThreeShop;
     }
 

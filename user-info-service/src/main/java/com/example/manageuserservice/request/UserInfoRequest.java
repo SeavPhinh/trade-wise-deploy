@@ -19,7 +19,7 @@ public class UserInfoRequest {
     private LocalDateTime dob;
     private String phoneNumber;
     @NotEmpty(message = ValidationConfig.PROFILE_IMAGE_RESPONSE)
-    private String profileImage;
+    private String profileImage = null;
 
     public UserInfo toEntity(String phoneNumber, UUID createdBy){
         return new UserInfo(null, this.gender,this.dob,phoneNumber,this.profileImage.trim(),createdBy);

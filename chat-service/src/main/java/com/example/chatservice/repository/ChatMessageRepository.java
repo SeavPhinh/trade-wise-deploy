@@ -21,7 +21,7 @@ public interface ChatMessageRepository extends JpaRepository<MessageModel, UUID>
 
     @Transactional
     @Modifying
-    @Query(value = "SELECT * FROM chats WHERE sender_id = :#{#senderId} AND receiver_id = :#{#receiverId} OR receiver_id = :#{#senderId} AND sender_id = :#{#receiverId} ORDER BY :#{#timestamp} ", nativeQuery = true)
+    @Query(value = "SELECT * FROM chats WHERE sender_id = :#{#senderId} AND receiver_id = :#{#receiverId} OR receiver_id = :#{#senderId} AND sender_id = :#{#receiverId} ORDER BY timestamp ", nativeQuery = true)
     List<MessageModel> findHistory(UUID senderId, UUID receiverId);
 
     @Transactional
@@ -36,7 +36,7 @@ public interface ChatMessageRepository extends JpaRepository<MessageModel, UUID>
 
     @Transactional
     @Modifying
-    @Query(value = "SELECT * FROM chats WHERE sender_id = :#{#id} AND receiver_id = :#{#userId} OR receiver_id = :#{#id} AND sender_id = :#{#userId}", nativeQuery = true)
+    @Query(value = "SELECT * FROM chats WHERE sender_id = :#{#id} AND receiver_id = :#{#userId} OR receiver_id = :#{#id} AND sender_id = :#{#userId} ORDER BY timestamp", nativeQuery = true)
     List<MessageModel> getAllMessageWithConnectedUser(UUID id, UUID userId);
 
     @Transactional

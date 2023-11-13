@@ -39,7 +39,7 @@ public class UserRequest {
     @Size(max = ValidationConfig.FIRSTNAME_VALIDATION_MAX, message = ValidationConfig.FIRSTNAME_RESPONSE_MESSAGE)
     private String firstname;
 
-    @NotEmpty(message = ValidationConfig.PROFILE_IMAGE_RESPONSE)
+    @NotEmpty(message = ValidationConfig.LASTNAME_REQUIRED_MESSAGE)
     @Size(max = ValidationConfig.LASTNAME_VALIDATION_MAX, message = ValidationConfig.LASTNAME_RESPONSE_MESSAGE)
     private String lastname;
 

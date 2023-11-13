@@ -116,7 +116,6 @@ public class ProductController {
 
     @GetMapping("/image")
     @Operation(summary = "fetched image")
-    @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(productService.getImage(fileName));
     }

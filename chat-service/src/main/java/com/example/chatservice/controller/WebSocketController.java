@@ -95,27 +95,22 @@ public class WebSocketController {
     @GetMapping("/{fileName}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
         Path filePath = Paths.get("chat-service/src/main/resources/storage/", fileName);
-
         try {
             // Load file as Resource
             ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(filePath));
-
             // Set content type
             String contentType = Files.probeContentType(filePath);
             MediaType mediaType = MediaType.parseMediaType(contentType);
-
             // Set headers
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + fileName);
             headers.setContentType(mediaType);
-
             // Return ResponseEntity
             return ResponseEntity.ok()
                     .headers(headers)
                     .contentLength(Files.size(filePath))
                     .contentType(mediaType)
                     .body(resource);
-
         } catch (IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

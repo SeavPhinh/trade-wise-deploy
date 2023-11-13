@@ -133,7 +133,6 @@ public class ChatServiceImpl implements ChatService{
 
             for (UUID id : uniqueIds) {
                 ConnectedResponse connectedResponse = new ConnectedResponse();
-                System.out.println("id: " + id);
                 User user = getUserById(id);
                 UserInfoResponse userInfo = getUserInfoById(user.getId());
                 if(userInfo != null){
@@ -141,6 +140,11 @@ public class ChatServiceImpl implements ChatService{
                 }else{
                     connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),null)));
                 }
+
+                System.out.println("ID user: " + id);
+
+                System.out.println("Size: " + chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size());
+                System.out.println("Last Index: " + (chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size() - 1));
 
                 int lastIndex = chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size()-1;
 
@@ -155,7 +159,6 @@ public class ChatServiceImpl implements ChatService{
                         userType,
                         chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getTimestamp()
                 ));
-
                 List<MessageModel> unseenCount = chatMessageRepository.getAllUnseenMessage(UUID.fromString(currentUser()));
                 connectedResponse.setUnseenCount(unseenCount.size());
                 responses.add(connectedResponse);
@@ -237,7 +240,6 @@ public class ChatServiceImpl implements ChatService{
 
     @Override
     public FileResponse saveFile(MultipartFile file, HttpServletRequest request) throws Exception {
-        System.out.println("File: "+ file);
         isNotVerify(UUID.fromString(currentUser()));
         String uploadPath = fileStorageProperties.getUploadPath();
         Path directoryPath = Paths.get(uploadPath).toAbsolutePath().normalize();
