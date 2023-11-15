@@ -76,8 +76,8 @@ public class WebSocketController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "read all messages successfully",
                 chatService.updateAllMessages(userId),
-                HttpStatus.OK
-        ), HttpStatus.OK);
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -88,8 +88,8 @@ public class WebSocketController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "image upload to user information successfully",
                 chatService.saveFile(file,request),
-                HttpStatus.OK
-        ), HttpStatus.OK);
+                HttpStatus.CONTINUE
+        ), HttpStatus.CONTINUE);
     }
 
     @GetMapping("/{fileName}")

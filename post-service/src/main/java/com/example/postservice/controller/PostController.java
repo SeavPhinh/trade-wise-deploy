@@ -150,4 +150,27 @@ public class PostController {
         ),HttpStatus.OK);
     }
 
+    @GetMapping("/sub-category/range")
+    @Operation(summary = "fetch all post based on sub-category and range budget")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> rangeBudget(@RequestParam List<String> subCategory,
+                                                                       @RequestParam Float budgetFrom,
+                                                                       @RequestParam Float budgetTo){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Fetch by SubCategory and Range Budget successfully.",
+                postService.filterRequest(subCategory,budgetFrom,budgetTo),
+                HttpStatus.OK
+        ),HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{id}")
+    @Operation(summary = "fetch all post by user id")
+    public ResponseEntity<ApiResponse<List<PostResponse>>> fetchByUserId(@PathVariable UUID id){
+        return new ResponseEntity<>(new ApiResponse<>(
+                "Fetch all post by user id successfully.",
+                postService.getAllPostByUserId(id),
+                HttpStatus.OK
+        ),HttpStatus.OK);
+    }
+
+
 }

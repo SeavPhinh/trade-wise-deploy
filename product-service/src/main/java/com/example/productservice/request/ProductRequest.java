@@ -33,6 +33,10 @@ public class ProductRequest {
     @NotEmpty(message = ValidationConfig.EMPTY_DESCRIPTION)
     private String description;
 
+    @NotNull(message = ValidationConfig.NULL_SUB_CATEGORY)
+    @NotEmpty(message = ValidationConfig.EMPTY_SUB_CATEGORY)
+    private String subCategory;
+
     @NotNull(message = ValidationConfig.NULL_PRICE)
     @DecimalMin(value = "0.0", message = ValidationConfig.INVALID_PRICE)
     private Float price;
@@ -42,7 +46,7 @@ public class ProductRequest {
     private Integer quantity;
 
     public Product toEntity(UUID shopId){
-        return new Product(null,this.title.trim(),this.files.toString(),this.description.trim(),this.price,this.quantity, LocalDateTime.now(),LocalDateTime.now(),shopId);
+        return new Product(null,this.title.trim(),this.files.toString(),this.description.trim(),this.subCategory,this.price,this.quantity, LocalDateTime.now(),LocalDateTime.now(),shopId);
     }
 
 }

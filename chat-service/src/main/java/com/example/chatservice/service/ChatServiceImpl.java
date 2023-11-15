@@ -43,7 +43,6 @@ public class ChatServiceImpl implements ChatService{
     private final WebClient.Builder userWeb;
     private final FileStorageProperties fileStorageProperties;
     private final Keycloak keycloak;
-
     @Value("${keycloak.realm}")
     private String realm;
 
@@ -73,7 +72,6 @@ public class ChatServiceImpl implements ChatService{
                 userDestination = messages.get(0);
             }
         }
-
         if(userDestination != null){
             messagingTemplate.convertAndSendToUser(userDestination.getSenderId()+"&"+userDestination.getReceiverId(), "/private", message);
         }else {
@@ -128,10 +126,8 @@ public class ChatServiceImpl implements ChatService{
                 }
             }
             for (UUID id : uniqueIds) {
-
                 ConnectedResponse connectedResponse = new ConnectedResponse();
                 User user = getUserById(id);
-
                 if(user != null){
                     UserInfoResponse userInfo = getUserInfoById(user.getId());
                     if(userInfo != null){

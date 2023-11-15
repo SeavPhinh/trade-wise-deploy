@@ -16,9 +16,7 @@ import java.util.List;
 @Tag(name = "Third Party")
 @CrossOrigin
 public class ThirdPartyController {
-
     private final ThirdPartyService thirdPartyService;
-
     public ThirdPartyController(ThirdPartyService thirdPartyService) {
         this.thirdPartyService = thirdPartyService;
     }
@@ -29,7 +27,7 @@ public class ThirdPartyController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account modified successfully",
                 thirdPartyService.modifyGmailAccount(),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 }

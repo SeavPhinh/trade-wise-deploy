@@ -117,8 +117,8 @@ public class ShopController {
         return new ResponseEntity<>(new ApiResponse<>(
                 " Updated shop by id successfully",
                 shopService.updateShopById(request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PutMapping("/current/action")
@@ -128,8 +128,8 @@ public class ShopController {
         return new ResponseEntity<>(new ApiResponse<>(
                 " shop has set to inactive successfully",
                 shopService.shopAction(isActive),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

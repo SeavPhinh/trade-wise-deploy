@@ -37,6 +37,8 @@ public class KeyCloakSecurityConfig {
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/newest").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/image/{fileName}").permitAll();
                     authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/budget").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/user/{id}").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"api/v1/posts/sub-category/range").permitAll();
                     authorize.anyRequest().authenticated();
                 }).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();

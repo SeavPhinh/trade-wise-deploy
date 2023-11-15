@@ -26,6 +26,7 @@ public class Product {
     private String file;
     @Column(length = 1000000)
     private String description;
+    private String subCategory;
     private Float price;
     private Integer quantity;
     private LocalDateTime createdDate;
@@ -33,7 +34,7 @@ public class Product {
     private UUID shopId;
 
     public ProductResponse toDto(List<String> files){
-        return new ProductResponse(this.id,this.title,files,this.description,this.price,this.quantity,this.createdDate,this.lastModified,this.shopId);
+        return new ProductResponse(this.id,this.title,files,this.description,this.subCategory,this.price,this.quantity,this.createdDate,this.lastModified,this.shopId);
     }
 
 }

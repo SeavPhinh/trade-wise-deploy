@@ -45,8 +45,8 @@ public class BuyerFavoriteController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "remove shop by id from favorite list successfully",
                 buyerFavoriteService.removeShopFromFavoriteList(id),
-                HttpStatus.OK
-        ), HttpStatus.OK);
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/current")

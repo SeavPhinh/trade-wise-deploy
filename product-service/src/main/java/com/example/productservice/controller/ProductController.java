@@ -97,8 +97,8 @@ public class ProductController {
         return new ResponseEntity<>(new ApiResponse<>(
                 " Updated products by id successfully",
                 productService.updateProductById(id, request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
 
@@ -109,7 +109,7 @@ public class ProductController {
             @RequestParam(required = false) List<MultipartFile> files,
                                            HttpServletRequest request) throws IOException {
         if(files != null){
-            return ResponseEntity.status(200).body(productService.saveListFile(productId,files,request));
+            return ResponseEntity.status(HttpStatus.CREATED).body(productService.saveListFile(productId,files,request));
         }
         throw new NotFoundExceptionClass("No filename to upload");
     }

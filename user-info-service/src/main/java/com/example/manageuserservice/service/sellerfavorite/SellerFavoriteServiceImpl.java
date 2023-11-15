@@ -11,6 +11,7 @@ import com.example.manageuserservice.model.SellerFavorite;
 import com.example.manageuserservice.repository.SellerFavoriteRepository;
 import com.example.manageuserservice.request.SellerFavoriteRequest;
 import com.example.manageuserservice.response.SellerFavoriteResponse;
+import com.example.manageuserservice.service.userinfo.UserInfoServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.keycloak.admin.client.Keycloak;
@@ -31,14 +32,16 @@ import java.util.stream.Collectors;
 public class SellerFavoriteServiceImpl implements SellerFavoriteService {
 
     private final SellerFavoriteRepository sellerFavoriteRepository;
+    private final UserInfoServiceImpl userInfoService;
     private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
     @Value("${keycloak.realm}")
     private String realm;
 
-    public SellerFavoriteServiceImpl(SellerFavoriteRepository favoriteRepository, WebClient.Builder webClient, Keycloak keycloak) {
+    public SellerFavoriteServiceImpl(SellerFavoriteRepository favoriteRepository, UserInfoServiceImpl userInfoService, WebClient.Builder webClient, Keycloak keycloak) {
         this.sellerFavoriteRepository = favoriteRepository;
+        this.userInfoService = userInfoService;
         this.webClient = webClient;
         this.keycloak = keycloak;
     }
@@ -52,14 +55,14 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
             throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_POST);
         }
         PostResponse post = post(request.getPostId());
-        return sellerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(post);
+        return sellerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(post, userInfoService.getUserInfoByUserId(createdBy(UUID.fromString(currentUser())).getId()).getProfileImage());
     }
 
     @Override
     public List<SellerFavoriteResponse> getAllPostedFromSellerFavoriteListByOwnerId() {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        List<SellerFavoriteResponse> list = sellerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(post(h.getPostId()))).collect(Collectors.toList());
+        List<SellerFavoriteResponse> list = sellerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(post(h.getPostId()),userInfoService.getUserInfoByUserId(h.getUserId()).getProfileImage())).collect(Collectors.toList());
         if(list.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.EMPTY_FAV_LIST);
         }
@@ -81,7 +84,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
         isLegal(UUID.fromString(currentUser()));
         SellerFavorite seller = sellerFavoriteRepository.findByPostIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(seller != null){
-            return seller.toDto(post(id));
+            return seller.toDto(post(id), userInfoService.getUserInfoByUserId(seller.getUserId()).getProfileImage());
         }
         throw new NotFoundExceptionClass(ValidationConfig.POST_NOTFOUND_IN_LIST);
     }

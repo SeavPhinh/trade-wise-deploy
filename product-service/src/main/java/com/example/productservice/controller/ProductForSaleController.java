@@ -86,8 +86,8 @@ public class ProductForSaleController {
         return new ResponseEntity<>(new ApiResponse<>(
                 " updated product by id successfully",
                 productForSaleService.updateProductById(id, request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PostMapping(value = "/upload/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

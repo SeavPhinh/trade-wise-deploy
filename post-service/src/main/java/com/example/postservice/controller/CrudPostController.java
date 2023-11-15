@@ -61,8 +61,8 @@ public class CrudPostController {
         return new ResponseEntity<>(new ApiResponse<>(
                 " updated post by id successfully",
                 postService.updatePostById(id, request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -71,7 +71,7 @@ public class CrudPostController {
     public ResponseEntity<?> saveMultiFile(@RequestParam(required = false) MultipartFile file,
                                            HttpServletRequest request) throws Exception {
         if (file != null) {
-            return ResponseEntity.status(200).body(postService.saveListFile(file, request));
+            return ResponseEntity.status(HttpStatus.CREATED).body(postService.saveListFile(file, request));
         }
         throw new NotFoundExceptionClass("No filename to upload");
     }

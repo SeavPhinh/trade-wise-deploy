@@ -42,8 +42,8 @@ public class SubCategoryController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "SubCategories added successfully",
                 subCategoryService.addSubCategory(categoryName,request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.CREATED
+        ), HttpStatus.CREATED);
     }
 
     @DeleteMapping("")
@@ -53,8 +53,8 @@ public class SubCategoryController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "SubCategories delete by name successfully",
                 subCategoryService.deleteSubCategoryByName(name),
-                HttpStatus.OK
-        ), HttpStatus.OK);
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
     }
 
 
@@ -66,8 +66,8 @@ public class SubCategoryController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "SubCategories updated by name successfully",
                 subCategoryService.updateSubCategoryByName(name,request),
-                HttpStatus.OK
-        ), HttpStatus.OK);
+                HttpStatus.CONTINUE
+        ), HttpStatus.CONTINUE);
     }
 
 

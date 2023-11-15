@@ -73,8 +73,8 @@ public class UserInfoController {
         return new ResponseEntity<>(new ApiResponse<>(
                 " updated current user information successfully",
                 userInfoService.updateCurrentUserInfo(request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PutMapping("/current/role")
@@ -84,8 +84,8 @@ public class UserInfoController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "user switch role successfully",
                 userInfoService.switchRole(role),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

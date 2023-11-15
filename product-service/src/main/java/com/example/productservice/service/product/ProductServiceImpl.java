@@ -6,6 +6,7 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.ApiResponse;
+import com.example.commonservice.response.CategorySubCategoryResponse;
 import com.example.commonservice.response.ShopResponse;
 import com.example.productservice.config.FileStorageProperties;
 import com.example.productservice.exception.NotFoundExceptionClass;
@@ -103,6 +104,7 @@ public class ProductServiceImpl implements ProductService{
         for (String image : postRequest.getFiles()) {
             validateFile(image);
         }
+        categoriesList(postRequest.getSubCategory());
         return productRepository.save(postRequest.toEntity(shop(UUID.fromString(currentUser())).getId())).toDto(postRequest.getFiles());
     }
 
@@ -202,6 +204,29 @@ public class ProductServiceImpl implements ProductService{
             return null;
         }
     }
+
+    // Returning list category
+    public String categoriesList(String categories) {
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        try {
+            CategorySubCategoryResponse subName = covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .baseUrl("http://8.222.225.41:8087/")
+                    .build()
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("api/v1/sub-categories")
+                            .queryParam("name", categories.toUpperCase())
+                            .build())
+                    .retrieve()
+                    .bodyToMono(ApiResponse.class)
+                    .block()).getPayload(), CategorySubCategoryResponse.class);
+            return subName.getSubCategory().getName();
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_SUB_CATEGORIES);
+        }
+    }
+
 
     // Return User
     public User createdBy(UUID id){

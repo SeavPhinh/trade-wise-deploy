@@ -63,4 +63,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Transactional
     @Query("select p from Post p  where p.status = true and p.subCategory like %:subCategory% ")
     List<Post> searchPostBySubCategory(String subCategory);
+
+    @Transactional
+    @Query("select p from Post p  where  p.status = true and p.userId= :id")
+    List<Post> getPostByUserId(UUID id);
 }

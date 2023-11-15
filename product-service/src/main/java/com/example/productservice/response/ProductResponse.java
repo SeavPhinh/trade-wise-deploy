@@ -17,6 +17,7 @@ public class ProductResponse {
     private String title;
     private List<String> file;
     private String description;
+    private String subCategory;
     private Float price;
     private Integer quantity;
     private LocalDateTime createdDate;

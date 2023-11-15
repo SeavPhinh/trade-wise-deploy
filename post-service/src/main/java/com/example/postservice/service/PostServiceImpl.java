@@ -4,6 +4,7 @@ import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.response.CategorySubCategoryResponse;
 import com.example.commonservice.response.FileResponse;
+import com.example.commonservice.response.UserInfoResponse;
 import com.example.postservice.config.FileStorageProperties;
 import com.example.postservice.enums.Filter;
 import com.example.postservice.exception.NotFoundExceptionClass;
@@ -68,7 +69,7 @@ public class PostServiceImpl implements PostService {
             throw new IllegalArgumentException(ValidationConfig.CANNOT_SMALLER);
         }
         validateFile(postRequest.getFile());
-        return postRepository.save(postRequest.toEntity(UUID.fromString(currentUser()))).toDto(createdBy(UUID.fromString(currentUser())));
+        return postRepository.save(postRequest.toEntity(UUID.fromString(currentUser()))).toDto(createdBy(UUID.fromString(currentUser())), getUserInfoById(UUID.fromString(currentUser())));
     }
 
     @Override
@@ -95,7 +96,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponse> getAllPost() {
-        List<PostResponse> posts = postRepository.findAllPosts().stream().map(post -> post.toDto(createdBy(post.getUserId()))).toList();
+        List<PostResponse> posts = postRepository.findAllPosts().stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).toList();
         if(!posts.isEmpty()){
             return posts;
         }
@@ -106,16 +107,17 @@ public class PostServiceImpl implements PostService {
     public PostResponse getPostById(UUID id) {
         Post post = postRepository.findPostById(id);
         if(post != null){
-            return postRepository.findPostById(id).toDto(createdBy(post.getUserId()));
+            return postRepository.findPostById(id).toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
 
     @Override
     public Void deletePostById(UUID id) {
+
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        Optional<Post> post= postRepository.findById(id);
+        Optional<Post> post = postRepository.findById(id);
         if(post.isPresent()){
             // Create new object to store before delete
             PostResponse response = getPostById(id);
@@ -148,7 +150,7 @@ public class PostServiceImpl implements PostService {
                 preData.setStatus(postRequest.getStatus());
                 preData.setLastModified(LocalDateTime.now());
                 preData.setSubCategory(postRequest.getSubCategory());
-                return postRepository.save(preData).toDto(createdBy(UUID.fromString(currentUser())));
+                return postRepository.save(preData).toDto(createdBy(UUID.fromString(currentUser())),getUserInfoById(UUID.fromString(currentUser())));
             }
             throw new NotFoundExceptionClass(ValidationConfig.NOT_OWNER_POST);
         }
@@ -159,7 +161,7 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getAllDraftPosts() {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        List<PostResponse> draftList = postRepository.getAllDraftPosts().stream().map(post -> post.toDto(createdBy(post.getUserId()))).toList();
+        List<PostResponse> draftList = postRepository.getAllDraftPosts().stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).toList();
         if(!draftList.isEmpty()){
             return draftList;
         }
@@ -172,7 +174,7 @@ public class PostServiceImpl implements PostService {
         isLegal(UUID.fromString(currentUser()));
         Post post = postRepository.findDraftedPostById(id);
         if(post != null){
-            return postRepository.findDraftedPostById(id).toDto(createdBy(post.getUserId()));
+            return postRepository.findDraftedPostById(id).toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
@@ -199,7 +201,7 @@ public class PostServiceImpl implements PostService {
         }
         List<Post> posts = postRepository.findByBudgetFromAndBudgetTo(budgetFrom, budgetTo);
         if(!posts.isEmpty()){
-            return posts.stream().map(post-> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            return posts.stream().map(post-> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
@@ -208,7 +210,7 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getAllPostSortedByNewest() {
         List<Post> posts = postRepository.findAllSortedByNewest();
         if(!posts.isEmpty()){
-            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
@@ -217,7 +219,7 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getAllPostSortedByOldest() {
         List<Post> posts = postRepository.findAllSortedByOldest();
         if(!posts.isEmpty()){
-            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            return posts.stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
@@ -225,12 +227,12 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostResponse> getAllPostSortedByAlphabet(Filter filter) {
         if(filter.name().equalsIgnoreCase(Filter.AZ.name())){
-            List<PostResponse> AZ = postRepository.findAllSortedByAZ().stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            List<PostResponse> AZ = postRepository.findAllSortedByAZ().stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
             if(!AZ.isEmpty()){
                 return AZ;
             }
         }else if (filter.name().equalsIgnoreCase(Filter.ZA.name())){
-            List<PostResponse> ZA = postRepository.findAllSortedByZA().stream().map(post -> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            List<PostResponse> ZA = postRepository.findAllSortedByZA().stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
             if(!ZA.isEmpty()){
                 return ZA;
             }
@@ -243,7 +245,7 @@ public class PostServiceImpl implements PostService {
         List<PostResponse> responses = new ArrayList<>();
         for (String subCategory: filter) {
             List<Post> eachSub = postRepository.getAllPostSortedBySubCategory(subCategory);
-            responses.addAll(eachSub.stream().map(post-> post.toDto(createdBy(post.getUserId()))).toList());
+            responses.addAll(eachSub.stream().map(post-> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).toList());
         }
         if (responses.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
@@ -256,7 +258,7 @@ public class PostServiceImpl implements PostService {
         isNotVerify(UUID.fromString(currentUser()));
         List<Post> posts = postRepository.findAllPostForCurrentUser(UUID.fromString(currentUser()));
         if(!posts.isEmpty()){
-            return posts.stream().map(post-> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            return posts.stream().map(post-> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
@@ -268,9 +270,42 @@ public class PostServiceImpl implements PostService {
             // Random 3 posts
             Collections.shuffle(posts);
             List<Post> randomThreePosts = posts.subList(0, Math.min(posts.size(), 3));
-            return randomThreePosts.stream().map(post-> post.toDto(createdBy(post.getUserId()))).collect(Collectors.toList());
+            return randomThreePosts.stream().map(post-> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
+    }
+
+    @Override
+    public List<PostResponse> filterRequest(List<String> subCategory, Float budgetFrom, Float budgetTo) {
+        List<Post> eachSub = new ArrayList<>();
+        if(budgetFrom < 0 || budgetTo < 0){
+            throw new IllegalArgumentException(ValidationConfig.INVALID_RANGE);
+        }
+        if(budgetFrom > budgetTo){
+            throw new IllegalArgumentException(ValidationConfig.CANNOT_SMALLER);
+        }
+        List<PostResponse> responses = new ArrayList<>();
+        for (String subCategories: subCategory) {
+            eachSub.addAll(postRepository.getAllPostSortedBySubCategory(subCategories));
+        }
+        for (Post post: eachSub) {
+            if(Objects.equals(post.getBudgetFrom(), budgetFrom)){
+                responses.addAll(eachSub.stream().map(p-> p.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).toList());
+            }
+        }
+        if (responses.isEmpty()){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
+        }
+        return responses;
+    }
+
+    @Override
+    public List<PostResponse> getAllPostByUserId(UUID id) {
+        List<Post> postList = postRepository.getPostByUserId(id);
+        if(!postList.isEmpty()){
+            return postList.stream().map(post-> post.toDto(createdBy(id),getUserInfoById(post.getUserId()))).collect(Collectors.toList());
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.POST_NOTFOUND);
     }
 
     // Returning Token
@@ -358,5 +393,22 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    // Return User
+    public String getUserInfoById(UUID id){
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        try{
+            return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
+                    .baseUrl("http://8.222.225.41:8084/")
+                    .build()
+                    .get()
+                    .uri("api/v1/user-info/{userId}", id)
+                    .retrieve()
+                    .bodyToMono(ApiResponse.class)
+                    .block()).getPayload(), UserInfoResponse.class).getProfileImage();
+        }catch (Exception e){
+            return null;
+        }
+    }
 
 }

@@ -12,6 +12,7 @@ import com.example.manageuserservice.model.BuyerFavorite;
 import com.example.manageuserservice.repository.BuyerFavoriteRepository;
 import com.example.manageuserservice.request.BuyerFavoriteRequest;
 import com.example.manageuserservice.response.BuyerFavoriteResponse;
+import com.example.manageuserservice.service.userinfo.UserInfoServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.keycloak.admin.client.Keycloak;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     private final BuyerFavoriteRepository buyerFavoriteRepository;
+    private final UserInfoServiceImpl userInfoService;
     private final WebClient.Builder webClient;
     private final Keycloak keycloak;
 
@@ -36,8 +38,9 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
     private String realm;
 
 
-    public BuyerFavoriteServiceImpl(BuyerFavoriteRepository buyerFavoriteRepository, WebClient.Builder webClient, Keycloak keycloak) {
+    public BuyerFavoriteServiceImpl(BuyerFavoriteRepository buyerFavoriteRepository, UserInfoServiceImpl userInfoService, WebClient.Builder webClient, Keycloak keycloak) {
         this.buyerFavoriteRepository = buyerFavoriteRepository;
+        this.userInfoService = userInfoService;
         this.webClient = webClient;
         this.keycloak = keycloak;
     }
@@ -51,14 +54,14 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
             throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_SHOP);
         }
         ShopResponse shop = shop(request.getShopId());
-        return buyerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(shop);
+        return buyerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(shop, userInfoService.getUserInfoByUserId(shop.getUserId()).getProfileImage());
     }
 
     @Override
     public List<BuyerFavoriteResponse> getCurrentUserInfo() {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        List<BuyerFavoriteResponse> list = buyerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(shop(h.getShopId()))).collect(Collectors.toList());
+        List<BuyerFavoriteResponse> list = buyerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(shop(h.getShopId()),userInfoService.getUserInfoByUserId(h.getUserId()).getProfileImage())).collect(Collectors.toList());
         if(list.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.EMPTY_FAV_LIST);
         }
@@ -80,7 +83,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
         isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyer = buyerFavoriteRepository.findByShopIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(buyer != null){
-            return buyer.toDto(shop(id));
+            return buyer.toDto(shop(id),userInfoService.getUserInfoByUserId(buyer.getUserId()).getProfileImage());
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND_IN_LIST);
     }

@@ -111,8 +111,8 @@ public class AppUserController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account verified successfully",
                 userService.verifiedAccount(role,login),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PostMapping("/login")
@@ -121,8 +121,8 @@ public class AppUserController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Account logged successfully",
                 userService.loginAccount(role,login),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PutMapping("/reset-password")
@@ -131,8 +131,8 @@ public class AppUserController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Password reset successfully",
                 userService.resetPassword(change),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
     @PostMapping("/otp/reset-password")
@@ -141,8 +141,8 @@ public class AppUserController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "OtpCode sent successfully",
                 userService.sendOptCode(reset),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.OK
+        ), HttpStatus.OK);
     }
 
 

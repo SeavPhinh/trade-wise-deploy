@@ -24,7 +24,8 @@ public class SellerFavorite {
     private UUID userId;
     private UUID postId;
 
-    public SellerFavoriteResponse toDto(PostResponse post){
-        return new SellerFavoriteResponse(this.id,this.userId,post);
+
+    public SellerFavoriteResponse toDto(PostResponse post, String profileImage){
+        return new SellerFavoriteResponse(this.id,this.userId,post,profileImage);
     }
 }

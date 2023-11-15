@@ -32,5 +32,6 @@ public interface PostService {
     List<PostResponse> searchPostBySubCategory(List<String> filter);
     List<PostResponse> getPostsForCurrentUser();
     List<PostResponse> randomPostBySubCategory(String subCategory);
-
+    List<PostResponse> filterRequest(List<String> subCategory, Float budgetFrom, Float budgetTo);
+    List<PostResponse> getAllPostByUserId(UUID id);
 }

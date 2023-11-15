@@ -63,8 +63,8 @@ public class CategoryController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Categories added successfully",
                 categoryService.addCategory(request),
-                HttpStatus.ACCEPTED
-        ), HttpStatus.ACCEPTED);
+                HttpStatus.CREATED
+        ), HttpStatus.CREATED);
     }
 
     @DeleteMapping("")
@@ -74,8 +74,8 @@ public class CategoryController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Categories delete by name successfully",
                 categoryService.deleteCategoryByName(name),
-                HttpStatus.OK
-        ), HttpStatus.OK);
+                HttpStatus.ACCEPTED
+        ), HttpStatus.ACCEPTED);
     }
 
     @PutMapping("")
@@ -86,8 +86,8 @@ public class CategoryController {
         return new ResponseEntity<>(new ApiResponse<>(
                 "Categories updated by name successfully",
                 categoryService.updateCategoryByName(name,request),
-                HttpStatus.OK
-        ), HttpStatus.OK);
+                HttpStatus.CONTINUE
+        ), HttpStatus.CONTINUE);
     }
 
 
