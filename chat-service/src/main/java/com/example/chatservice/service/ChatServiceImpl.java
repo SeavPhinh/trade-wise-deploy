@@ -10,10 +10,7 @@ import com.example.chatservice.model.MessageResponse;
 import com.example.chatservice.repository.ChatMessageRepository;
 import com.example.commonservice.config.ValidationConfig;
 import com.example.commonservice.model.User;
-import com.example.commonservice.response.ApiResponse;
-import com.example.commonservice.response.FileResponse;
-import com.example.commonservice.response.UserContact;
-import com.example.commonservice.response.UserInfoResponse;
+import com.example.commonservice.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
@@ -130,24 +127,23 @@ public class ChatServiceImpl implements ChatService{
                     uniqueIds.add(senderId);
                 }
             }
-
             for (UUID id : uniqueIds) {
+
                 ConnectedResponse connectedResponse = new ConnectedResponse();
                 User user = getUserById(id);
-                UserInfoResponse userInfo = getUserInfoById(user.getId());
-                if(userInfo != null){
-                    connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),userInfo.getProfileImage())));
+
+                if(user != null){
+                    UserInfoResponse userInfo = getUserInfoById(user.getId());
+                    if(userInfo != null){
+                        connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),userInfo.getProfileImage())));
+                    }else{
+                        connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),null)));
+                    }
                 }else{
-                    connectedResponse.setUser((new UserContact(user.getId(),user.getUsername(),null)));
+                    ShopResponse shop = shopById(id);
+                    connectedResponse.setUser((new UserContact(shop.getId(),shop.getName(),shop.getProfileImage())));
                 }
-
-                System.out.println("ID user: " + id);
-
-                System.out.println("Size: " + chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size());
-                System.out.println("Last Index: " + (chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size() - 1));
-
                 int lastIndex = chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size()-1;
-
                 String userType = null;
                 if(chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getSenderId().toString().equals(currentUser())){
                     userType = "Sender";
@@ -201,8 +197,32 @@ public class ChatServiceImpl implements ChatService{
                     .bodyToMono(ApiResponse.class)
                     .block()).getPayload(), User.class);
         }catch (Exception e){
-            throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER);
+            return null;
         }
+    }
+
+    // Return Shop
+    public ShopResponse shopById(UUID id){
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        try{
+            if(authentication.getPrincipal() instanceof Jwt jwt){
+                return covertSpecificClass.convertValue(Objects.requireNonNull(userWeb
+                        .baseUrl("http://8.222.225.41:8088/")
+                        .build()
+                        .get()
+                        .uri("api/v1/shops/{id}", id)
+                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
+                        .retrieve()
+                        .bodyToMono(ApiResponse.class)
+                        .block()).getPayload(), ShopResponse.class);
+            }
+
+        }catch (Exception e){
+            throw new IllegalArgumentException("Contact now found");
+        }
+        throw new IllegalArgumentException("Contact now found");
     }
 
     // Return User
