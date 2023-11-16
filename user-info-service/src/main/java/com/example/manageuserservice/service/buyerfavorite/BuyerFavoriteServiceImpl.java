@@ -12,6 +12,7 @@ import com.example.manageuserservice.model.BuyerFavorite;
 import com.example.manageuserservice.repository.BuyerFavoriteRepository;
 import com.example.manageuserservice.request.BuyerFavoriteRequest;
 import com.example.manageuserservice.response.BuyerFavoriteResponse;
+import com.example.manageuserservice.response.UserInfoResponse;
 import com.example.manageuserservice.service.userinfo.UserInfoServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -47,6 +48,7 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
 
     @Override
     public BuyerFavoriteResponse addedShopToFavoriteList(BuyerFavoriteRequest request) {
+        String profileImage = null;
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyerFav = buyerFavoriteRepository.findByUserIdAndShopId(request.getShopId(),createdBy(UUID.fromString(currentUser())).getId());
@@ -54,14 +56,21 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
             throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_SHOP);
         }
         ShopResponse shop = shop(request.getShopId());
-        return buyerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(shop, userInfoService.getUserInfoByUserId(shop.getUserId()).getProfileImage());
+        UserInfoResponse userInfoResponse = userInfoService.getUserInfoByUserIdFavorite(shop.getUserId());
+        if(userInfoResponse != null){
+            profileImage = userInfoResponse.getProfileImage();
+        }
+        return buyerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(shop, profileImage);
     }
 
     @Override
     public List<BuyerFavoriteResponse> getCurrentUserInfo() {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        List<BuyerFavoriteResponse> list = buyerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(shop(h.getShopId()),userInfoService.getUserInfoByUserId(h.getUserId()).getProfileImage())).collect(Collectors.toList());
+        List<BuyerFavoriteResponse> list = buyerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId())
+                .stream()
+                .map(h-> h.toDto(shop(h.getShopId()),userInfoService.getUserInfoByUserIdFavorite(h.getUserId()) == null ? null : userInfoService.getUserInfoByUserIdFavorite(h.getUserId()).getProfileImage()))
+                .collect(Collectors.toList());
         if(list.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.EMPTY_FAV_LIST);
         }
@@ -72,18 +81,23 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
     public Void removeShopFromFavoriteList(UUID id) {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        BuyerFavoriteResponse delete = getShopFromFavoriteList(id);
-        buyerFavoriteRepository.deleteById(delete.getId());
+        BuyerFavorite buyer = buyerFavoriteRepository.findByShopIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
+        buyerFavoriteRepository.deleteById(buyer.getId());
         return null;
     }
 
     @Override
     public BuyerFavoriteResponse getShopFromFavoriteList(UUID id) {
+        String profileImage = null;
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyer = buyerFavoriteRepository.findByShopIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(buyer != null){
-            return buyer.toDto(shop(id),userInfoService.getUserInfoByUserId(buyer.getUserId()).getProfileImage());
+            UserInfoResponse user = userInfoService.getUserInfoByUserIdFavorite(buyer.getUserId());
+            if(user != null){
+                profileImage = user.getProfileImage();
+            }
+            return buyer.toDto(shop(id),profileImage);
         }
         throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND_IN_LIST);
     }

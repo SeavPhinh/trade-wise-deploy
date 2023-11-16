@@ -13,5 +13,4 @@ public class SellerFavoriteResponse {
     private UUID id;
     private UUID userId;
     private PostResponse post;
-    private String profileImage;
 }

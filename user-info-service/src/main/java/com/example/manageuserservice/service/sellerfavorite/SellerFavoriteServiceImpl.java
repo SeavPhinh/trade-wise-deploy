@@ -11,6 +11,7 @@ import com.example.manageuserservice.model.SellerFavorite;
 import com.example.manageuserservice.repository.SellerFavoriteRepository;
 import com.example.manageuserservice.request.SellerFavoriteRequest;
 import com.example.manageuserservice.response.SellerFavoriteResponse;
+import com.example.manageuserservice.response.UserInfoResponse;
 import com.example.manageuserservice.service.userinfo.UserInfoServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -55,14 +56,14 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
             throw new IllegalArgumentException(ValidationConfig.ALREADY_FAV_TO_POST);
         }
         PostResponse post = post(request.getPostId());
-        return sellerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(post, userInfoService.getUserInfoByUserId(createdBy(UUID.fromString(currentUser())).getId()).getProfileImage());
+        return sellerFavoriteRepository.save(request.toEntity(createdBy(UUID.fromString(currentUser())).getId())).toDto(post);
     }
 
     @Override
     public List<SellerFavoriteResponse> getAllPostedFromSellerFavoriteListByOwnerId() {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        List<SellerFavoriteResponse> list = sellerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(post(h.getPostId()),userInfoService.getUserInfoByUserId(h.getUserId()).getProfileImage())).collect(Collectors.toList());
+        List<SellerFavoriteResponse> list = sellerFavoriteRepository.findByOwnerId(createdBy(UUID.fromString(currentUser())).getId()).stream().map(h-> h.toDto(post(h.getPostId()))).collect(Collectors.toList());
         if(list.isEmpty()){
             throw new NotFoundExceptionClass(ValidationConfig.EMPTY_FAV_LIST);
         }
@@ -73,8 +74,8 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
     public Void removePostedFromFavoriteList(UUID id) {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        SellerFavoriteResponse delete = getPostedFromFavoriteList(id);
-        sellerFavoriteRepository.deleteById(delete.getId());
+        SellerFavorite seller = sellerFavoriteRepository.findByPostIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
+        sellerFavoriteRepository.deleteById(seller.getId());
         return null;
     }
 
@@ -84,7 +85,7 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
         isLegal(UUID.fromString(currentUser()));
         SellerFavorite seller = sellerFavoriteRepository.findByPostIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
         if(seller != null){
-            return seller.toDto(post(id), userInfoService.getUserInfoByUserId(seller.getUserId()).getProfileImage());
+            return seller.toDto(post(id));
         }
         throw new NotFoundExceptionClass(ValidationConfig.POST_NOTFOUND_IN_LIST);
     }

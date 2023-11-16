@@ -20,7 +20,6 @@ public class PostRequest {
     @Size(min = 5, max = 25, message = ValidationConfig.POST_TITLE_MESSAGE)
     private String title;
 
-    @NotNull(message = ValidationConfig.NULL_FILE)
     private String file;
 
     @Size(max =ValidationConfig.POST_DESCRIPTION_MAX ,message = ValidationConfig.POST_DESCRIPTION_MESSAGE)

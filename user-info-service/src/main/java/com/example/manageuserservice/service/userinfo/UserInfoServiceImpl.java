@@ -90,6 +90,10 @@ public class UserInfoServiceImpl implements UserInfoService {
         return isNotExisting(id);
     }
 
+    public UserInfoResponse getUserInfoByUserIdFavorite(UUID id) {
+        return userInfoResponseForFavorite(id);
+    }
+
     @Override
     public UserInfoResponse getCurrentUserInfo() {
         isNotVerify(UUID.fromString(currentUser()));
@@ -168,6 +172,14 @@ public class UserInfoServiceImpl implements UserInfoService {
             return userInfoRepository.findByOwnerId(id).toDto(createdBy(isFound.getUserId()));
         }
         throw new NotFoundExceptionClass(ValidationConfig.NOTFOUND_USER_INFO);
+    }
+
+    public UserInfoResponse userInfoResponseForFavorite(UUID id){
+        UserInfo isFound = userInfoRepository.findByOwnerId(id);
+        if(isFound != null){
+            return userInfoRepository.findByOwnerId(id).toDto(createdBy(isFound.getUserId()));
+        }
+        return null;
     }
 
     // Phone Number Validating

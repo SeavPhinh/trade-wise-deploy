@@ -68,7 +68,9 @@ public class PostServiceImpl implements PostService {
         if(postRequest.getBudgetFrom() > postRequest.getBudgetTo()){
             throw new IllegalArgumentException(ValidationConfig.CANNOT_SMALLER);
         }
-        validateFile(postRequest.getFile());
+        if(postRequest.getFile() != null){
+            validateFile(postRequest.getFile());
+        }
         return postRepository.save(postRequest.toEntity(UUID.fromString(currentUser()))).toDto(createdBy(UUID.fromString(currentUser())), getUserInfoById(UUID.fromString(currentUser())));
     }
 

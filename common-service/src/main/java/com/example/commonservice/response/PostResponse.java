@@ -24,5 +24,6 @@ public class PostResponse {
     private LocalDateTime createdDate;
     private LocalDateTime lastModified;
     private User createdBy;
+    private String profileImage;
 
 }
