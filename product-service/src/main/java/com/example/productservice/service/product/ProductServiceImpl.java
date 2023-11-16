@@ -227,7 +227,7 @@ public class ProductServiceImpl implements ProductService{
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                        .baseUrl("http://8.222.225.41:8088/")
+                        .baseUrl("http://localhost:8088/")
                         .build()
                         .get()
                         .uri("api/v1/shops/user/{userId}", userId)
@@ -250,7 +250,7 @@ public class ProductServiceImpl implements ProductService{
         try{
             if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
-                        .baseUrl("http://8.222.225.41:8088/")
+                        .baseUrl("http://localhost:8088/")
                         .build()
                         .get()
                         .uri("api/v1/shops/{id}", id)

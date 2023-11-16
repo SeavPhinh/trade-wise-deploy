@@ -5,6 +5,7 @@ import com.example.commonservice.response.ApiResponse;
 import com.example.postservice.request.PostRequest;
 import com.example.postservice.response.PostResponse;
 import com.example.postservice.service.PostService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class CrudPostController {
 
     private final PostService postService;
+
     public CrudPostController(PostService postService) {
         this.postService = postService;
     }
@@ -75,5 +77,4 @@ public class CrudPostController {
         }
         throw new NotFoundExceptionClass("No filename to upload");
     }
-
 }

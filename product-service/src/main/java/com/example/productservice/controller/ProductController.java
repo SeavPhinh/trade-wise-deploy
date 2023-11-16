@@ -5,6 +5,7 @@ import com.example.productservice.exception.NotFoundExceptionClass;
 import com.example.productservice.request.ProductRequest;
 import com.example.productservice.response.ProductResponse;
 import com.example.productservice.service.product.ProductService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +29,7 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+    public static final String SHOP_SERVICE="shopService";
 
     public ProductController(ProductService productService) {
         this.productService = productService;
@@ -47,6 +49,7 @@ public class ProductController {
     @GetMapping("")
     @Operation(summary = "fetch all products")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = SHOP_SERVICE, fallbackMethod = "shopUnderMaintenance")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "products fetched successfully",
@@ -69,6 +72,7 @@ public class ProductController {
     @GetMapping("/shop/{id}")
     @Operation(summary = "fetch product by shop id")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = SHOP_SERVICE, fallbackMethod = "shopUnderMaintenance")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProductByShopId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by shop id successfully",
@@ -120,4 +124,7 @@ public class ProductController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(productService.getImage(fileName));
     }
 
+    public ResponseEntity<String> shopUnderMaintenance(Exception e) {
+        return ResponseEntity.ok("Shop service is under maintenance.");
+    }
 }

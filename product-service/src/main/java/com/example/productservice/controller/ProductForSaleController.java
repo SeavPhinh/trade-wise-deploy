@@ -6,6 +6,7 @@ import com.example.productservice.request.ProductForSaleRequest;
 import com.example.productservice.request.ProductForSaleRequestUpdate;
 import com.example.productservice.response.ProductForSaleResponse;
 import com.example.productservice.service.comment.ProductForSaleService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,7 @@ import java.util.UUID;
 public class ProductForSaleController {
 
     private final ProductForSaleService productForSaleService;
+    public static final String POST_SERVICE="postService";
 
     public ProductForSaleController(ProductForSaleService productForSaleService) {
         this.productForSaleService = productForSaleService;
@@ -59,6 +61,7 @@ public class ProductForSaleController {
     @GetMapping("/post/{id}")
     @Operation(summary = "fetch all product for sale by posted id")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = POST_SERVICE, fallbackMethod = "postUnderMaintenance")
     public ResponseEntity<ApiResponse<List<ProductForSaleResponse>>> getProductForSaleByPostId(@PathVariable UUID id){
         return new ResponseEntity<>(new ApiResponse<>(
                 "product fetched by posted id successfully",
@@ -81,6 +84,7 @@ public class ProductForSaleController {
     @PutMapping("/{id}")
     @Operation(summary = "update post by id")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = POST_SERVICE, fallbackMethod = "postUnderMaintenance")
     public ResponseEntity<ApiResponse<ProductForSaleResponse>> updateProductForSaleById(@PathVariable UUID id,
                                                                @Valid @RequestBody ProductForSaleRequestUpdate request) throws Exception {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -107,6 +111,9 @@ public class ProductForSaleController {
     @SecurityRequirement(name = "oAuth2")
     public ResponseEntity<ByteArrayResource> getFileByFileName(@RequestParam String fileName) throws IOException {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(productForSaleService.getImage(fileName));
+    }
+    public ResponseEntity<String> postUnderMaintenance(Exception e) {
+        return ResponseEntity.ok("Post service is under maintenance.");
     }
 
 }

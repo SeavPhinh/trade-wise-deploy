@@ -10,3 +10,8 @@ server:
   port: 8084
 
 baseUrl: http://gateway-service/
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

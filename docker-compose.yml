@@ -142,6 +142,5 @@ services:
       - "8080:8080"
     networks:
       - trade-wise
-
 volumes:
   keycloak-db-data:

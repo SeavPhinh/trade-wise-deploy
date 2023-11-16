@@ -9,6 +9,7 @@ import com.example.userservice.model.UserResponse;
 import com.example.userservice.model.VerifyLogin;
 import com.example.userservice.request.*;
 import com.example.userservice.service.User.UserService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
