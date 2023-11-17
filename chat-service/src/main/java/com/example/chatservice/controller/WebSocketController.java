@@ -5,6 +5,7 @@ import com.example.chatservice.service.ChatService;
 import com.example.chatservice.service.ChatServiceImpl;
 import com.example.commonservice.response.ApiResponse;
 import com.example.commonservice.response.FileResponse;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,6 +35,8 @@ public class WebSocketController {
 
     private final ChatService chatService;
 
+    public static final String USER_SERVICE="userService";
+
     @Autowired
     public WebSocketController(ChatServiceImpl chatServiceImpl) {
         this.chatService = chatServiceImpl;
@@ -48,12 +51,14 @@ public class WebSocketController {
     @GetMapping("/history/{userId}")
     @Operation(summary = "getting chat messages with connected user")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = USER_SERVICE, fallbackMethod = "userUnderMaintenance")
     public List<MessageModel> getHistory(@PathVariable UUID userId){
         return chatService.getHistoryMessage(userId);
     }
 
     @GetMapping("/destination/{userId}")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = USER_SERVICE, fallbackMethod = "userUnderMaintenance")
     public MessageModel findDestination(@PathVariable UUID userId){
         return chatService.isContainDestination(userId);
     }
@@ -72,6 +77,7 @@ public class WebSocketController {
     @PutMapping("/update/{userId}")
     @Operation(summary = "update all unseen message")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = USER_SERVICE, fallbackMethod = "userUnderMaintenance")
     public ResponseEntity<ApiResponse<String>> UpdateAllUnseenMessage(@PathVariable UUID userId){
         return new ResponseEntity<>(new ApiResponse<>(
                 "read all messages successfully",
@@ -117,7 +123,9 @@ public class WebSocketController {
         }
     }
 
-
+    public ResponseEntity<String> userUnderMaintenance(Exception e) {
+        return ResponseEntity.ok("User service is under maintenance.");
+    }
 }
 
 

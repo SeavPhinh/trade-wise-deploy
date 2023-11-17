@@ -11,3 +11,8 @@ server:
 logging:
   level:
     org.springframework.web.servlet.handler.SimpleUrlHandlerMapping: OFF
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

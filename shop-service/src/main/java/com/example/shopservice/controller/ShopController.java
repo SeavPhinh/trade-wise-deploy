@@ -5,6 +5,7 @@ import com.example.shopservice.enumeration.Filter;
 import com.example.shopservice.request.ShopRequest;
 import com.example.shopservice.response.ShopResponse;
 import com.example.shopservice.service.shop.ShopService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,8 @@ public class ShopController {
 
     private final ShopService shopService;
 
+    public static final String USER_SERVICE="userService";
+
     public ShopController(ShopService shopService) {
         this.shopService = shopService;
     }
@@ -47,6 +50,7 @@ public class ShopController {
     @GetMapping("")
     @Operation(summary = "fetch all shops")
     @SecurityRequirement(name = "oAuth2")
+    @CircuitBreaker(name = USER_SERVICE, fallbackMethod = "userUnderMaintenance")
     public ResponseEntity<ApiResponse<List<ShopResponse>>> getAllShop(){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shops fetched successfully",
@@ -79,6 +83,7 @@ public class ShopController {
 
     @GetMapping("/user/{userId}")
     @Operation(summary = "fetch shop by owner id")
+    @CircuitBreaker(name = USER_SERVICE, fallbackMethod = "userUnderMaintenance")
     public ResponseEntity<ApiResponse<ShopResponse>> getShopByOwnerId(@PathVariable UUID userId){
         return new ResponseEntity<>(new ApiResponse<>(
                 "Shop fetched by owner id successfully",
@@ -135,6 +140,7 @@ public class ShopController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "oAuth2")
     @Operation(summary = "upload file")
+    @CircuitBreaker(name = USER_SERVICE, fallbackMethod = "userUnderMaintenance")
     public ResponseEntity<ApiResponse<ShopResponse>> saveFile(@RequestParam(required = false) MultipartFile file,
                                                               HttpServletRequest request) throws IOException {
         return new ResponseEntity<>(new ApiResponse<>(
@@ -150,4 +156,7 @@ public class ShopController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(shopService.getImage(fileName));
     }
 
+    public ResponseEntity<String> userUnderMaintenance(Exception e) {
+        return ResponseEntity.ok("User service is under maintenance.");
+    }
 }
