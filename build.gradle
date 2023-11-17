@@ -64,40 +64,40 @@ project("chat-service"){
     }
 
 }
-project("notification-service"){
-
-    // Apply external plugin
-//    apply from: "$rootProject.projectDir/plugin.gradle"
-
-    apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
-    apply plugin: 'io.spring.dependency-management'
-
-    // Apply external dependencies
-    apply from: "$rootProject.projectDir/dependencies.gradle"
-
-    group = 'com.example'
-    version = '0.0.1-SNAPSHOT'
-
-    java {
-        sourceCompatibility = '17'
-    }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-
-    }
-
-}
+//project("notification-service"){
+//
+//    // Apply external plugin
+////    apply from: "$rootProject.projectDir/plugin.gradle"
+//
+//    apply plugin: 'java'
+//    apply plugin: 'org.springframework.boot'
+//    apply plugin: 'io.spring.dependency-management'
+//
+//    // Apply external dependencies
+//    apply from: "$rootProject.projectDir/dependencies.gradle"
+//
+//    group = 'com.example'
+//    version = '0.0.1-SNAPSHOT'
+//
+//    java {
+//        sourceCompatibility = '17'
+//    }
+//
+//    configurations {
+//        compileOnly {
+//            extendsFrom annotationProcessor
+//        }
+//    }
+//
+//    repositories {
+//        mavenCentral()
+//    }
+//
+//    dependencies {
+//
+//    }
+//
+//}
 project("config-server"){
 
     // Apply external plugin
@@ -229,7 +229,7 @@ project("gateway-service"){
     }
 
 }
-project("common-service"){
+project("common-service")   {
 
     // Apply external plugin
 //    apply from: "$rootProject.projectDir/plugin.gradle"
@@ -322,12 +322,13 @@ allprojects {
     dependencies {
 
         if (
-                projectDir.name.startsWith("user-service") ||
+                        projectDir.name.startsWith("user-service") ||
                         projectDir.name.startsWith("shop-service") ||
                         projectDir.name.startsWith("product-service") ||
                         projectDir.name.startsWith("user-info-service") ||
                         projectDir.name.startsWith("category-service") ||
-                        projectDir.name.startsWith("post-service")
+                        projectDir.name.startsWith("post-service") ||
+                        projectDir.name.startsWith("notification-service")
         ) {
 
             if (!projectDir.name.startsWith("gateway-service")) {
