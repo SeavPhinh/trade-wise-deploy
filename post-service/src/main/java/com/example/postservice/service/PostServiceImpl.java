@@ -163,7 +163,7 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getAllDraftPosts() {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        List<PostResponse> draftList = postRepository.getAllDraftPosts().stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).toList();
+        List<PostResponse> draftList = postRepository.getAllDraftPosts(UUID.fromString(currentUser())).stream().map(post -> post.toDto(createdBy(post.getUserId()),getUserInfoById(post.getUserId()))).toList();
         if(!draftList.isEmpty()){
             return draftList;
         }

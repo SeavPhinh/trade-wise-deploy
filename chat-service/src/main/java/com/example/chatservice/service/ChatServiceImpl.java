@@ -9,6 +9,7 @@ import com.example.chatservice.model.MessageModel;
 import com.example.chatservice.model.MessageResponse;
 import com.example.chatservice.repository.ChatMessageRepository;
 import com.example.commonservice.config.ValidationConfig;
+import com.example.commonservice.enumeration.Role;
 import com.example.commonservice.model.User;
 import com.example.commonservice.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,7 +52,6 @@ public class ChatServiceImpl implements ChatService{
                            ChatMessageRepository chatMessageRepository,
                            WebClient.Builder userWeb,
                            FileStorageProperties fileStorageProperties, Keycloak keycloak) {
-
         this.messagingTemplate = messagingTemplate;
         this.chatMessageRepository = chatMessageRepository;
         this.userWeb = userWeb;
@@ -85,24 +85,49 @@ public class ChatServiceImpl implements ChatService{
 
     public List<MessageModel> getHistoryMessage(UUID connectedUser) {
         isNotVerify(UUID.fromString(currentUser()));
-        List<MessageModel> model = chatMessageRepository.findHistory(connectedUser, UUID.fromString(currentUser()));
-        if(!model.isEmpty()){
-            return model;
+        String loggedAs =  createdBy(UUID.fromString(currentUser())).getLoggedAs();
+        if(loggedAs.equalsIgnoreCase("BUYER")){
+            List<MessageModel> model = chatMessageRepository.findHistory(connectedUser, UUID.fromString(currentUser()));
+            if(!model.isEmpty()){
+                return model;
+            }
+        }else{
+            ShopResponse shopResponse = getShopByUserId(UUID.fromString(currentUser()));
+            List<MessageModel> model = chatMessageRepository.findHistory(connectedUser, shopResponse.getId());
+            if(!model.isEmpty()){
+                return model;
+            }
         }
+
         throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_MESSAGE);
     }
 
     public MessageModel isContainDestination(UUID userId) {
         isNotVerify(UUID.fromString(currentUser()));
         List<MessageModel> messages = new ArrayList<>();
-        for (MessageModel message : chatMessageRepository.findAll()) {
-            if(message.getReceiverId().toString().equalsIgnoreCase(userId.toString()) &&
-               message.getSenderId().toString().equalsIgnoreCase(currentUser()) ||
-               message.getReceiverId().toString().equalsIgnoreCase(currentUser()) &&
-               message.getSenderId().toString().equalsIgnoreCase(userId.toString())
-            ){
-                messages.add(message);
-                return messages.get(0);
+        String loggedAs =  createdBy(UUID.fromString(currentUser())).getLoggedAs();
+        if(loggedAs.equalsIgnoreCase("SELLER")){
+            ShopResponse shopResponse = getShopByUserId(UUID.fromString(currentUser()));
+            for (MessageModel message : chatMessageRepository.findAll()) {
+                if(message.getReceiverId().toString().equalsIgnoreCase(userId.toString()) &&
+                        message.getSenderId().toString().equalsIgnoreCase(shopResponse.getId().toString()) ||
+                        message.getReceiverId().toString().equalsIgnoreCase(shopResponse.getId().toString()) &&
+                                message.getSenderId().toString().equalsIgnoreCase(userId.toString())
+                ){
+                    messages.add(message);
+                    return messages.get(0);
+                }
+            }
+        }else{
+            for (MessageModel message : chatMessageRepository.findAll()) {
+                if(message.getReceiverId().toString().equalsIgnoreCase(userId.toString()) &&
+                        message.getSenderId().toString().equalsIgnoreCase(currentUser()) ||
+                        message.getReceiverId().toString().equalsIgnoreCase(currentUser()) &&
+                                message.getSenderId().toString().equalsIgnoreCase(userId.toString())
+                ){
+                    messages.add(message);
+                    return messages.get(0);
+                }
             }
         }
         return null;
@@ -113,21 +138,41 @@ public class ChatServiceImpl implements ChatService{
         checkChat(UUID.fromString(currentUser()));
         List<ConnectedResponse> responses = new ArrayList<>();
         List<UUID> uniqueIds = new ArrayList<>();
-        List<MessageModel> listMessage = chatMessageRepository.getUserByCurrentUserId(UUID.fromString(currentUser()));
+        List<MessageModel> listMessage = new ArrayList<>();
+        String loggedAs =  createdBy(UUID.fromString(currentUser())).getLoggedAs();
+        ShopResponse shopResponse = getShopByUserId(UUID.fromString(currentUser()));
+
+        if(loggedAs.equalsIgnoreCase("SELLER")){
+            listMessage = chatMessageRepository.getUserByCurrentUserId(shopResponse.getId());
+        }else{
+            listMessage = chatMessageRepository.getUserByCurrentUserId(UUID.fromString(currentUser()));
+        }
+
         if(!listMessage.isEmpty()){
             for (MessageModel message : listMessage) {
                 UUID senderId = message.getSenderId();
                 UUID receiverId = message.getReceiverId();
-                if (senderId != null && senderId.equals(UUID.fromString(currentUser())) && !uniqueIds.contains(receiverId)) {
-                    uniqueIds.add(receiverId);
-                }
-                if (receiverId != null && receiverId.equals(UUID.fromString(currentUser())) && !uniqueIds.contains(senderId)) {
-                    uniqueIds.add(senderId);
+                if(loggedAs.equalsIgnoreCase("BUYER")){
+                    if (senderId != null && senderId.equals(UUID.fromString(currentUser())) && !uniqueIds.contains(receiverId)) {
+                        uniqueIds.add(receiverId);
+                    }
+                    if (receiverId != null && receiverId.equals(UUID.fromString(currentUser())) && !uniqueIds.contains(senderId)) {
+                        uniqueIds.add(senderId);
+                    }
+                }else{
+                    if (senderId != null && senderId.equals(shopResponse.getId()) && !uniqueIds.contains(receiverId)) {
+                        uniqueIds.add(receiverId);
+                    }
+                    if (receiverId != null && receiverId.equals(shopResponse.getId()) && !uniqueIds.contains(senderId)) {
+                        uniqueIds.add(senderId);
+                    }
                 }
             }
             for (UUID id : uniqueIds) {
+
                 ConnectedResponse connectedResponse = new ConnectedResponse();
                 User user = getUserById(id);
+
                 if(user != null){
                     UserInfoResponse userInfo = getUserInfoById(user.getId());
                     if(userInfo != null){
@@ -139,21 +184,39 @@ public class ChatServiceImpl implements ChatService{
                     ShopResponse shop = shopById(id);
                     connectedResponse.setUser((new UserContact(shop.getId(),shop.getName(),shop.getProfileImage())));
                 }
-                int lastIndex = chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size()-1;
-                String userType = null;
-                if(chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getSenderId().toString().equals(currentUser())){
-                    userType = "Sender";
-                }else if((chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getReceiverId().toString().equals(currentUser()))){
-                    userType = "Receiver";
+
+                int lastIndex;
+                if(!loggedAs.equalsIgnoreCase("BUYER")){
+                    lastIndex = chatMessageRepository.getAllMessageWithConnectedUser(id, shopResponse.getId()).size() - 1;
+                    String userType = null;
+                    if(chatMessageRepository.getAllMessageWithConnectedUser(id, shopResponse.getId()).get(lastIndex).getSenderId().toString().equals(shopResponse.getId().toString())){
+                        userType = "Sender";
+                    }else if((chatMessageRepository.getAllMessageWithConnectedUser(id, shopResponse.getId()).get(lastIndex).getReceiverId().toString().equals(shopResponse.getId().toString()))){
+                        userType = "Receiver";
+                    }
+                    connectedResponse.setMessage(new MessageResponse(
+                            chatMessageRepository.getAllMessageWithConnectedUser(id, shopResponse.getId()).get(lastIndex),
+                            userType,
+                            chatMessageRepository.getAllMessageWithConnectedUser(id, shopResponse.getId()).get(lastIndex).getTimestamp()
+                    ));
+                    connectedResponse.setUnseenCount(chatMessageRepository.getAllUnseenMessage(shopResponse.getId()).size());
+                    responses.add(connectedResponse);
+                }else{
+                    lastIndex = chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).size() - 1;
+                    String userType = null;
+                    if(chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getSenderId().toString().equals(currentUser())){
+                        userType = "Sender";
+                    }else if((chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getReceiverId().toString().equals(currentUser()))){
+                        userType = "Receiver";
+                    }
+                    connectedResponse.setMessage(new MessageResponse(
+                            chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex),
+                            userType,
+                            chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getTimestamp()
+                    ));
+                    connectedResponse.setUnseenCount(chatMessageRepository.getAllUnseenMessage(UUID.fromString(currentUser())).size());
+                    responses.add(connectedResponse);
                 }
-                connectedResponse.setMessage(new MessageResponse(
-                        chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex),
-                        userType,
-                        chatMessageRepository.getAllMessageWithConnectedUser(id, UUID.fromString(currentUser())).get(lastIndex).getTimestamp()
-                ));
-                List<MessageModel> unseenCount = chatMessageRepository.getAllUnseenMessage(UUID.fromString(currentUser()));
-                connectedResponse.setUnseenCount(unseenCount.size());
-                responses.add(connectedResponse);
             }
             return responses;
         }
@@ -165,6 +228,13 @@ public class ChatServiceImpl implements ChatService{
         isNotVerify(UUID.fromString(currentUser()));
         checkChat(connectedUser);
         checkChat(UUID.fromString(currentUser()));
+        String loggedAs =  createdBy(UUID.fromString(currentUser())).getLoggedAs();
+        if(loggedAs.equalsIgnoreCase("BUYER")){
+            chatMessageRepository.updateAllUnseenMessages(connectedUser,UUID.fromString(currentUser()));
+        }else{
+            ShopResponse shopResponse = getShopByUserId(UUID.fromString(currentUser()));
+            chatMessageRepository.updateAllUnseenMessages(connectedUser,shopResponse.getId());
+        }
         chatMessageRepository.updateAllUnseenMessages(connectedUser,UUID.fromString(currentUser()));
         return "Messages updated successfully";
     }
@@ -194,6 +264,24 @@ public class ChatServiceImpl implements ChatService{
                     .block()).getPayload(), User.class);
         }catch (Exception e){
             return null;
+        }
+    }
+
+    public ShopResponse getShopByUserId(UUID id){
+        isNotVerify(UUID.fromString(currentUser()));
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        try{
+            return covertSpecificClass.convertValue(Objects.requireNonNull(userWeb
+                    .baseUrl("http://8.222.225.41:8088/")
+                    .build()
+                    .get()
+                    .uri("api/v1/shops/user/{id}", id)
+                    .retrieve()
+                    .bodyToMono(ApiResponse.class)
+                    .block()).getPayload(), ShopResponse.class);
+        }catch (Exception e){
+            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
         }
     }
 
@@ -274,6 +362,28 @@ public class ChatServiceImpl implements ChatService{
         UserRepresentation user = keycloak.realm(realm).users().get(String.valueOf(id)).toRepresentation();
         if(!user.getAttributes().get("is_verify").get(0).equalsIgnoreCase("true")){
             throw new IllegalArgumentException(ValidationConfig.ILLEGAL_USER);
+        }
+    }
+
+
+    // Return User
+    public User createdBy(UUID id){
+        ObjectMapper covertSpecificClass = new ObjectMapper();
+        covertSpecificClass.registerModule(new JavaTimeModule());
+        return covertSpecificClass.convertValue(Objects.requireNonNull(userWeb
+                .baseUrl("http://8.222.225.41:8081/")
+                .build()
+                .get()
+                .uri("api/v1/users/{id}", id)
+                .retrieve()
+                .bodyToMono(ApiResponse.class)
+                .block()).getPayload(), User.class);
+    }
+
+    // Validation legal Role
+    public void isLegal(UUID id){
+        if(!createdBy(id).getLoggedAs().equalsIgnoreCase(String.valueOf(Role.SELLER))){
+            throw new IllegalArgumentException(ValidationConfig.ILLEGAL_PROCESS);
         }
     }
 

@@ -242,23 +242,18 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     public PostResponse post(UUID id){
         ObjectMapper covertSpecificClass = new ObjectMapper();
         covertSpecificClass.registerModule(new JavaTimeModule());
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try{
-            if(authentication.getPrincipal() instanceof Jwt jwt){
                 return covertSpecificClass.convertValue(Objects.requireNonNull(webClient
                         .baseUrl("http://8.222.225.41:8083/")
                         .build()
                         .get()
                         .uri("api/v1/posts/{id}", id)
-                        .headers(h -> h.setBearerAuth(jwt.getTokenValue()))
                         .retrieve()
                         .bodyToMono(ApiResponse.class)
                         .block()).getPayload(), PostResponse.class);
-            }
         }catch (Exception e){
             throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
         }
-        throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_POST);
     }
 
     // Separate file -> List

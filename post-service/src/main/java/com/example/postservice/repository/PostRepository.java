@@ -14,8 +14,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
 
 
     @Transactional
-    @Query("SELECT p from Post p where p.status = false ")
-    List<Post> getAllDraftPosts();
+    @Query("SELECT p from Post p where p.status = false AND p.userId = :id")
+    List<Post> getAllDraftPosts(UUID id);
 
 
     @Transactional
