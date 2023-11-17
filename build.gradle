@@ -56,8 +56,6 @@ project("chat-service"){
         implementation libraries.postgresql
         implementation libraries.cloudClient
         implementation libraries.eurekaClient
-//        implementation libraries.amqpStarter
-//        testImplementation libraries.rabbitMQtest
         implementation libraries.webSocket
         implementation libraries.resourceServer
         implementation libraries.webMvc
@@ -69,40 +67,40 @@ project("chat-service"){
     }
 
 }
-//project("notification-service"){
-//
-//    // Apply external plugin
-////    apply from: "$rootProject.projectDir/plugin.gradle"
-//
-//    apply plugin: 'java'
-//    apply plugin: 'org.springframework.boot'
-//    apply plugin: 'io.spring.dependency-management'
-//
-//    // Apply external dependencies
-//    apply from: "$rootProject.projectDir/dependencies.gradle"
-//
-//    group = 'com.example'
-//    version = '0.0.1-SNAPSHOT'
-//
-//    java {
-//        sourceCompatibility = '17'
-//    }
-//
-//    configurations {
-//        compileOnly {
-//            extendsFrom annotationProcessor
-//        }
-//    }
-//
-//    repositories {
-//        mavenCentral()
-//    }
-//
-//    dependencies {
-//
-//    }
-//
-//}
+project("notification-service"){
+
+    // Apply external plugin
+//    apply from: "$rootProject.projectDir/plugin.gradle"
+
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    // Apply external dependencies
+    apply from: "$rootProject.projectDir/dependencies.gradle"
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation libraries.webSocket
+    }
+
+}
 project("config-server"){
 
     // Apply external plugin

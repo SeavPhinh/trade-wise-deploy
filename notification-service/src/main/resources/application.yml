@@ -1,6 +1,12 @@
 spring:
   application:
     name: notification-service
+  profiles:
+    active: native
+  config:
+    import: optional:configserver:http://8.222.225.41:8888
+  main:
+    allow-bean-definition-overriding: true
 server:
   port: 8086
 
