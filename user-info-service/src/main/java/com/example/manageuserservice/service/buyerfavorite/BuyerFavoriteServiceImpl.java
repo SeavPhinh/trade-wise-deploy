@@ -82,6 +82,9 @@ public class BuyerFavoriteServiceImpl implements BuyerFavoriteService {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         BuyerFavorite buyer = buyerFavoriteRepository.findByShopIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
+        if(buyer == null){
+            throw new NotFoundExceptionClass(ValidationConfig.SHOP_NOTFOUND);
+        }
         buyerFavoriteRepository.deleteById(buyer.getId());
         return null;
     }
