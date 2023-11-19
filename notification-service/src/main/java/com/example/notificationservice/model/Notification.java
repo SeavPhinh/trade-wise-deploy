@@ -11,13 +11,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "notications")
+@Table(name = "notifications")
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private UUID userId;
+    private String username;
+    private String profileImage;
     private String message;
     private String subCategory;
     private LocalDateTime createdDate;
