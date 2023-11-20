@@ -30,7 +30,7 @@ import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/v1/chats")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin
 public class WebSocketController {
 
     private final ChatService chatService;

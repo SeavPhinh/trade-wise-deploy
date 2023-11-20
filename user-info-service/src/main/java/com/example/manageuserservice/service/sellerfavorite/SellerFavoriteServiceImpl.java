@@ -75,8 +75,11 @@ public class SellerFavoriteServiceImpl implements SellerFavoriteService {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
         SellerFavorite seller = sellerFavoriteRepository.findByPostIdAndOwnerId(id, createdBy(UUID.fromString(currentUser())).getId());
-        sellerFavoriteRepository.deleteById(seller.getId());
-        return null;
+        if(seller != null){
+            sellerFavoriteRepository.deleteById(seller.getId());
+            return null;
+        }
+        throw new NotFoundExceptionClass(ValidationConfig.POST_NOTFOUND);
     }
 
     @Override
