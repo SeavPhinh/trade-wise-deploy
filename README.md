@@ -73,8 +73,9 @@
 - ### post-service and product-service and shop-service depend on user-service
 - ### post-service and shop-service depend on category-service
 
-<style>H1{color:Orange;}</style>
-<style>H4{color:Orange;text-align: center}   </style>
+[//]: # (<style>H1{color:Orange;}</style>)
+
+[//]: # (<style>H4{color:Orange;text-align: center}   </style>)
 
 
  # access service by url of running  manually
