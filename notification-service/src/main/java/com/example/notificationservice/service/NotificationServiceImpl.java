@@ -14,10 +14,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,14 +38,31 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void sendDirectMessage(Notification notification) {
-        messagingTemplate.convertAndSend("/topic/" + notification.getSubCategory(), notification);
+        Notification sendNotification = new Notification();
+        List<Notification> notifications = new ArrayList<>();
+        for(Notification notify : notificationRepository.getAllBySubCategory(notification.getSubCategory())){
+            notifications.add(notify);
+            sendNotification = notifications.get(0);
+        }
+        if(sendNotification != null){
+            messagingTemplate.convertAndSend("/topic/" + notification.getSubCategory(), notification);
+        }
+        assert sendNotification != null;
+        sendNotification.setMessage(notification.getMessage());
+        sendNotification.setId(UUID.randomUUID());
+        sendNotification.setUsername(notification.getUsername());
+        sendNotification.setSubCategory(notification.getSubCategory());
+        sendNotification.setProfileImage(notification.getProfileImage());
+        sendNotification.setCreatedDate(LocalDateTime.now());
+        notificationRepository.persistData(sendNotification);
     }
 
     @Override
     public List<Notification> historyNotification(List<String> subCategory) {
         List<Notification> response = new ArrayList<>();
         for (String category : subCategory) {
-            response.addAll(notificationRepository.getAllBySubCategory(categoriesList(category)));
+            categoriesList(category);
+            response.addAll(notificationRepository.getAllBySubCategory(category));
         }
         if (!response.isEmpty()){
             return response;
