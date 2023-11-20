@@ -17,6 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/post-notification")
+@CrossOrigin
 public class PostNotificationController {
     private final PostNotificationServiceImpl postNotificationService;
 
