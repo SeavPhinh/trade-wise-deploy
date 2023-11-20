@@ -298,8 +298,9 @@ public class UserServiceImpl implements UserService {
                 Boolean.valueOf(resource(id).toRepresentation().getAttributes().get("is_verify").get(0)),
                 roles(resource(id).toRepresentation().getAttributes().get("role").get(0)),
                 resource(id).toRepresentation().getAttributes().get("logged_as").get(0),
-                LocalDateTime.now(),
-                LocalDateTime.now());
+                LocalDateTime.parse(resource(id).toRepresentation().getAttributes().get("created_date").get(0)),
+                LocalDateTime.parse(resource(id).toRepresentation().getAttributes().get("last_modified").get(0))
+        );
     }
 
     // Converting Role from Attribute as String to ArrayList
