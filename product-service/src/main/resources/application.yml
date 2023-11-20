@@ -2,7 +2,7 @@ spring:
   application:
     name: product-service
   profiles:
-    active: native
+    active: dev
   config:
 #    import: optional:configserver:http://localhost:8888
     import: optional:configserver:http://8.222.225.41:8888

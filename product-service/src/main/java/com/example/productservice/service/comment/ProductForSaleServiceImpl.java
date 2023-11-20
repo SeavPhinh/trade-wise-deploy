@@ -136,8 +136,11 @@ public class ProductForSaleServiceImpl implements ProductForSaleService {
     public ProductForSaleResponse updateProductById(UUID id, ProductForSaleRequestUpdate request) throws Exception {
         isNotVerify(UUID.fromString(currentUser()));
         isLegal(UUID.fromString(currentUser()));
-        ProductForSale preData = productForSaleRepository.findById(id).orElseThrow();
 
+        ProductForSale preData = productForSaleRepository.findById(id).get();
+        if(preData == null){
+            throw new NotFoundExceptionClass(ValidationConfig.NOT_FOUND_PRODUCT);
+        }
         for (String image : request.getFiles()) {
             validateFile(image);
         }
