@@ -1,0 +1,75 @@
+version: "3.8"
+
+x-postgres-config: &postgres-config
+  image: postgres:14.4-alpine
+  environment:
+    PGDATA: /var/lib/postgresql/data
+  healthcheck:
+    test: [ "CMD","pg_isready","-U","postgres" ]
+    interval: 10s
+    timeout: 5s
+    retries: 3
+  restart: unless-stopped
+volumes:
+  user-info_data:
+
+services:
+  user-info-database:
+    <<: *postgres-config
+    container_name: user-info-database
+    environment:
+      POSTGRES_DB: user_info_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - user-info_data:/var/lib/postgresql/data
+    ports:
+      - "5444:5432"
+
+  category-database:
+    <<: *postgres-config
+    container_name: category-database
+    environment:
+      POSTGRES_DB: category_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - category_data:/var/lib/postgresql/data
+    ports:
+      - "5447:5432"
+
+  post-database:
+    <<: *postgres-config
+    container_name: post-database
+    environment:
+      POSTGRES_DB: post_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - post_data:/var/lib/postgresql/data
+    ports:
+      - "5443:5432"
+
+  shop-database:
+    <<: *postgres-config
+    container_name: shop-database
+    environment:
+      POSTGRES_DB: shop_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+    - shop_data:/var/lib/postgresql/data
+    ports:
+      - "5448:5432"
+
+  product-database:
+    <<: *postgres-config
+    container_name: product-database
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - product_data:/var/lib/postgresql/data
+    ports:
+      - "5449:5432"
